@@ -135,9 +135,12 @@ describe('VisitsService', () => {
   it('times out when the check-in insert hangs', async () => {
     vi.useFakeTimers();
     visits.createCheckIn.mockReturnValue(new Promise(() => {}));
-    const result = service.checkIn(USER_ID, input);
+    // Attach the expectation before advancing time: the timer is created only after the park and
+    // dog lookups resolve, so time must advance asynchronously, and the rejection must already
+    // have a handler when it fires (otherwise it is reported as unhandled).
+    const assertion = expect(service.checkIn(USER_ID, input)).rejects.toBeInstanceOf(TimeoutError);
     await vi.advanceTimersByTimeAsync(TIMEOUT_MS);
-    await expect(result).rejects.toBeInstanceOf(TimeoutError);
+    await assertion;
   });
 });
 

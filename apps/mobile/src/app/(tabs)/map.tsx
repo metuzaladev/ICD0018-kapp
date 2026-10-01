@@ -1,43 +1,77 @@
 import type { Park } from '@kapp/shared';
-import { useEffect, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 
+import { Chip } from '@/components/chip';
+import { FormError } from '@/components/form-error';
+import { LocationPrompt } from '@/components/location-prompt';
+import { OfflineBanner } from '@/components/offline-banner';
+import { ParkMap } from '@/components/park-map';
+import { ParkRow } from '@/components/park-row';
 import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Radius, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
-import { apiGet, ApiRequestError } from '@/lib/api';
+import { Spacing } from '@/constants/theme';
+import { useDeviceLocation } from '@/hooks/use-device-location';
+import { useNearbyParks } from '@/hooks/use-parks';
+import { errorMessage } from '@/lib/api';
+import { activeFilterCount, setParkFilters, useParkFilters } from '@/state/park-filters';
 
-// Tallinn city centre until device location is wired up (milestone M2).
-const ORIGIN = { lat: 59.437, lng: 24.7536 };
+/** "Lähedal" shows only parks within walking distance. */
+const NEAR_RADIUS_KM = 2;
 
+/** Figma 02 / Explore / Map + Park List: map with markers, selected park, list below. */
 export default function MapScreen() {
-  const c = useTheme();
-  const [parks, setParks] = useState<Park[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const location = useDeviceLocation();
+  const filters = useParkFilters();
+  const { data: parks = [], error, isPending } = useNearbyParks(location.origin, filters);
+  const [selected, setSelected] = useState<Park | null>(null);
 
-  useEffect(() => {
-    apiGet<Park[]>('/parks/nearby', { ...ORIGIN, radiusKm: 10 })
-      .then(setParks)
-      .catch((e: unknown) => setError(e instanceof ApiRequestError ? e.message : 'Midagi läks valesti'));
-  }, []);
+  const nearOnly = filters.radiusKm === NEAR_RADIUS_KM;
+  const featureCount = activeFilterCount(filters);
+  const subtitle = location.usingFallback
+    ? 'Tallinna kesklinna lähedal'
+    : `${parks.length} parki ${filters.radiusKm} km raadiuses`;
 
   return (
-    <Screen title="Avastame Tallinna." subtitle="Kaart (MapLibre) tuleb siia; praegu nimekiri API-st.">
-      {error ? <ThemedText themeColor="danger">{error}</ThemedText> : null}
-      {parks?.map((p) => (
-        <ThemedView key={p.id} type="surface" style={[styles.row, { borderColor: c.border }]}>
-          <ThemedText type="smallBold">{p.name}</ThemedText>
-          <ThemedText type="small" themeColor="muted">
-            {p.distanceKm} km · {p.activeDogs ?? 0} koera praegu
-          </ThemedText>
-        </ThemedView>
-      ))}
+    <Screen title="Avastame Tallinna." subtitle={subtitle}>
+      <OfflineBanner />
+      <LocationPrompt status={location.status} canAskAgain={location.canAskAgain} onRequest={location.requestPermission} />
+
+      <View style={styles.chips}>
+        <Chip label="Kõik" selected={!nearOnly} onPress={() => setParkFilters({ ...filters, radiusKm: 5 })} />
+        <Chip label="Lähedal" selected={nearOnly} onPress={() => setParkFilters({ ...filters, radiusKm: NEAR_RADIUS_KM })} />
+        <Chip
+          label={featureCount > 0 ? `Filtrid (${featureCount})` : 'Filtrid'}
+          selected={featureCount > 0}
+          onPress={() => router.push('/park-filters')}
+        />
+      </View>
+
+      <ParkMap
+        parks={parks}
+        center={location.origin}
+        showUserLocation={!location.usingFallback}
+        selectedId={selected?.id}
+        onSelect={setSelected}
+      />
+
+      {/* Keep showing cached parks when a refresh fails (offline); only report the error. */}
+      {error ? <FormError message={errorMessage(error)} /> : null}
+      {!isPending && parks.length === 0 && !error ? (
+        <ThemedText themeColor="muted">Selles raadiuses parke ei leitud. Proovi suuremat kaugust või vähem filtreid.</ThemedText>
+      ) : null}
+
+      {selected ? <ParkRow park={selected} highlighted /> : null}
+      {parks
+        .filter((p) => p.id !== selected?.id)
+        .map((park) => (
+          <ParkRow key={park.id} park={park} />
+        ))}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { padding: Spacing.three, borderRadius: Radius[16], borderWidth: StyleSheet.hairlineWidth, gap: 2 },
+  chips: { flexDirection: 'row', gap: Spacing.two },
 });

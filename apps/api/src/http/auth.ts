@@ -27,3 +27,13 @@ export function requireUser(resolveUserId: ResolveUserId): preHandlerAsyncHookHa
     request.userId = userId;
   };
 }
+
+/**
+ * For public routes that show extra data to signed-in users (e.g. "is this park my favourite").
+ * Never rejects for a missing session; a failing session store still surfaces as 503.
+ */
+export function optionalUser(resolveUserId: ResolveUserId): preHandlerAsyncHookHandler {
+  return async (request) => {
+    request.userId = (await resolveUserId(request)) ?? undefined;
+  };
+}

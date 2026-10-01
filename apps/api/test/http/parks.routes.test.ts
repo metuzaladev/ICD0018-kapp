@@ -42,7 +42,37 @@ describe('GET /api/v1/parks/nearby', () => {
   });
 });
 
+describe('GET /api/v1/parks/nearby filters', () => {
+  it('parses feature flags from the query string', async () => {
+    ctx = await buildTestApp();
+    await ctx.app.inject({ method: 'GET', url: '/api/v1/parks/nearby?lat=59&lng=24&water=true&lighting=false' });
+    expect(ctx.service.listNearby).toHaveBeenCalledWith(
+      expect.objectContaining({ water: true, lighting: false, radiusKm: 5 }),
+    );
+  });
+
+  it('400 for a flag that is not a boolean', async () => {
+    ctx = await buildTestApp();
+    const res = await ctx.app.inject({ method: 'GET', url: '/api/v1/parks/nearby?lat=59&lng=24&water=maybe' });
+    expect(res.statusCode).toBe(400);
+    expectApiError(res, /"water"/);
+  });
+});
+
 describe('GET /api/v1/parks/:parkId', () => {
+  it('is public and passes no viewer for anonymous requests', async () => {
+    ctx = await buildTestApp({ resolveUserId: fakeAuth });
+    const res = await ctx.app.inject({ method: 'GET', url: `/api/v1/parks/${PARK_ID}` });
+    expect(res.statusCode).toBe(200);
+    expect(ctx.service.getPublicPark).toHaveBeenCalledWith(PARK_ID, undefined);
+  });
+
+  it('passes the signed-in viewer so favourite state can be shown', async () => {
+    ctx = await buildTestApp({ resolveUserId: fakeAuth });
+    await ctx.app.inject({ method: 'GET', url: `/api/v1/parks/${PARK_ID}`, headers: { authorization: 'Bearer test' } });
+    expect(ctx.service.getPublicPark).toHaveBeenCalledWith(PARK_ID, USER_ID);
+  });
+
   it('400 for an id that is not a UUID', async () => {
     ctx = await buildTestApp();
     const res = await ctx.app.inject({ method: 'GET', url: '/api/v1/parks/12345' });

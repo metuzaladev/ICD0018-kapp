@@ -5,16 +5,10 @@
 import { eq, like } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { buildApp, defaultAppConfig } from '../../src/app';
 import { db, pool } from '../../src/db/client';
 import { user } from '../../src/db/schema';
-import { createAuth } from '../../src/modules/auth/auth';
 import type { Mailer } from '../../src/modules/auth/mailer';
-import { createSessionResolver } from '../../src/modules/auth/session-resolver';
-import { createParksRepository } from '../../src/modules/parks/parks.repository';
-import { createParksService } from '../../src/modules/parks/parks.service';
-import { createProfileRepository } from '../../src/modules/profile/profile.repository';
-import { createProfileService } from '../../src/modules/profile/profile.service';
+import { buildRealApp } from './real-app';
 
 const EMAIL_DOMAIN = '@auth-flow.test.invalid';
 const email = `kasutaja-${Date.now()}${EMAIL_DOMAIN}`;
@@ -22,19 +16,7 @@ const password = 'pikk-parool-123';
 const sentResets: { to: string; url: string }[] = [];
 const mailer: Mailer = { sendPasswordReset: async (m) => void sentResets.push(m) };
 
-const auth = createAuth({
-  db,
-  mailer,
-  config: {
-    secret: 'integration-test-secret-integration-test-secret',
-    publicUrl: 'http://localhost:3000',
-    appScheme: 'kapp',
-    isProduction: false,
-    rateLimit: false,
-  },
-});
-
-let app: Awaited<ReturnType<typeof buildApp>>;
+let app: Awaited<ReturnType<typeof buildRealApp>>;
 const origin = { 'expo-origin': 'kapp://' };
 
 function cookieHeader(setCookie: string | string[] | undefined): string {
@@ -43,16 +25,7 @@ function cookieHeader(setCookie: string | string[] | undefined): string {
 }
 
 beforeAll(async () => {
-  app = await buildApp(
-    {
-      parksService: createParksService({ repository: createParksRepository(db), timeoutMs: 5000 }),
-      profileService: createProfileService({ repository: createProfileRepository(db), timeoutMs: 5000 }),
-      checkDatabase: async () => true,
-      resolveUserId: createSessionResolver(auth),
-      authHandler: auth.handler,
-    },
-    defaultAppConfig,
-  );
+  app = await buildRealApp(mailer);
 });
 
 afterAll(async () => {

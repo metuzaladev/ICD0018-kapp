@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NotFoundError } from '../../src/http/errors';
 import { TimeoutError } from '../../src/lib/timeout';
 import { createParksService, NEARBY_LIMIT } from '../../src/modules/parks/parks.service';
-import { makeParkRecord, mockRepository, PARK_ID, USER_ID } from '../helpers';
+import { makeParkDetailRecord, makeParkRecord, mockRepository, PARK_ID, USER_ID } from '../helpers';
 
 const TIMEOUT_MS = 1000;
 
@@ -26,7 +26,16 @@ describe('ParksService', () => {
 
       expect(parks).toHaveLength(1);
       expect(parks[0]?.distanceKm).toBe(2.3);
-      expect(repository.findApprovedNearby).toHaveBeenCalledWith({ lat: 59.437, lng: 24.7536 }, 5, NEARBY_LIMIT);
+      expect(repository.findApprovedNearby).toHaveBeenCalledWith({ lat: 59.437, lng: 24.7536 }, 5, NEARBY_LIMIT, {});
+    });
+
+    it('passes feature filters to the repository', async () => {
+      repository.findApprovedNearby.mockResolvedValue([]);
+      await service.listNearby({ lat: 59, lng: 24, radiusKm: 1, water: true, lighting: false });
+      expect(repository.findApprovedNearby).toHaveBeenCalledWith({ lat: 59, lng: 24 }, 1, NEARBY_LIMIT, {
+        water: true,
+        lighting: false,
+      });
     });
 
     it('returns an empty list when nothing is nearby', async () => {
@@ -52,9 +61,26 @@ describe('ParksService', () => {
   });
 
   describe('getPublicPark', () => {
-    it('returns an approved park', async () => {
-      repository.findById.mockResolvedValue(makeParkRecord());
-      await expect(service.getPublicPark(PARK_ID)).resolves.toMatchObject({ id: PARK_ID, status: 'approved' });
+    it('returns an approved park with its review summary', async () => {
+      repository.findById.mockResolvedValue(makeParkDetailRecord());
+      await expect(service.getPublicPark(PARK_ID)).resolves.toMatchObject({
+        id: PARK_ID,
+        status: 'approved',
+        ratingAverage: 4.8,
+        reviewCount: 32,
+      });
+      expect(repository.findById).toHaveBeenCalledWith(PARK_ID, undefined);
+    });
+
+    it('asks for favourite state only for a signed-in viewer', async () => {
+      repository.findById.mockResolvedValue(makeParkDetailRecord({ isFavorite: true }));
+      await expect(service.getPublicPark(PARK_ID, USER_ID)).resolves.toMatchObject({ isFavorite: true });
+      expect(repository.findById).toHaveBeenCalledWith(PARK_ID, USER_ID);
+    });
+
+    it('keeps a missing rating as null (park without reviews)', async () => {
+      repository.findById.mockResolvedValue(makeParkDetailRecord({ ratingAverage: null, reviewCount: 0 }));
+      await expect(service.getPublicPark(PARK_ID)).resolves.toMatchObject({ ratingAverage: null, reviewCount: 0 });
     });
 
     it('throws NotFoundError when the park does not exist (null)', async () => {

@@ -11,6 +11,8 @@ import { env } from './config/env';
 import { db, pool } from './db/client';
 import { createAuth } from './modules/auth/auth';
 import { createLogMailer } from './modules/auth/mailer';
+import { createFavoritesRepository } from './modules/favorites/favorites.repository';
+import { createFavoritesService } from './modules/favorites/favorites.service';
 import { createSessionResolver } from './modules/auth/session-resolver';
 import { createParksRepository } from './modules/parks/parks.repository';
 import { createParksService } from './modules/parks/parks.service';
@@ -44,9 +46,16 @@ const auth = createAuth({
   },
 });
 
+const parksRepository = createParksRepository(db);
+
 const app = await buildApp(
   {
-    parksService: createParksService({ repository: createParksRepository(db), timeoutMs: env.SERVICE_TIMEOUT_MS }),
+    parksService: createParksService({ repository: parksRepository, timeoutMs: env.SERVICE_TIMEOUT_MS }),
+    favoritesService: createFavoritesService({
+      favorites: createFavoritesRepository(db),
+      parks: parksRepository,
+      timeoutMs: env.SERVICE_TIMEOUT_MS,
+    }),
     profileService: createProfileService({ repository: createProfileRepository(db), timeoutMs: env.SERVICE_TIMEOUT_MS }),
     checkDatabase: async () => {
       await db.execute(sql`select 1`);

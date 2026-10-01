@@ -90,6 +90,8 @@ Kuidas lisada: viska teenuses või marsruudis `HttpError` alamklass (`throw new 
 - **Päised:** `@fastify/helmet`. CORS keelab brauserid, kui `CORS_ORIGINS` pole seatud (natiivne äpp CORS-i ei kasuta).
 - **Logid** ei sisalda `Authorization` ega cookie päiseid.
 - **SQL** ainult Drizzle'i või parameetritega `sql`-mallide kaudu, mitte kunagi stringide liitmisega.
+- **Korrelatsiooniga alampäringus viita välisele reale selgesõnaliselt** (`"parks"."id"`). Drizzle kirjutab ühe tabeli päringus `${parks.id}` kujul `"id"` ja alampäringus seob Postgres selle sisemise tabeliga, mis annab vaikselt vale tulemuse (vt docs/08).
+- **Idempotentsed muutused on `PUT`/`DELETE`** (nt lemmikud), et korduspäringud oleksid ohutud.
 
 ## 6.5 Testid
 

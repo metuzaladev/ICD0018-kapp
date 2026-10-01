@@ -57,12 +57,20 @@ export const parkIdParamsSchema = z.object({
 });
 export type ParkIdParams = z.infer<typeof parkIdParamsSchema>;
 
+/** Feature filters from the "Filtrid" screen; only `true` narrows the result (false = don't care). */
+const featureFlag = z.stringbool().optional();
+
 export const nearbyParksQuerySchema = z.object({
   lat: z.coerce.number().pipe(latitude),
   lng: z.coerce.number().pipe(longitude),
   radiusKm: z.coerce.number().positive().max(50).default(5),
+  fenced: featureFlag,
+  smallDogArea: featureFlag,
+  water: featureFlag,
+  lighting: featureFlag,
 });
 export type NearbyParksQuery = z.infer<typeof nearbyParksQuerySchema>;
+export type ParkFeatureFilters = Pick<NearbyParksQuery, 'fenced' | 'smallDogArea' | 'water' | 'lighting'>;
 
 /** "Lisa koerapark" form. New parks are always created as `pending` and moderated. */
 export const createParkInputSchema = z
@@ -98,6 +106,14 @@ export const parkSchema = z.object({
   activeDogs: z.number().int().nonnegative().optional(),
 });
 export type Park = z.infer<typeof parkSchema>;
+
+/** GET /api/v1/parks/:parkId — adds review summary and, for signed-in users, favourite state. */
+export const parkDetailSchema = parkSchema.extend({
+  ratingAverage: z.number().nullable(),
+  reviewCount: z.number().int().nonnegative(),
+  isFavorite: z.boolean().optional(),
+});
+export type ParkDetail = z.infer<typeof parkDetailSchema>;
 
 /* ---------- auth & profile (M1) ---------- */
 

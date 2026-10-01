@@ -12,6 +12,8 @@ Rules that are easy to miss:
 - New API feature = `modules/<domain>/<domain>.{routes,service,repository}.ts` + unit, HTTP and (for SQL) integration tests.
 - DB changes: edit `apps/api/src/db/schema.ts`, then `npm run db:generate -w @kapp/api`; never edit merged migrations.
 - Auth: Better Auth behind `/api/v1/auth/*` (see docs/07-autentimine.md); protected routes use `requireUser`; the app sends the session cookie via `lib/api.ts`.
+- The app needs a development build (MapLibre is native): `npx expo run:ios`; Expo Go no longer works. Never build with CODE_SIGNING_ALLOWED=NO (breaks Keychain/SecureStore). See docs/08.
+- Server data in the app goes through TanStack Query hooks (`hooks/use-*.ts`), never raw fetch in screens.
 - UI text is Estonian; code, identifiers and comments are English.
 
 Before finishing: `npm run typecheck && npm test` and `npm run lint -w mobile`.

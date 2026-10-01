@@ -1,0 +1,24 @@
+{
+  "name": "icd0018-kapp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Käpp — dog park and dog care app. TalTech ICD0018 Hybrid Mobile Applications course project.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev:api": "npm run dev -w @kapp/api",
+    "dev:mobile": "npm run start -w mobile",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down",
+    "db:migrate": "npm run db:migrate -w @kapp/api",
+    "db:seed": "npm run db:seed -w @kapp/api",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  }
+}

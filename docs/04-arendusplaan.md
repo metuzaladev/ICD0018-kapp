@@ -1,0 +1,25 @@
+# 4. Arendusplaan
+
+Etapid on prioriteedi järjekorras. **M0–M3 ja M8 on miinimum kaitsmiseks**; M4–M7 lisavad väärtust, kui aega jääb.
+Iga etapp lõpeb töötava äpiga simulaatoris, rohelise tüübikontrolli ja testidega.
+
+| Etapp | Sisu | Kursuse õpiväljund | Valmis, kui |
+|---|---|---|---|
+| **M0 Vundament** ✅ | Monorepo, Expo äpp (4 tab'i, Figma tokenid, tume teema), Fastify API, Postgres + PostGIS, migratsioonid, seed, testid, dokumentatsioon | Tehnoloogiate hindamine ja valik; arendustsükli kirjeldus | `npm run typecheck && npm test` roheline, äpp näitab API-st parke |
+| **M1 Autentimine ja profiil** | Better Auth (e-post, Apple, Google), sessioon äpis (SecureStore), onboarding ja konto vaated, profiili muutmine, Manrope + DM Sans fondid | Kasutaja autentimine | Uus kasutaja saab registreeruda, välja ja sisse logida mõlemal platvormil |
+| **M2 Pargid ja kaart** | MapLibre + OpenFreeMap (development build), seadme asukoht, pargi detailvaade, filtrid, lemmikud, TanStack Query, offline-olek | Natiivsed võimalused hübriidäpis | Kaardil on pargid, markerilt avaneb park, filtrid töötavad |
+| **M3 Kohalolek ja külastused** | Check-in koos aegumisega (BullMQ ajastatud töö), külastuse planeerimine, ajalugu, hinnangud, ohuteated | Andmebaas ja äriloogika | Kaks kasutajat näevad teineteise kohalolekut õiguste järgi |
+| **M4 Koerad ja tervis** | Koera CRUD, fotod (presigned upload R2-sse, pisipildid sharp'iga), privaatsed tervisekirjed ja meeldetuletused | Kaamera, failid, privaatsus | Koera profiil fotoga, tervisekirje nähtav ainult omanikule |
+| **M5 Kogukond** | Sõbrakutsed, vestlused (Socket.IO), push-teavitused (expo-server-sdk), blokeerimine ja teavitamine | Reaalaja andmed | Sõnum jõuab teisele kasutajale reaalajas ja push-teavitusena |
+| **M6 Teenused** | Teenusepakkujad, aja valik, broneering, minu broneeringud | – | Broneeringu voog lõpuni |
+| **M7 Animatsioonid ja viimistlus** | Reanimated üleminekud, jagatud elemendi animatsioonid (park → detail), haptika, tühjad olekud, ligipääsetavus (VoiceOver, Dynamic Type) | Animatsioonid, UI/UX | Põhivood on animeeritud, VoiceOver loeb kõik nupud |
+| **M8 Pakendamine ja levitamine** | EAS Build profiilid, TestFlight, Google Play internal testing, API hostimine EL-is, keskkonnamuutujad, varukoopiad | Pakendamine ja levitamine | Testijad saavad äpi poest või TestFlightist alla laadida |
+
+## Töövõtted
+
+- **Harud:** `main` on alati töötav; töö harudes `feature/<lühike-nimi>`, liitmine Pull Requestiga.
+- **Commitid:** [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `chore:`), lühike ja käskivas kõneviisis.
+- **CI:** GitHub Actions jooksutab iga PR-i peal `npm run typecheck` ja `npm test` (`.github/workflows/ci.yml`).
+- **Andmebaasi muutused:** muuda `schema.ts` → `npm run db:generate -w @kapp/api` → vaata SQL üle → `npm run db:migrate`. Migratsioone ei muudeta pärast `main`-i liitmist.
+- **Expo paketid:** lisa alati `npx expo install <pakett>` (õiged SDK-ga ühilduvad versioonid).
+- **Disain enne koodi:** uus vaade või komponent tehakse esmalt Figmas, tokenid sünkroonitakse `packages/shared/src/tokens.ts`-i.

@@ -19,3 +19,9 @@ export function isUniqueViolation(error: unknown, constraint?: string): boolean 
   const state = sqlState(error);
   return state?.code === '23505' && (constraint === undefined || state.constraint === constraint);
 }
+
+/** 23514 check_violation, optionally for one named CHECK constraint. */
+export function isCheckViolation(error: unknown, constraint?: string): boolean {
+  const state = sqlState(error);
+  return state?.code === '23514' && (constraint === undefined || state.constraint === constraint);
+}

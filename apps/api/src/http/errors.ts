@@ -11,8 +11,10 @@ export class HttpError extends Error {
   constructor(
     readonly statusCode: number,
     message: string,
+    /** `cause` is for the server log only; the client never sees it. */
+    options?: ErrorOptions,
   ) {
-    super(message);
+    super(message, options);
     this.name = new.target.name;
   }
 
@@ -60,7 +62,7 @@ export class TooManyRequestsError extends HttpError {
 
 /** Downstream dependency (database, storage, push service) is slow or unreachable. */
 export class ServiceUnavailableError extends HttpError {
-  constructor(message = 'Teenus ei vasta, proovi hetke pärast uuesti') {
-    super(503, message);
+  constructor(message = 'Teenus ei vasta, proovi hetke pärast uuesti', options?: ErrorOptions) {
+    super(503, message, options);
   }
 }

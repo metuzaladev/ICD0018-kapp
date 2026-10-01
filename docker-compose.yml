@@ -22,5 +22,31 @@ services:
     ports:
       - '6379:6379'
 
+  # S3-compatible object storage for dog photos (production: Cloudflare R2), see docs/10.
+  # MinIO no longer publishes images on Docker Hub; Chainguard builds it from source (multi-arch).
+  minio:
+    image: chainguard/minio:latest
+    command: ['server', '/data', '--console-address', ':9001']
+    environment:
+      MINIO_ROOT_USER: kapp
+      MINIO_ROOT_PASSWORD: kapp-dev-secret
+    ports:
+      - '9000:9000' # S3 API
+      - '9001:9001' # web console
+    volumes:
+      - minio-data:/data
+
+  # One-shot: creates the private photo bucket (idempotent). The image has no shell, so the server
+  # address and credentials come from MC_HOST_<alias>. `restart: "no"` lets `up --wait` treat
+  # its successful exit as done instead of as a failed service.
+  minio-setup:
+    image: chainguard/minio-client:latest
+    depends_on: [minio]
+    environment:
+      MC_HOST_local: http://kapp:kapp-dev-secret@minio:9000
+    command: ['mb', '--ignore-existing', 'local/kapp-photos']
+    restart: "no"
+
 volumes:
   db-data:
+  minio-data:

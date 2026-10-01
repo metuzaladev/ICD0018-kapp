@@ -12,8 +12,12 @@ import type { DogsService } from './modules/dogs/dogs.service';
 import { favoritesRoutes } from './modules/favorites/favorites.routes';
 import type { FavoritesService } from './modules/favorites/favorites.service';
 import { healthRoutes } from './modules/health/health.routes';
+import { healthRecordsRoutes } from './modules/health-records/health-records.routes';
+import type { HealthRecordsService } from './modules/health-records/health-records.service';
 import { parksRoutes } from './modules/parks/parks.routes';
 import type { ParksService } from './modules/parks/parks.service';
+import { photosRoutes } from './modules/photos/photos.routes';
+import type { PhotosService } from './modules/photos/photos.service';
 import { profileRoutes } from './modules/profile/profile.routes';
 import type { ProfileService } from './modules/profile/profile.service';
 import { reportsRoutes } from './modules/reports/reports.routes';
@@ -35,6 +39,8 @@ export interface AppDeps {
   visitsService: VisitsService;
   reviewsService: ReviewsService;
   reportsService: ReportsService;
+  photosService: PhotosService;
+  healthRecordsService: HealthRecordsService;
   checkDatabase: () => Promise<boolean>;
   /** Reads the user id from the session; defaults to "nobody is signed in". */
   resolveUserId?: ResolveUserId;
@@ -94,6 +100,8 @@ export async function buildApp(deps: AppDeps, config: AppConfig = defaultAppConf
   await app.register(profileRoutes, { prefix: API_PREFIX, service: deps.profileService, resolveUserId });
   await app.register(favoritesRoutes, { prefix: API_PREFIX, service: deps.favoritesService, resolveUserId });
   await app.register(dogsRoutes, { prefix: API_PREFIX, service: deps.dogsService, resolveUserId });
+  await app.register(photosRoutes, { prefix: API_PREFIX, service: deps.photosService, resolveUserId });
+  await app.register(healthRecordsRoutes, { prefix: API_PREFIX, service: deps.healthRecordsService, resolveUserId });
   await app.register(visitsRoutes, { prefix: API_PREFIX, service: deps.visitsService, resolveUserId });
   await app.register(reviewsRoutes, { prefix: API_PREFIX, service: deps.reviewsService, resolveUserId });
   await app.register(reportsRoutes, { prefix: API_PREFIX, service: deps.reportsService, resolveUserId });

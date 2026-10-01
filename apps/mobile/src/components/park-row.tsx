@@ -1,5 +1,6 @@
 import type { Park } from '@kapp/shared';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -7,10 +8,13 @@ import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { dogsLabel, formatKm } from '@/lib/format';
 
-/** Figma "List Row" for a park: name, distance and dogs present; opens the park detail. */
+/** Figma "List Row" for a park: "1,2 km · 6 koera praegu" or "8,2 km · hetkel vaikne"; opens the park detail. */
 export function ParkRow({ park, highlighted = false }: { park: Park; highlighted?: boolean }) {
   const c = useTheme();
-  const meta = [formatKm(park.distanceKm), `${dogsLabel(park.activeDogs ?? 0)} praegu`].filter(Boolean).join(' · ');
+  const { t } = useTranslation();
+  const dogs = park.activeDogs ?? 0;
+  const presence = dogs > 0 ? t('parkRow.dogsNow', { dogs: dogsLabel(dogs) }) : t('parkRow.quiet');
+  const meta = [formatKm(park.distanceKm), presence].filter(Boolean).join(' · ');
 
   return (
     <Pressable

@@ -1,0 +1,8 @@
+{
+  "ios": {
+    "CFBundleDisplayName": "Käpp",
+    "NSLocationWhenInUseUsageDescription": "Käpp uses your location to show the nearest dog parks and how far away they are. Your location is never shared with others without your permission.",
+    "NSPhotoLibraryUsageDescription": "Käpp needs access to your photos so you can choose pictures for your dog’s profile. Location data is removed from photos before they are saved.",
+    "NSCameraUsageDescription": "Käpp uses the camera so you can take photos of your dog. Location data is removed from photos before they are saved."
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "ios": {
+    "CFBundleDisplayName": "Käpp",
+    "NSLocationWhenInUseUsageDescription": "Käpp kasutab sinu asukohta, et näidata lähimaid koeraparke ja nende kaugust. Asukohta ei jagata teistega ilma sinu loata.",
+    "NSPhotoLibraryUsageDescription": "Käpp vajab ligipääsu sinu piltidele, et saaksid valida fotosid oma koera profiili jaoks. Pildi asukohaandmed eemaldatakse enne salvestamist.",
+    "NSCameraUsageDescription": "Käpp kasutab kaamerat, et saaksid oma koerast pilti teha. Pildi asukohaandmed eemaldatakse enne salvestamist."
+  }
+}

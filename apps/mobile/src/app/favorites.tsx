@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/button';
 import { FormError } from '@/components/form-error';
@@ -11,20 +12,17 @@ import { errorMessage } from '@/lib/api';
 
 /** Figma 05 / Saved / Favorite Parks. */
 export default function FavoritesScreen() {
+  const { t } = useTranslation();
   const { data: parks, error, isPending } = useFavoriteParks();
 
   return (
-    <Screen underHeader title="Lemmikpargid" subtitle="Paigad, kuhu ikka tagasi tulla.">
+    <Screen underHeader title={t('favorites.title')} subtitle={t('favorites.subtitle')}>
       <OfflineBanner />
       {error && !parks ? <FormError message={errorMessage(error)} /> : null}
-      {isPending ? <ThemedText themeColor="muted">Laen…</ThemedText> : null}
-      {parks?.length === 0 ? (
-        <>
-          <ThemedText themeColor="muted">Lemmikuid veel pole. Vajuta pargi lehel südamele.</ThemedText>
-          <Button label="Avasta parke" variant="secondary" onPress={() => router.navigate('/map')} />
-        </>
-      ) : null}
+      {isPending ? <ThemedText themeColor="muted">{t('common.loading')}</ThemedText> : null}
+      {parks?.length === 0 ? <ThemedText themeColor="muted">{t('favorites.empty')}</ThemedText> : null}
       {parks?.map((park) => <ParkRow key={park.id} park={park} />)}
+      {parks ? <Button label={t('favorites.explore')} variant="secondary" onPress={() => router.navigate('/map')} /> : null}
     </Screen>
   );
 }

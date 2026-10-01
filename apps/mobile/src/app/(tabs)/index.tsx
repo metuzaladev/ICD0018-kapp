@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -10,11 +11,12 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
 import { useDeviceLocation } from '@/hooks/use-device-location';
+import { useMyDogs } from '@/hooks/use-dogs';
 import { useHealthReminders } from '@/hooks/use-health';
 import { useNearbyParks } from '@/hooks/use-parks';
 import { useActiveCheckIn, usePlannedVisits } from '@/hooks/use-visits';
 import { authClient } from '@/lib/auth-client';
-import { dueLabel, formatDate, formatDay, formatTime } from '@/lib/format';
+import { dueLabel, formatDate, formatDay, formatTime, formatToday } from '@/lib/format';
 import { useParkFilters } from '@/state/park-filters';
 
 /**
@@ -22,6 +24,7 @@ import { useParkFilters } from '@/state/park-filters';
  * overdue), nearby parks. Friends' plans arrive in M5.
  */
 export default function HomeScreen() {
+  const { t } = useTranslation();
   const { data: session } = authClient.useSession();
   const location = useDeviceLocation();
   // Same query key as the map tab, so both screens share one cached request.
@@ -29,29 +32,31 @@ export default function HomeScreen() {
   const { data: active } = useActiveCheckIn();
   const { data: plans = [] } = usePlannedVisits();
   const { data: reminders = [] } = useHealthReminders();
-  const firstName = session?.user.name.split(' ')[0];
+  const { data: dogs } = useMyDogs();
+  // Figma asks the dog ("Õue, Freddy?"); with several dogs (or none) the owner is greeted instead.
+  const greetName = dogs?.length === 1 ? dogs[0]!.name : session?.user.name.split(' ')[0];
   const openPark = (parkId: string) => router.push({ pathname: '/parks/[parkId]', params: { parkId } });
 
   return (
-    <Screen title={firstName ? `Õue, ${firstName}?` : 'Õue?'} subtitle="Täna Tallinnas">
+    <Screen
+      title={greetName ? t('home.greeting', { name: greetName }) : t('home.greetingNoName')}
+      subtitle={t('home.subtitle', { date: formatToday() })}>
       <OfflineBanner />
 
       {active ? (
         <ThemedView type="tint" style={styles.card}>
-          {/* Park names are not declined ("Kadrioru koerapark" → "koerapargis"); a label avoids wrong grammar. */}
-          <ThemedText type="caption" themeColor="muted">
-            OLED PARGIS
-          </ThemedText>
-          <ThemedText type="heading">{active.park.name}</ThemedText>
+          {/* Park names are never declined ("Kadrioru koerapargis"), so the name stands on its own line. */}
+          <ThemedText type="heading">{t('home.activeTitle')}</ThemedText>
+          <ThemedText type="label">{active.park.name}</ThemedText>
           <ThemedText>
-            {active.dogs.map((d) => d.name).join(', ')} · kuni {formatTime(active.expiresAt)}
+            {t('home.activeDogs', { dogs: active.dogs.map((d) => d.name).join(', '), time: formatTime(active.expiresAt) })}
           </ThemedText>
-          <Button label="Ava park" variant="secondary" onPress={() => openPark(active.park.id)} />
+          <Button label={t('home.openPark')} variant="secondary" onPress={() => openPark(active.park.id)} />
         </ThemedView>
       ) : (
         <ThemedView type="soft" style={styles.card}>
-          <ThemedText type="heading">Täna võiks koos mängida</ThemedText>
-          <ThemedText themeColor="muted">Märgi pargis kohalolek või planeeri käik, et sõbrad teaksid tulla.</ThemedText>
+          <ThemedText type="heading">{t('home.idleTitle')}</ThemedText>
+          <ThemedText themeColor="muted">{t('home.idleBody')}</ThemedText>
         </ThemedView>
       )}
 
@@ -59,19 +64,19 @@ export default function HomeScreen() {
         <ThemedView key={p.id} type="surface" style={styles.card}>
           <ThemedText type="label">{p.park.name}</ThemedText>
           <ThemedText type="caption" themeColor="muted">
-            Plaanis {formatDay(p.startsAt)} {formatTime(p.startsAt)}–{formatTime(p.endsAt)}
+            {t('home.planned', { day: formatDay(p.startsAt), from: formatTime(p.startsAt), to: formatTime(p.endsAt) })}
           </ThemedText>
         </ThemedView>
       ))}
 
       {reminders.length > 0 ? (
         <>
-          <ThemedText type="heading">Tervise meeldetuletused</ThemedText>
+          <ThemedText type="heading">{t('home.remindersTitle')}</ThemedText>
           {reminders.slice(0, 3).map((r) => (
             <ListRow
               key={r.recordId}
               title={`${r.dog.name} · ${r.title}`}
-              subtitle={`Tähtaeg ${formatDate(r.nextDue)} · ${dueLabel(r.nextDue)}`}
+              subtitle={t('home.reminderDue', { date: formatDate(r.nextDue), due: dueLabel(r.nextDue) })}
               alert={r.overdue}
               onPress={() => router.push({ pathname: '/dogs/[dogId]/health', params: { dogId: r.dog.id } })}
             />
@@ -79,11 +84,11 @@ export default function HomeScreen() {
         </>
       ) : null}
 
-      <Button label="Leia lähim park" onPress={() => router.navigate('/map')} />
+      <Button label={t('home.findPark')} onPress={() => router.navigate('/map')} />
 
       {parks.length > 0 ? (
         <>
-          <ThemedText type="heading">Teie lähedal</ThemedText>
+          <ThemedText type="heading">{t('home.nearby')}</ThemedText>
           {parks.slice(0, 3).map((park) => (
             <ParkRow key={park.id} park={park} />
           ))}

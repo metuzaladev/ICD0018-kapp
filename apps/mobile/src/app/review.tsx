@@ -1,6 +1,7 @@
 import { reviewInputSchema } from '@kapp/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -15,6 +16,7 @@ import { validateForm } from '@/lib/form';
 
 /** Figma 03 / Visit / Add Review — modal. Writing again replaces the previous review. */
 export default function ReviewScreen() {
+  const { t } = useTranslation();
   const c = useTheme();
   const { parkId, parkName } = useLocalSearchParams<{ parkId: string; parkName?: string }>();
   const submitReview = useSubmitReview(parkId);
@@ -24,7 +26,7 @@ export default function ReviewScreen() {
 
   async function submit() {
     const { data, errors } = validateForm(reviewInputSchema, { rating, body });
-    if (!data) return setError(errors.rating ? 'Vali hinne 1–5' : (Object.values(errors)[0] ?? 'Kontrolli välju'));
+    if (!data) return setError(errors.rating ? t('review.chooseRating') : (Object.values(errors)[0] ?? t('errors.checkChoices')));
     setError(null);
     try {
       await submitReview.mutateAsync(data);
@@ -35,14 +37,15 @@ export default function ReviewScreen() {
   }
 
   return (
-    <Screen underHeader title={parkName ?? 'Hinda parki'} subtitle="Sinu hinnang aitab teistel õige pargi valida.">
+    <Screen underHeader title={t('review.title')} subtitle={parkName}>
       <FormError message={error} />
-      <View style={styles.stars} accessibilityRole="adjustable" accessibilityLabel={`Hinne ${rating} viiest`}>
+      <ThemedText themeColor="muted">{t('review.hint')}</ThemedText>
+      <View style={styles.stars} accessibilityRole="adjustable" accessibilityLabel={t('review.ratingA11y', { rating })}>
         {[1, 2, 3, 4, 5].map((n) => (
           <Pressable
             key={n}
             accessibilityRole="button"
-            accessibilityLabel={`${n} tärni`}
+            accessibilityLabel={t('review.star', { count: n })}
             accessibilityState={{ selected: rating >= n }}
             onPress={() => setRating(n)}
             style={styles.star}>
@@ -53,14 +56,14 @@ export default function ReviewScreen() {
         ))}
       </View>
       <TextField
-        label="Sinu kogemus (valikuline)"
-        placeholder="Näiteks: sõbralikud koerad ja mõnus jalutuskäik"
+        label={t('review.experience')}
+        placeholder={t('review.experiencePlaceholder')}
         value={body}
         onChangeText={setBody}
         multiline
         maxLength={1000}
       />
-      <Button label="Salvesta hinnang" loading={submitReview.isPending} onPress={submit} />
+      <Button label={t('review.submit')} loading={submitReview.isPending} onPress={submit} />
     </Screen>
   );
 }

@@ -8,11 +8,13 @@ import {
   type LngLatBounds,
 } from '@maplibre/maplibre-react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, useColorScheme, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { dogsLabel } from '@/lib/format';
 
 /**
  * OpenFreeMap vector styles: free, no API key, OSM data with attribution built into the style.
@@ -44,6 +46,7 @@ function boundsOf(center: { lat: number; lng: number }, parks: Park[]): LngLatBo
 /** Figma "Map / Tallinn schematic", now a real map. Markers show how many dogs are there now. */
 export function ParkMap({ parks, center, showUserLocation, selectedId, onSelect }: ParkMapProps) {
   const c = useTheme();
+  const { t } = useTranslation();
   const scheme = useColorScheme() === 'light' ? 'light' : 'dark';
   const camera = useRef<CameraRef>(null);
   // Camera commands sent before the style has loaded are dropped by the native map.
@@ -82,7 +85,7 @@ export function ParkMap({ parks, center, showUserLocation, selectedId, onSelect 
               <View
                 accessible
                 accessibilityRole="button"
-                accessibilityLabel={`${park.name}, ${park.activeDogs ?? 0} koera praegu`}
+                accessibilityLabel={t('map.marker', { name: park.name, dogs: dogsLabel(park.activeDogs ?? 0) })}
                 style={[
                   styles.marker,
                   { backgroundColor: selected ? c.onBrand : c.brand, borderColor: selected ? c.brand : c.onBrand },

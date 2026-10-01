@@ -1,5 +1,6 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Platform, StyleSheet, useColorScheme, View } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -8,7 +9,7 @@ import { authClient, authErrorMessage } from '@/lib/auth-client';
 import { AUTH_APPLE_ENABLED, AUTH_GOOGLE_ENABLED } from '@/lib/config';
 
 /**
- * "Jätka Apple'iga" / "Jätka Google'iga".
+ * Continue with Apple / Google. Apple's button draws its own text in the device language.
  *
  * Apple: native sheet (expo-apple-authentication) → identity token → Better Auth verifies it.
  * Uses Apple's own button component, as App Store guideline 4.8 and the HIG require.
@@ -16,6 +17,7 @@ import { AUTH_APPLE_ENABLED, AUTH_GOOGLE_ENABLED } from '@/lib/config';
  * Both are hidden unless the API has credentials configured (EXPO_PUBLIC_AUTH_*).
  */
 export function SocialSignIn({ onError }: { onError: (message: string | null) => void }) {
+  const { t } = useTranslation();
   const scheme = useColorScheme();
   const [appleAvailable, setAppleAvailable] = useState(false);
 
@@ -40,7 +42,7 @@ export function SocialSignIn({ onError }: { onError: (message: string | null) =>
     } catch (e) {
       // The user closing the Apple sheet is not an error.
       if ((e as { code?: string }).code === 'ERR_REQUEST_CANCELED') return;
-      onError("Apple'iga sisselogimine ebaõnnestus");
+      onError(t('auth.social.appleFailed'));
     }
   }
 
@@ -67,7 +69,7 @@ export function SocialSignIn({ onError }: { onError: (message: string | null) =>
           onPress={signInWithApple}
         />
       ) : null}
-      {AUTH_GOOGLE_ENABLED ? <Button variant="secondary" label="Jätka Google'iga" onPress={signInWithGoogle} /> : null}
+      {AUTH_GOOGLE_ENABLED ? <Button variant="secondary" label={t('auth.social.google')} onPress={signInWithGoogle} /> : null}
     </View>
   );
 }

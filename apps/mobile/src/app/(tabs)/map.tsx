@@ -1,6 +1,7 @@
 import type { Park } from '@kapp/shared';
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { Chip } from '@/components/chip';
@@ -22,6 +23,7 @@ const NEAR_RADIUS_KM = 2;
 
 /** Figma 02 / Explore / Map + Park List: map with markers, selected park, list below. */
 export default function MapScreen() {
+  const { t } = useTranslation();
   const location = useDeviceLocation();
   const filters = useParkFilters();
   const { data: parks = [], error, isPending } = useNearbyParks(location.origin, filters);
@@ -29,20 +31,17 @@ export default function MapScreen() {
 
   const nearOnly = filters.radiusKm === NEAR_RADIUS_KM;
   const featureCount = activeFilterCount(filters);
-  const subtitle = location.usingFallback
-    ? 'Tallinna kesklinna lähedal'
-    : `${parks.length} parki ${filters.radiusKm} km raadiuses`;
 
   return (
-    <Screen title="Avastame Tallinna." subtitle={subtitle}>
+    <Screen title={t('map.title')} subtitle={t('map.subtitle')}>
       <OfflineBanner />
       <LocationPrompt status={location.status} canAskAgain={location.canAskAgain} onRequest={location.requestPermission} />
 
       <View style={styles.chips}>
-        <Chip label="Kõik" selected={!nearOnly} onPress={() => setParkFilters({ ...filters, radiusKm: 5 })} />
-        <Chip label="Lähedal" selected={nearOnly} onPress={() => setParkFilters({ ...filters, radiusKm: NEAR_RADIUS_KM })} />
+        <Chip label={t('map.all')} selected={!nearOnly} onPress={() => setParkFilters({ ...filters, radiusKm: 5 })} />
+        <Chip label={t('map.near')} selected={nearOnly} onPress={() => setParkFilters({ ...filters, radiusKm: NEAR_RADIUS_KM })} />
         <Chip
-          label={featureCount > 0 ? `Filtrid (${featureCount})` : 'Filtrid'}
+          label={featureCount > 0 ? t('map.filtersCount', { count: featureCount }) : t('map.filters')}
           selected={featureCount > 0}
           onPress={() => router.push('/park-filters')}
         />
@@ -58,8 +57,16 @@ export default function MapScreen() {
 
       {/* Keep showing cached parks when a refresh fails (offline); only report the error. */}
       {error ? <FormError message={errorMessage(error)} /> : null}
-      {!isPending && parks.length === 0 && !error ? (
-        <ThemedText themeColor="muted">Selles raadiuses parke ei leitud. Proovi suuremat kaugust või vähem filtreid.</ThemedText>
+      {!isPending && parks.length === 0 && !error ? <ThemedText themeColor="muted">{t('map.empty')}</ThemedText> : null}
+
+      {parks.length > 0 ? (
+        <View style={styles.listHeader}>
+          <ThemedText type="heading">{t('map.listTitle')}</ThemedText>
+          <ThemedText type="caption" themeColor="muted">
+            {t('map.count', { count: parks.length })}
+            {location.usingFallback ? ` ${t('map.fallbackNote')}` : ''}
+          </ThemedText>
+        </View>
       ) : null}
 
       {selected ? <ParkRow park={selected} highlighted /> : null}
@@ -74,4 +81,5 @@ export default function MapScreen() {
 
 const styles = StyleSheet.create({
   chips: { flexDirection: 'row', gap: Spacing.two },
+  listHeader: { gap: 2 },
 });

@@ -1,5 +1,6 @@
 import { PermissionStatus } from 'expo-location';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Linking, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -18,25 +19,27 @@ type LocationPromptProps = {
  * HIG recommendation and raises acceptance; iOS only lets an app show that dialog once.
  */
 export function LocationPrompt({ status, canAskAgain, onRequest }: LocationPromptProps) {
+  const { t } = useTranslation();
   const [dismissed, setDismissed] = useState(false);
   if (status === PermissionStatus.GRANTED || dismissed) return null;
 
   const denied = status === PermissionStatus.DENIED;
   return (
     <ThemedView type="soft" style={styles.card}>
-      <ThemedText type="heading">{denied ? 'Asukoht on välja lülitatud' : 'Näita lähimaid parke'}</ThemedText>
-      <ThemedText themeColor="muted">
-        {denied
-          ? 'Näitan parke Tallinna kesklinna järgi. Asukoha saad lubada seadetes.'
-          : 'Asukoht aitab leida lähima pargi ja näidata kaugusi. Me ei jaga seda teistega ilma sinu loata.'}
-      </ThemedText>
+      <ThemedText type="heading">{denied ? t('location.deniedTitle') : t('location.title')}</ThemedText>
+      <ThemedText themeColor="muted">{denied ? t('location.deniedBody') : t('location.body')}</ThemedText>
+      {denied ? null : (
+        <ThemedText type="caption" themeColor="muted">
+          {t('location.privacy')}
+        </ThemedText>
+      )}
       <View style={styles.actions}>
         {denied && !canAskAgain ? (
-          <Button label="Ava seaded" onPress={() => Linking.openSettings()} />
+          <Button label={t('common.openSettings')} onPress={() => Linking.openSettings()} />
         ) : (
-          <Button label="Luba asukoht" onPress={onRequest} />
+          <Button label={t('location.allow')} onPress={onRequest} />
         )}
-        <Button label="Mitte praegu" variant="tertiary" onPress={() => setDismissed(true)} />
+        <Button label={t('location.notNow')} variant="tertiary" onPress={() => setDismissed(true)} />
       </View>
     </ThemedView>
   );

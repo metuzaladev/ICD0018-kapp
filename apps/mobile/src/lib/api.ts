@@ -1,12 +1,14 @@
 import { apiErrorSchema } from '@kapp/shared';
 
+import i18n, { currentLanguage } from '@/i18n';
+
 import { authClient } from './auth-client';
 import { API_ORIGIN } from './config';
 
 /**
  * The only place in the app that talks to our REST API.
- * Why: base URL, session cookie, timeout and the `{ error, message }` contract are handled once,
- * so screens only deal with data or an ApiRequestError whose message is safe to show.
+ * Why: base URL, session cookie, language, timeout and the `{ error, message }` contract are handled
+ * once, so screens only deal with data or an ApiRequestError whose message is safe to show.
  */
 
 const BASE_URL = `${API_ORIGIN}/api/v1`;
@@ -25,7 +27,8 @@ export class ApiRequestError extends Error {
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 async function request<T>(method: Method, path: string, body?: unknown): Promise<T> {
-  const headers: Record<string, string> = { accept: 'application/json' };
+  // The API translates error messages per Accept-Language, so they match the app's language.
+  const headers: Record<string, string> = { accept: 'application/json', 'accept-language': currentLanguage() };
   // The Expo auth client keeps the session cookie in SecureStore; attach it manually because
   // React Native's fetch has no shared cookie jar with Better Auth. A Keychain failure must not
   // break public endpoints: continue anonymously and let protected ones answer 401.
@@ -48,13 +51,13 @@ async function request<T>(method: Method, path: string, body?: unknown): Promise
     });
   } catch {
     // Network down, DNS failure or timeout — the "Offline State" screen in Figma covers this.
-    throw new ApiRequestError('Internetiühendus puudub või server ei vasta', 0);
+    throw new ApiRequestError(i18n.t('errors.network'), 0);
   }
 
   const data: unknown = await res.json().catch(() => null);
   if (!res.ok) {
     const parsed = apiErrorSchema.safeParse(data);
-    throw new ApiRequestError(parsed.success ? parsed.data.message : 'Midagi läks valesti', res.status);
+    throw new ApiRequestError(parsed.success ? parsed.data.message : i18n.t('errors.unknown'), res.status);
   }
   return data as T;
 }
@@ -71,5 +74,5 @@ export function apiSend<T>(method: Exclude<Method, 'GET'>, path: string, body?: 
 export function errorMessage(error: unknown): string {
   if (error instanceof ApiRequestError) return error.message;
   // Unexpected (programming) errors: show the cause in development builds only.
-  return __DEV__ ? `Midagi läks valesti: ${String(error)}` : 'Midagi läks valesti, proovi uuesti';
+  return __DEV__ ? i18n.t('errors.genericDev', { detail: String(error) }) : i18n.t('errors.generic');
 }

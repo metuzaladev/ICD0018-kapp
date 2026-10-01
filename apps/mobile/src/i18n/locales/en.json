@@ -1,0 +1,447 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "close": "Close",
+    "openSettings": "Open Settings",
+    "you": "You",
+    "dog": "dog",
+    "until": "until {{time}}"
+  },
+  "units": {
+    "km": "{{value}} km",
+    "kg": "{{value}} kg",
+    "minutes": "{{value}} min",
+    "hours": "{{value}} h",
+    "hoursMinutes": "{{hours}} h {{minutes}} min"
+  },
+  "counts": {
+    "dogs_one": "{{count}} dog",
+    "dogs_other": "{{count}} dogs",
+    "reviews_one": "{{count}} review",
+    "reviews_other": "{{count}} reviews",
+    "photos_one": "{{count}} photo",
+    "photos_other": "{{count}} photos",
+    "visits_one": "{{count}} visit",
+    "visits_other": "{{count}} visits"
+  },
+  "dates": {
+    "today": "today",
+    "tomorrow": "tomorrow",
+    "yesterday": "yesterday",
+    "inDays_one": "in {{count}} day",
+    "inDays_other": "in {{count}} days",
+    "overdue_one": "{{count}} day overdue",
+    "overdue_other": "{{count}} days overdue",
+    "ageNewborn": "under a month",
+    "ageMonths_one": "{{count}} month",
+    "ageMonths_other": "{{count}} months",
+    "ageYears_one": "{{count}} year",
+    "ageYears_other": "{{count}} years"
+  },
+  "errors": {
+    "network": "No internet connection, or the server is not responding",
+    "unknown": "Something went wrong",
+    "generic": "Something went wrong, please try again",
+    "genericDev": "Something went wrong: {{detail}}",
+    "checkChoices": "Please check your choices",
+    "photoTooLarge": "The photo is too large (up to {{max}} MB)",
+    "uploadNetwork": "Photo upload failed, check your internet connection",
+    "uploadFailed": "Photo upload failed, please try again"
+  },
+  "tabs": {
+    "home": "Home",
+    "map": "Map",
+    "notifications": "Updates",
+    "profile": "Profile"
+  },
+  "nav": {
+    "profileEdit": "Edit profile",
+    "filters": "Filters",
+    "checkIn": "Check in",
+    "planVisit": "Plan a visit",
+    "review": "Review",
+    "report": "Report",
+    "dogAdd": "Add a dog",
+    "dogEdit": "Edit dog",
+    "vaccinationAdd": "Add vaccination",
+    "vetVisitAdd": "Vet visit",
+    "healthRecordEdit": "Edit record"
+  },
+  "auth": {
+    "email": "Email",
+    "emailPlaceholder": "Your email address",
+    "password": "Password",
+    "passwordHint": "At least {{min}} characters",
+    "backToSignIn": "Back to sign in",
+    "welcome": {
+      "region": "TALLINN · ESTONIA",
+      "tagline": "Dogs bring people together.",
+      "photoLabel": "A Cardigan corgi on the grass",
+      "intro": "Find a playmate for your dog and a new favourite park for yourself.",
+      "start": "Let’s go",
+      "haveAccount": "I already have an account"
+    },
+    "signUp": {
+      "title": "Welcome to the pack.",
+      "subtitle": "One account for you and your dogs.",
+      "name": "Your name",
+      "namePlaceholder": "First and last name",
+      "emailPlaceholder": "name@example.com",
+      "terms": "By creating an account you agree to the terms of use and the privacy policy.",
+      "submit": "Create account",
+      "haveAccount": "Already a member? Sign in"
+    },
+    "signIn": {
+      "title": "Good to see you again.",
+      "subtitle": "Your dog’s friends are waiting.",
+      "passwordPlaceholder": "••••••••",
+      "submit": "Sign in",
+      "forgot": "Forgot your password?",
+      "createAccount": "Create a new account",
+      "passwordChanged": "Your password has been changed. Sign in with the new one."
+    },
+    "resetPassword": {
+      "title": "Fresh start?",
+      "subtitle": "We’ll send you a link to reset your password.",
+      "submit": "Send reset link",
+      "hintTitle": "Check your inbox",
+      "hintBody": "After sending, check your spam folder too. The link is valid for a limited time."
+    },
+    "resetSent": {
+      "title": "Check your inbox",
+      "subtitle": "If an account exists for this address, we’ve sent a link to it. The link is valid for one hour."
+    },
+    "newPassword": {
+      "title": "New password",
+      "subtitle": "Choose a password you don’t use anywhere else.",
+      "label": "New password",
+      "submit": "Save password",
+      "requestNew": "Request a new link",
+      "linkInvalid": "The link has expired or is invalid, request a new one"
+    },
+    "social": {
+      "google": "Continue with Google",
+      "appleFailed": "Signing in with Apple failed"
+    }
+  },
+  "location": {
+    "title": "What’s near you?",
+    "body": "Your location helps find parks nearby.",
+    "privacy": "We use your location to find parks. Others only see you in a park when you check in.",
+    "allow": "Allow while using the app",
+    "notNow": "Not now",
+    "deniedTitle": "Location is turned off",
+    "deniedBody": "We’re showing parks around Tallinn city centre. You can allow location in Settings."
+  },
+  "offline": {
+    "title": "No internet connection.",
+    "body": "We’re showing the last loaded data and will refresh when you’re back online."
+  },
+  "home": {
+    "greeting": "Walkies, {{name}}?",
+    "greetingNoName": "Walkies?",
+    "subtitle": "{{date}} · Tallinn",
+    "activeTitle": "Have a great playtime!",
+    "activeDogs": "{{dogs}} · until {{time}}",
+    "openPark": "Open park",
+    "idleTitle": "A good day to play together",
+    "idleBody": "Check in at a park or plan a visit so your friends know to come.",
+    "planned": "Planned {{day}} {{from}}–{{to}}",
+    "remindersTitle": "Health reminders",
+    "reminderDue": "Due {{date}} · {{due}}",
+    "findPark": "Find the nearest park",
+    "nearby": "Near you"
+  },
+  "map": {
+    "title": "Let’s explore Tallinn.",
+    "subtitle": "Your next favourite spot is here.",
+    "all": "All",
+    "near": "Nearby",
+    "filters": "Filters",
+    "filtersCount": "Filters ({{count}})",
+    "listTitle": "Parks around you",
+    "count_one": "{{count}} spot for little adventures.",
+    "count_other": "{{count}} spots for little adventures.",
+    "fallbackNote": "Distances are measured from Tallinn city centre.",
+    "empty": "No parks found in this radius. Try a larger distance or fewer filters.",
+    "marker": "{{name}}, {{dogs}} now"
+  },
+  "parkRow": {
+    "dogsNow": "{{dogs}} now",
+    "quiet": "quiet right now"
+  },
+  "filters": {
+    "title": "Just right for you.",
+    "subtitle": "Choose what makes a park great.",
+    "features": "Park features",
+    "smallDogArea": "Separate area for small dogs",
+    "water": "Drinking water",
+    "lighting": "Lit at night",
+    "fenced": "Fenced",
+    "distance": "Distance",
+    "apply": "Show parks",
+    "clear": "Clear filters"
+  },
+  "park": {
+    "favoriteAdd": "Add to favourites",
+    "favoriteRemove": "Remove from favourites",
+    "photoLabel": "Park photo (sample)",
+    "hereUntil": "You’re here until {{time}}",
+    "endVisit": "End visit",
+    "dogsNow_zero": "It’s quiet in the park right now.",
+    "dogsNow_one": "{{count}} dog, a new friend is waiting.",
+    "dogsNow_other": "{{count}} dogs, plenty of new friends.",
+    "rating": "{{rating}} / 5 · {{reviews}}",
+    "noReviews": "No reviews yet",
+    "goodToKnow": "Good to know",
+    "feature": {
+      "fenced": "Fenced",
+      "smallDogArea": "Small dog area",
+      "water": "Water",
+      "lighting": "Lighting"
+    },
+    "checkIn": "We’re here",
+    "plan": "Plan a visit",
+    "directions": "Get directions",
+    "visitorsTitle": "In the park now",
+    "visitorDetails": "{{breeds}} · until {{time}}",
+    "hiddenDogs_one": "+ {{count}} dog whose owner doesn’t share their presence",
+    "hiddenDogs_other": "+ {{count}} dogs whose owners don’t share their presence",
+    "firstMeetTitle": "First meeting?",
+    "firstMeetBody": "Ask the owner first and give the dogs room to get to know each other at their own pace.",
+    "reviewsTitle": "What other paws think",
+    "reviewA11y": "{{name}}, rated {{rating}} out of 5",
+    "reviewsEmpty": "Be the first to review this park.",
+    "addReview": "Share your experience",
+    "report": "Noticed a problem?"
+  },
+  "checkIn": {
+    "title": "We’re here!",
+    "who": "Who came to play today?",
+    "duration": "For how long?",
+    "expiry_one": "Your check-in expires in {{count}} minute. You can end it at any time.",
+    "expiry_other": "Your check-in expires in {{count}} minutes. You can end it at any time.",
+    "privacy": "Others see you according to your privacy setting.",
+    "submit": "Check in",
+    "noDogs": "Add your dog first.",
+    "addDog": "Add a dog"
+  },
+  "plan": {
+    "title": "Let’s make a play plan.",
+    "subtitle": "Let your friends know when you’re coming.",
+    "date": "Date",
+    "time": "Time",
+    "duration": "Duration",
+    "tooLate": "It’s too late for today, pick another day.",
+    "chooseTime": "Choose a time",
+    "note": "Message to friends",
+    "notePlaceholder": "Calm playmates welcome!",
+    "submit": "Plan a visit"
+  },
+  "visits": {
+    "title": "Our pawprints",
+    "subtitle": "Every walk is a little story.",
+    "planned": "Planned",
+    "cancelPlan": "Cancel plan",
+    "done": "Visited",
+    "empty": "No visits yet. Check in at a park and the visit will be remembered here.",
+    "addReview": "Add a review"
+  },
+  "review": {
+    "title": "How did it go?",
+    "hint": "Your review helps others choose the right park.",
+    "ratingA11y": "Rating {{rating}} out of 5",
+    "star_one": "{{count}} star",
+    "star_other": "{{count}} stars",
+    "experience": "Your experience",
+    "experiencePlaceholder": "Friendly dogs and a lovely walk.",
+    "submit": "Save review",
+    "chooseRating": "Choose a rating from 1 to 5"
+  },
+  "report": {
+    "title": "Let’s keep parks pleasant.",
+    "examples": "For example a broken gate, broken glass or suspected poison. In an emergency, call 112.",
+    "what": "What happened?",
+    "whatPlaceholder": "Describe the hazard and exactly where it is",
+    "calmTitle": "Describe the situation calmly",
+    "calmBody": "Add facts that can be checked. If there is immediate danger, keep yourself and your dog at a safe distance.",
+    "submit": "Send report",
+    "thanksTitle": "Thank you!",
+    "thanksBody": "We’ll review the report and let other park visitors know if it matters."
+  },
+  "favorites": {
+    "title": "Our favourite spots",
+    "subtitle": "Places worth coming back to.",
+    "empty": "No favourites yet. Tap the heart on a park’s page.",
+    "explore": "Discover more parks"
+  },
+  "dogs": {
+    "sex": {
+      "male": "male",
+      "female": "female"
+    },
+    "list": {
+      "title": "My furry friends",
+      "subtitle": "Your best friends, all in one place.",
+      "emptyTitle": "Introduce your dog",
+      "emptyBody": "Personality and play preferences help find the right company.",
+      "noDetails": "Add breed and other details",
+      "openA11y": "{{name}}, open profile",
+      "add": "Add a dog"
+    },
+    "profile": {
+      "notFound": "Dog not found",
+      "photoA11y": "{{name}}, profile photo",
+      "born": "Born {{date}}",
+      "temperament": "PERSONALITY",
+      "photos": "Photos",
+      "photosEmpty": "Add the first photo",
+      "photosCount": "Our little adventures · {{photos}}",
+      "health": "Health and vaccinations",
+      "healthPrivate": "Private · only for you",
+      "nextDue": "Next due {{due}}",
+      "edit": "Edit profile"
+    },
+    "edit": {
+      "title": "Tell us about your friend.",
+      "subtitle": "These details help find playmates.",
+      "name": "Dog’s name",
+      "breed": "Breed",
+      "breedPlaceholder": "For example Cardigan corgi",
+      "sex": "Sex",
+      "male": "Male",
+      "female": "Female",
+      "birthDate": "Date of birth",
+      "datePlaceholder": "YYYY-MM-DD",
+      "weight": "Weight (kg)",
+      "weightPlaceholder": "12.5",
+      "temperament": "Personality and preferences",
+      "temperamentPlaceholder": "A little shy at first, then very playful.",
+      "save": "Save profile",
+      "add": "Add dog",
+      "delete": "Delete dog",
+      "deleteTitle": "Delete {{name}}?",
+      "deleteBody": "The dog’s photos and health records will be deleted too, and the dog will be removed from your visit history."
+    }
+  },
+  "health": {
+    "title": "{{name}}’s health",
+    "titleFallback": "Health",
+    "subtitle": "A private health diary.",
+    "introTitle": "Everything important, in one place",
+    "introBody": "Health records are visible only to you.",
+    "vaccinations": "Vaccinations",
+    "vetVisits": "Vet visits",
+    "addVaccination": "Add vaccination",
+    "addVetVisit": "Add vet visit",
+    "emptyVaccinations": "No vaccinations added yet.",
+    "emptyVetVisits": "No vet visits added yet.",
+    "next": "next {{due}}",
+    "rowHint": "Edit the record. Long press to delete.",
+    "deleteTitle": "Delete “{{title}}”?",
+    "deleteBody": "The record cannot be restored.",
+    "edit": {
+      "subtitle": "{{name}} · private",
+      "kind": "Type",
+      "vaccination": "Vaccination",
+      "vetVisit": "Vet visit",
+      "vaccinationTitle": "Vaccine name",
+      "vaccinationPlaceholder": "Rabies",
+      "vetVisitTitle": "Visit title",
+      "vetVisitPlaceholder": "General check-up",
+      "date": "Date",
+      "nextDue": "Next due date",
+      "datePlaceholder": "YYYY-MM-DD",
+      "reminderHint_one": "A reminder appears on the home screen {{count}} day before the due date.",
+      "reminderHint_other": "A reminder appears on the home screen {{count}} days before the due date.",
+      "clinic": "Clinic",
+      "clinicPlaceholder": "Add the clinic’s name",
+      "notes": "Notes",
+      "notesPlaceholder": "Check-up results and the vet’s instructions",
+      "saveVetVisit": "Save visit",
+      "delete": "Delete record",
+      "notFound": "Health record not found"
+    }
+  },
+  "photos": {
+    "title": "{{name}}’s photo album",
+    "titleFallback": "Photo album",
+    "subtitle": "Little moments worth keeping.",
+    "camera": "Take photo",
+    "library": "Choose from library",
+    "uploading": "Uploading photo…",
+    "full": "This dog already has {{max}} photos. Delete an older one to add more.",
+    "empty": "No photos yet. Location data is removed from photos before they are saved.",
+    "cameraDeniedTitle": "Camera access not allowed",
+    "cameraDeniedBody": "Allow camera access in Settings to take a photo of your dog.",
+    "actionsTitle": "Photo {{date}}",
+    "setProfile": "Set as profile photo",
+    "removeProfile": "Remove as profile photo",
+    "deleteTitle": "Delete photo?",
+    "deleteBody": "The photo cannot be restored.",
+    "a11y": "Photo, added {{date}}",
+    "a11yProfile": "Photo, added {{date}}, profile photo",
+    "hint": "Opens options: profile photo or delete",
+    "badge": "PROFILE"
+  },
+  "profile": {
+    "greeting": "Hi, {{name}}.",
+    "greetingNoName": "Hi!",
+    "subtitle_zero": "Your little world.",
+    "subtitle_one": "The little world of you and your dog.",
+    "subtitle_other": "The little world of you and your dogs.",
+    "stats": "{{dogs}} · {{visits}}",
+    "presence": "Presence visible to: {{who}}",
+    "presenceWho": {
+      "nobody": "nobody",
+      "friends": "friends only",
+      "everyone": "everyone"
+    },
+    "myDogs": "My dogs",
+    "myVisits": "My visits",
+    "myVisitsSub": "Plans and memories",
+    "favorites": "Favourite parks",
+    "favoritesSub": "Always good to come back to",
+    "settings": "Settings",
+    "settingsSub": "Make Käpp your own"
+  },
+  "settings": {
+    "title": "Your Käpp.",
+    "subtitle": "Everything important, under your control.",
+    "editProfile": "Edit profile",
+    "editProfileSub": "Name, area and bio",
+    "language": "Language",
+    "languageAuto": "automatic",
+    "languageAutoCurrent": "automatic · currently {{language}}",
+    "languageNames": {
+      "et": "eesti",
+      "en": "English",
+      "ru": "русский"
+    },
+    "signOut": "Sign out"
+  },
+  "profileEdit": {
+    "title": "Just your style.",
+    "subtitle": "Edit your profile.",
+    "name": "Name",
+    "area": "Area",
+    "areaPlaceholder": "For example Kadriorg",
+    "bio": "About",
+    "bioPlaceholder": "A few words about you and your dog",
+    "presenceTitle": "Who can see when you’re in a park?",
+    "presence": {
+      "nobody": "Nobody",
+      "friends": "Friends",
+      "everyone": "Everyone"
+    },
+    "save": "Save changes"
+  },
+  "notifications": {
+    "title": "What’s new?",
+    "subtitle": "Good news for your little pack.",
+    "body": "Friends’ plans, friend requests and park alerts will show up here."
+  }
+}

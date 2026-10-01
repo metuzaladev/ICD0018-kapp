@@ -1,33 +1,38 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native';
 
-import { Button } from '@/components/button';
 import { FormError } from '@/components/form-error';
+import { ListRow } from '@/components/list-row';
 import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
+import { useMyDogs } from '@/hooks/use-dogs';
 import { useProfile } from '@/hooks/use-profile';
 import { useTheme } from '@/hooks/use-theme';
-import { authClient } from '@/lib/auth-client';
+import { useVisitHistory } from '@/hooks/use-visits';
+import { dogsLabel, visitsLabel } from '@/lib/format';
 
-const PRESENCE_TEXT = { nobody: 'Mitte kellelegi', friends: 'Ainult sõpradele', everyone: 'Kõigile' } as const;
-
-/** Figma 07 / Profile / Overview (account part; dogs and visits arrive in M3–M4). */
+/**
+ * Figma 07 / Profile / Overview: greeting, counts and the user's areas. Account settings
+ * (edit profile, language, sign out) live on the Settings screen like in Figma.
+ */
 export default function ProfileScreen() {
+  const { t } = useTranslation();
   const c = useTheme();
   const { profile, error } = useProfile();
-  const [signingOut, setSigningOut] = useState(false);
-
-  async function signOut() {
-    setSigningOut(true);
-    // Clears the session server-side and in SecureStore; the root layout then shows Welcome.
-    await authClient.signOut();
-  }
+  const dogs = useMyDogs().data;
+  const visits = useVisitHistory().data;
+  const firstName = profile?.name.split(' ')[0];
+  const stats =
+    dogs && visits ? t('profile.stats', { dogs: dogsLabel(dogs.length), visits: visitsLabel(visits.length) }) : null;
 
   return (
-    <Screen title="Sinu Käpp." subtitle="Kõik oluline, sinu kontrolli all.">
+    <Screen
+      title={firstName ? t('profile.greeting', { name: firstName }) : t('profile.greetingNoName')}
+      // Dog names are never declined ("Sinu ja Freddy …" would need the genitive), so the count decides.
+      subtitle={t('profile.subtitle', { count: dogs?.length ?? 0 })}>
       <FormError message={error} />
       {profile ? (
         <ThemedView type="surface" style={[styles.card, { borderColor: c.border }]}>
@@ -38,15 +43,15 @@ export default function ProfileScreen() {
           {profile.area ? <ThemedText type="caption">{profile.area}</ThemedText> : null}
           {profile.bio ? <ThemedText>{profile.bio}</ThemedText> : null}
           <ThemedText type="caption" themeColor="muted">
-            Kohalolek nähtav: {PRESENCE_TEXT[profile.presenceSharing]}
+            {t('profile.presence', { who: t(`profile.presenceWho.${profile.presenceSharing}`) })}
           </ThemedText>
+          {stats ? <ThemedText type="label">{stats}</ThemedText> : null}
         </ThemedView>
       ) : null}
-      <Button label="Muuda profiili" variant="secondary" onPress={() => router.push('/profile-edit')} />
-      <Button label="Minu koerad" variant="secondary" onPress={() => router.push('/dogs')} />
-      <Button label="Minu külastused" variant="secondary" onPress={() => router.push('/visits')} />
-      <Button label="Lemmikpargid" variant="secondary" onPress={() => router.push('/favorites')} />
-      <Button label="Logi välja" variant="tertiary" loading={signingOut} onPress={signOut} />
+      <ListRow title={t('profile.myDogs')} subtitle={dogs ? dogsLabel(dogs.length) : null} onPress={() => router.push('/dogs')} />
+      <ListRow title={t('profile.myVisits')} subtitle={t('profile.myVisitsSub')} onPress={() => router.push('/visits')} />
+      <ListRow title={t('profile.favorites')} subtitle={t('profile.favoritesSub')} onPress={() => router.push('/favorites')} />
+      <ListRow title={t('profile.settings')} subtitle={t('profile.settingsSub')} onPress={() => router.push('/settings')} />
     </Screen>
   );
 }

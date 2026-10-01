@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { issueMessage } from './validation';
+
 /**
  * Request/response contracts shared by apps/api and apps/mobile.
  *
@@ -16,7 +18,7 @@ import { z } from 'zod';
 
 /* ---------- errors ---------- */
 
-/** The only error shape the API returns. `message` is safe to show to the user (Estonian UI). */
+/** The only error shape the API returns. `message` is safe to show to the user, in the request's Accept-Language (default Estonian). */
 export const apiErrorSchema = z.object({
   error: z.literal(true),
   message: z.string(),
@@ -119,22 +121,22 @@ export type ParkDetail = z.infer<typeof parkDetailSchema>;
 
 /**
  * Field rules mirror the Better Auth server config (apps/api/src/modules/auth/auth.ts):
- * passwords 8–128 characters. Messages prefixed with `kapp:` are shown as-is by `fieldErrors`.
+ * passwords 8–128 characters. `issueMessage` keys are translated by `fieldErrors` / `describeFirstIssue`.
  */
 export const PASSWORD_MIN = 8;
 export const PASSWORD_MAX = 128;
 
-const email = z.string().trim().toLowerCase().pipe(z.email('kapp:sisesta korrektne e-posti aadress')).pipe(z.string().max(254));
+const email = z.string().trim().toLowerCase().pipe(z.email(issueMessage('validation.email'))).pipe(z.string().max(254));
 const password = z
   .string()
-  .min(PASSWORD_MIN, `kapp:vähemalt ${PASSWORD_MIN} märki`)
-  .max(PASSWORD_MAX, `kapp:kuni ${PASSWORD_MAX} märki`);
-const personName = z.string().trim().min(2, 'kapp:vähemalt 2 märki').max(60, 'kapp:kuni 60 märki');
+  .min(PASSWORD_MIN, issueMessage('validation.minChars', { min: PASSWORD_MIN }))
+  .max(PASSWORD_MAX, issueMessage('validation.maxChars', { max: PASSWORD_MAX }));
+const personName = z.string().trim().min(2, issueMessage('validation.minChars', { min: 2 })).max(60, issueMessage('validation.maxChars', { max: 60 }));
 
 export const signUpInputSchema = z.object({ name: personName, email, password }).strict();
 export type SignUpInput = z.infer<typeof signUpInputSchema>;
 
-export const signInInputSchema = z.object({ email, password: z.string().min(1, 'kapp:sisesta parool') }).strict();
+export const signInInputSchema = z.object({ email, password: z.string().min(1, issueMessage('validation.passwordRequired')) }).strict();
 export type SignInInput = z.infer<typeof signInInputSchema>;
 
 export const requestPasswordResetInputSchema = z.object({ email }).strict();
@@ -169,7 +171,7 @@ export const updateProfileInputSchema = z
     presenceSharing: presenceSharingSchema.optional(),
   })
   .strict()
-  .refine((v) => Object.values(v).some((x) => x !== undefined), { message: 'kapp:muuda vähemalt üht välja' });
+  .refine((v) => Object.values(v).some((x) => x !== undefined), { message: issueMessage('validation.changeAtLeastOne') });
 export type UpdateProfileInput = z.infer<typeof updateProfileInputSchema>;
 
 /* ---------- dogs (basic profile in M3; photos and health in M4) ---------- */
@@ -179,16 +181,16 @@ export type DogSex = z.infer<typeof dogSexSchema>;
 
 /** Not in the future and not older than 30 years — catches typos like 2062 or 1925. */
 const birthDate = z.iso
-  .date('kapp:kuupäev kujul AAAA-KK-PP')
-  .refine((d) => d <= new Date().toISOString().slice(0, 10), 'kapp:sünnipäev ei saa olla tulevikus')
-  .refine((d) => Number(d.slice(0, 4)) >= new Date().getFullYear() - 30, 'kapp:kontrolli aastat');
+  .date(issueMessage('validation.dateFormat'))
+  .refine((d) => d <= new Date().toISOString().slice(0, 10), issueMessage('validation.birthDateFuture'))
+  .refine((d) => Number(d.slice(0, 4)) >= new Date().getFullYear() - 30, issueMessage('validation.checkYear'));
 
 const dogFields = {
-  name: z.string().trim().min(1, 'kapp:sisesta nimi').max(40, 'kapp:kuni 40 märki'),
+  name: z.string().trim().min(1, issueMessage('validation.nameRequired')).max(40, issueMessage('validation.maxChars', { max: 40 })),
   breed: optionalText(80),
   sex: dogSexSchema.nullish().transform((v) => v ?? null),
   birthDate: birthDate.nullish().transform((v) => v ?? null),
-  weightKg: z.number().positive('kapp:kaal peab olema positiivne').max(120, 'kapp:kontrolli kaalu').nullish().transform((v) => v ?? null),
+  weightKg: z.number().positive(issueMessage('validation.weightPositive')).max(120, issueMessage('validation.checkWeight')).nullish().transform((v) => v ?? null),
   temperament: optionalText(500),
 };
 
@@ -206,7 +208,7 @@ export const updateDogInputSchema = z
     temperament: patchText(500),
   })
   .strict()
-  .refine((v) => Object.values(v).some((x) => x !== undefined), { message: 'kapp:muuda vähemalt üht välja' });
+  .refine((v) => Object.values(v).some((x) => x !== undefined), { message: issueMessage('validation.changeAtLeastOne') });
 export type UpdateDogInput = z.infer<typeof updateDogInputSchema>;
 
 export const dogIdParamsSchema = z.object({ dogId: z.uuid() });
@@ -247,8 +249,8 @@ export const MAX_PHOTOS_PER_DOG = 50;
 
 export const createPhotoUploadInputSchema = z
   .object({
-    contentType: z.enum(PHOTO_CONTENT_TYPES, 'kapp:toetatud on JPEG, PNG, WebP ja HEIC'),
-    byteSize: z.number().int().positive().max(MAX_PHOTO_BYTES, 'kapp:pilt võib olla kuni 10 MB'),
+    contentType: z.enum(PHOTO_CONTENT_TYPES, issueMessage('validation.photoType')),
+    byteSize: z.number().int().positive().max(MAX_PHOTO_BYTES, issueMessage('validation.photoTooLarge', { max: MAX_PHOTO_BYTES / 1024 / 1024 })),
   })
   .strict();
 export type CreatePhotoUploadInput = z.infer<typeof createPhotoUploadInputSchema>;
@@ -265,7 +267,7 @@ export type PhotoUpload = z.infer<typeof photoUploadSchema>;
 
 export const addDogPhotoInputSchema = z
   .object({
-    uploadKey: z.string().regex(/^uploads\/[A-Za-z0-9_-]{1,64}\/[0-9a-f-]{36}$/, 'kapp:vigane üleslaadimise võti'),
+    uploadKey: z.string().regex(/^uploads\/[A-Za-z0-9_-]{1,64}\/[0-9a-f-]{36}$/, issueMessage('validation.uploadKey')),
     caption: optionalText(200),
   })
   .strict();
@@ -289,13 +291,13 @@ export const healthRecordKindSchema = z.enum(['vaccination', 'vet_visit']);
 export type HealthRecordKind = z.infer<typeof healthRecordKindSchema>;
 
 const today = () => new Date().toISOString().slice(0, 10);
-const recordDate = z.iso.date('kapp:kuupäev kujul AAAA-KK-PP');
+const recordDate = z.iso.date(issueMessage('validation.dateFormat'));
 
 const healthFields = {
   kind: healthRecordKindSchema,
-  title: z.string().trim().min(1, 'kapp:sisesta nimetus').max(120, 'kapp:kuni 120 märki'),
+  title: z.string().trim().min(1, issueMessage('validation.titleRequired')).max(120, issueMessage('validation.maxChars', { max: 120 })),
   /** When it happened — a record of the past, so not in the future. */
-  date: recordDate.refine((d) => d <= today(), 'kapp:kuupäev ei saa olla tulevikus'),
+  date: recordDate.refine((d) => d <= today(), issueMessage('validation.dateFuture')),
   /** Next vaccination / check-up; drives the reminders list. */
   nextDue: recordDate.nullish().transform((v) => v ?? null),
   clinic: optionalText(120),
@@ -305,7 +307,7 @@ const healthFields = {
 export const healthRecordInputSchema = z
   .object(healthFields)
   .strict()
-  .refine((v) => !v.nextDue || v.nextDue > v.date, { path: ['nextDue'], message: 'kapp:järgmine tähtaeg peab olema pärast kuupäeva' });
+  .refine((v) => !v.nextDue || v.nextDue > v.date, { path: ['nextDue'], message: issueMessage('validation.nextDueAfterDate') });
 export type HealthRecordInput = z.infer<typeof healthRecordInputSchema>;
 
 export const updateHealthRecordInputSchema = z
@@ -318,7 +320,7 @@ export const updateHealthRecordInputSchema = z
     notes: patchText(2000),
   })
   .strict()
-  .refine((v) => Object.values(v).some((x) => x !== undefined), { message: 'kapp:muuda vähemalt üht välja' });
+  .refine((v) => Object.values(v).some((x) => x !== undefined), { message: issueMessage('validation.changeAtLeastOne') });
 export type UpdateHealthRecordInput = z.infer<typeof updateHealthRecordInputSchema>;
 
 export const healthRecordParamsSchema = z.object({ dogId: z.uuid(), recordId: z.uuid() });
@@ -358,9 +360,9 @@ export const checkInInputSchema = z
     parkId: z.uuid(),
     dogIds: z
       .array(z.uuid())
-      .min(1, 'kapp:vali vähemalt üks koer')
+      .min(1, issueMessage('validation.chooseDog'))
       .max(MAX_DOGS_PER_USER)
-      .refine((ids) => new Set(ids).size === ids.length, 'kapp:sama koer on valitud kaks korda'),
+      .refine((ids) => new Set(ids).size === ids.length, issueMessage('validation.duplicateDog')),
     durationMinutes: z.number().int().min(15).max(180).default(60),
   })
   .strict();
@@ -415,8 +417,8 @@ export const PLAN_MAX_HOURS = 4;
 export const plannedVisitInputSchema = z
   .object({
     parkId: z.uuid(),
-    startsAt: z.iso.datetime({ offset: true, message: 'kapp:vigane algusaeg' }),
-    endsAt: z.iso.datetime({ offset: true, message: 'kapp:vigane lõpuaeg' }),
+    startsAt: z.iso.datetime({ offset: true, message: issueMessage('validation.startInvalid') }),
+    endsAt: z.iso.datetime({ offset: true, message: issueMessage('validation.endInvalid') }),
     note: optionalText(200),
   })
   .strict()
@@ -424,12 +426,12 @@ export const plannedVisitInputSchema = z
     const start = Date.parse(v.startsAt);
     const end = Date.parse(v.endsAt);
     // 5 minutes of slack: "now" on the phone and on the server are never exactly equal.
-    if (start < Date.now() - 5 * 60_000) ctx.addIssue({ code: 'custom', path: ['startsAt'], message: 'kapp:algus ei saa olla minevikus' });
+    if (start < Date.now() - 5 * 60_000) ctx.addIssue({ code: 'custom', path: ['startsAt'], message: issueMessage('validation.startInPast') });
     if (start > Date.now() + PLAN_MAX_DAYS_AHEAD * 86_400_000)
-      ctx.addIssue({ code: 'custom', path: ['startsAt'], message: `kapp:planeeri kuni ${PLAN_MAX_DAYS_AHEAD} päeva ette` });
-    if (end <= start) ctx.addIssue({ code: 'custom', path: ['endsAt'], message: 'kapp:lõpp peab olema pärast algust' });
+      ctx.addIssue({ code: 'custom', path: ['startsAt'], message: issueMessage('validation.planMaxDays', { max: PLAN_MAX_DAYS_AHEAD }) });
+    if (end <= start) ctx.addIssue({ code: 'custom', path: ['endsAt'], message: issueMessage('validation.endBeforeStart') });
     if (end - start > PLAN_MAX_HOURS * 3_600_000)
-      ctx.addIssue({ code: 'custom', path: ['endsAt'], message: `kapp:kuni ${PLAN_MAX_HOURS} tundi` });
+      ctx.addIssue({ code: 'custom', path: ['endsAt'], message: issueMessage('validation.planMaxHours', { max: PLAN_MAX_HOURS }) });
   });
 export type PlannedVisitInput = z.infer<typeof plannedVisitInputSchema>;
 
@@ -448,7 +450,7 @@ export type PlannedVisit = z.infer<typeof plannedVisitSchema>;
 
 export const reviewInputSchema = z
   .object({
-    rating: z.number().int().min(1, 'kapp:vali 1–5').max(5, 'kapp:vali 1–5'),
+    rating: z.number().int().min(1, issueMessage('validation.rating')).max(5, issueMessage('validation.rating')),
     body: optionalText(1000),
   })
   .strict();
@@ -466,7 +468,7 @@ export type Review = z.infer<typeof reviewSchema>;
 /** "Märkasid probleemi?" — hazard report; long enough to be actionable for a moderator. */
 export const parkReportInputSchema = z
   .object({
-    description: z.string().trim().min(10, 'kapp:kirjelda vähemalt 10 märgiga').max(1000, 'kapp:kuni 1000 märki'),
+    description: z.string().trim().min(10, issueMessage('validation.describeMin', { min: 10 })).max(1000, issueMessage('validation.maxChars', { max: 1000 })),
   })
   .strict();
 export type ParkReportInput = z.infer<typeof parkReportInputSchema>;

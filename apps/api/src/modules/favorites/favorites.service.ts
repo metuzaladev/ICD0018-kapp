@@ -28,7 +28,7 @@ export function createFavoritesService({
     async add(userId, parkId) {
       // Only public parks can be saved; same 404 as GET /parks/:id so ids of unmoderated parks stay hidden.
       const park = await withTimeout(parks.findById(parkId), timeoutMs, 'parks.findById');
-      if (!isPublic(park)) throw new NotFoundError('Parki ei leitud');
+      if (!isPublic(park)) throw new NotFoundError('errors.parkNotFound');
       await withTimeout(favorites.add(userId, parkId), timeoutMs, 'favorites.add');
     },
 

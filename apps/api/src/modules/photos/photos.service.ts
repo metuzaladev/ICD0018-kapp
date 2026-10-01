@@ -40,13 +40,11 @@ export interface PhotosService {
   setProfilePhoto(ownerId: string, dogId: string, photoId: string | null): Promise<Dog>;
 }
 
-const DOG_NOT_FOUND = 'Koera ei leitud';
-const PHOTO_NOT_FOUND = 'Fotot ei leitud';
+const DOG_NOT_FOUND = 'errors.dogNotFound';
+const PHOTO_NOT_FOUND = 'errors.photoNotFound';
 /** Same text for "expired", "never uploaded" and "someone else's key" — nothing to enumerate. */
-const UPLOAD_NOT_FOUND = 'Üleslaaditud pilti ei leitud, proovi uuesti';
-const TOO_LARGE = `Pilt võib olla kuni ${MAX_PHOTO_BYTES / 1024 / 1024} MB`;
-const NOT_AN_IMAGE = 'Faili ei saanud pildina lugeda, proovi JPEG- või PNG-pildiga';
-const LIMIT_REACHED = `Kuni ${MAX_PHOTOS_PER_DOG} fotot koera kohta`;
+const UPLOAD_NOT_FOUND = 'errors.uploadNotFound';
+const NOT_AN_IMAGE = 'errors.notAnImage';
 
 export function createPhotosService({
   photos,
@@ -71,7 +69,7 @@ export function createPhotosService({
   // Checked before the upload URL and again before saving. Not race-proof (like the dog limit):
   // it bounds storage per dog against abuse, an exact 50 is not a business rule.
   async function requireRoom(dogId: string) {
-    if ((await t(photos.countByDog(dogId), 'photos.count')) >= MAX_PHOTOS_PER_DOG) throw new ConflictError(LIMIT_REACHED);
+    if ((await t(photos.countByDog(dogId), 'photos.count')) >= MAX_PHOTOS_PER_DOG) throw new ConflictError('errors.photoLimit', { max: MAX_PHOTOS_PER_DOG });
   }
 
   async function toDogPhoto(record: PhotoRecord): Promise<DogPhoto> {
@@ -91,7 +89,7 @@ export function createPhotosService({
     } catch (error) {
       if (!(error instanceof ObjectTooLargeError)) throw error;
       await bestEffort(s(storage.remove([key]), 'storage.removeUpload'));
-      throw new BadRequestError(TOO_LARGE);
+      throw new BadRequestError('errors.photoTooLarge', { max: MAX_PHOTO_BYTES / 1024 / 1024 });
     }
   }
 

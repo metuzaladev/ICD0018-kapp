@@ -96,7 +96,7 @@ describe('VisitsService', () => {
 
   it("404 when one of the dogs is someone else's", async () => {
     dogs.ownedIds.mockResolvedValue([]);
-    await expect(service.checkIn(USER_ID, input)).rejects.toThrow('Koera ei leitud');
+    await expect(service.checkIn(USER_ID, input)).rejects.toMatchObject({ key: 'errors.dogNotFound' });
     expect(visits.createCheckIn).not.toHaveBeenCalled();
   });
 

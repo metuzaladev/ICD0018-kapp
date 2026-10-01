@@ -26,7 +26,7 @@ export function createReviewsService({
   const t = <T>(p: Promise<T>, label: string) => withTimeout(p, timeoutMs, label);
 
   async function requirePublicPark(parkId: string) {
-    if (!isPublic(await t(parks.findById(parkId), 'parks.findById'))) throw new NotFoundError('Parki ei leitud');
+    if (!isPublic(await t(parks.findById(parkId), 'parks.findById'))) throw new NotFoundError('errors.parkNotFound');
   }
 
   return {
@@ -34,7 +34,7 @@ export function createReviewsService({
       await requirePublicPark(parkId);
       // A check-in is the proof of a visit: stops drive-by ratings of parks nobody went to.
       if (!(await t(reviews.hasVisited(userId, parkId), 'reviews.hasVisited'))) {
-        throw new ForbiddenError('Hinnata saab parki, mida oled külastanud');
+        throw new ForbiddenError('errors.reviewNeedsVisit');
       }
       return t(reviews.upsert(userId, parkId, input), 'reviews.upsert');
     },

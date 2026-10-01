@@ -97,7 +97,8 @@ export function createAuth({ db, config, mailer }: { db: Db; config: AuthConfig;
           before: async (data) => {
             const name = signUpInputSchema.shape.name.safeParse(data.name);
             if (!name.success) {
-              throw new APIError('BAD_REQUEST', { message: 'Nimi peab olema 2–60 märki', code: 'INVALID_NAME' });
+              // English for Better Auth's logs; the proxy translates the code (auth-errors.ts).
+              throw new APIError('BAD_REQUEST', { message: 'Name must be 2–60 characters', code: 'INVALID_NAME' });
             }
             return { data: { ...data, name: name.data } };
           },

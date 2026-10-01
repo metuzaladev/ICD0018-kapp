@@ -63,7 +63,7 @@ describe('PhotosService', () => {
 
     it("404 for someone else's (or a missing) dog — storage is never asked", async () => {
       dogs.ownedIds.mockResolvedValue([]);
-      await expect(service.createUpload(USER_ID, DOG_ID, { contentType: 'image/png', byteSize: 1 })).rejects.toThrow('Koera ei leitud');
+      await expect(service.createUpload(USER_ID, DOG_ID, { contentType: 'image/png', byteSize: 1 })).rejects.toMatchObject({ key: 'errors.dogNotFound' });
       expect(store.storage.createUploadUrl).not.toHaveBeenCalled();
     });
 
@@ -76,7 +76,8 @@ describe('PhotosService', () => {
       store.storage.createUploadUrl.mockRejectedValue(storageDown);
       const error = await service.createUpload(USER_ID, DOG_ID, { contentType: 'image/png', byteSize: 1 }).catch((e) => e);
       expect(error).toBeInstanceOf(ServiceUnavailableError);
-      expect(error.message).toBe('Pildihoidla ei vasta, proovi hetke pärast uuesti');
+      expect(error.localize('et')).toBe('Pildihoidla ei vasta, proovi hetke pärast uuesti');
+      expect(error.message).toBe('Photo storage is not responding, please try again in a moment'); // English for the log
       expect(error.cause).toBe(storageDown); // kept for the server log only
     });
   });
@@ -108,18 +109,18 @@ describe('PhotosService', () => {
     });
 
     it('404 when nothing was uploaded (or the upload expired)', async () => {
-      await expect(service.addPhoto(USER_ID, DOG_ID, { uploadKey: UPLOAD_KEY, caption: null })).rejects.toThrow('Üleslaaditud pilti ei leitud');
+      await expect(service.addPhoto(USER_ID, DOG_ID, { uploadKey: UPLOAD_KEY, caption: null })).rejects.toMatchObject({ key: 'errors.uploadNotFound' });
     });
 
     it("404 for someone else's dog even with an own upload", async () => {
       dogs.ownedIds.mockResolvedValue([]);
       await upload(await makeCameraJpeg(100, 100));
-      await expect(service.addPhoto(USER_ID, DOG_ID, { uploadKey: UPLOAD_KEY, caption: null })).rejects.toThrow('Koera ei leitud');
+      await expect(service.addPhoto(USER_ID, DOG_ID, { uploadKey: UPLOAD_KEY, caption: null })).rejects.toMatchObject({ key: 'errors.dogNotFound' });
     });
 
     it('400 for an object above the size limit: never downloaded, raw upload deleted', async () => {
       await upload(Buffer.alloc(MAX_PHOTO_BYTES + 1));
-      await expect(service.addPhoto(USER_ID, DOG_ID, { uploadKey: UPLOAD_KEY, caption: null })).rejects.toThrow('kuni 10 MB');
+      await expect(service.addPhoto(USER_ID, DOG_ID, { uploadKey: UPLOAD_KEY, caption: null })).rejects.toMatchObject({ key: 'errors.photoTooLarge', params: { max: 10 } });
       expect(store.storage.read).not.toHaveBeenCalled();
       expect(store.objects.has(UPLOAD_KEY)).toBe(false);
     });
@@ -132,7 +133,7 @@ describe('PhotosService', () => {
 
     it('400 for bytes that are not an image (Content-Type is not trusted); nothing stored', async () => {
       await upload(Buffer.from('<html>not a photo</html>'));
-      await expect(service.addPhoto(USER_ID, DOG_ID, { uploadKey: UPLOAD_KEY, caption: null })).rejects.toThrow('pildina lugeda');
+      await expect(service.addPhoto(USER_ID, DOG_ID, { uploadKey: UPLOAD_KEY, caption: null })).rejects.toMatchObject({ key: 'errors.notAnImage' });
       expect(store.storage.write).not.toHaveBeenCalled();
       expect(photos.create).not.toHaveBeenCalled();
       expect(store.objects.size).toBe(0);
@@ -204,7 +205,7 @@ describe('PhotosService', () => {
 
     it('remove is 404 for a photo the dog does not have; a storage error after the row is gone is not fatal', async () => {
       photos.remove.mockResolvedValueOnce(null).mockResolvedValueOnce({ id: PHOTO_ID });
-      await expect(service.remove(USER_ID, DOG_ID, PHOTO_ID)).rejects.toThrow('Fotot ei leitud');
+      await expect(service.remove(USER_ID, DOG_ID, PHOTO_ID)).rejects.toMatchObject({ key: 'errors.photoNotFound' });
       store.storage.removePrefix.mockRejectedValue(storageDown);
       await expect(service.remove(USER_ID, DOG_ID, PHOTO_ID)).resolves.toBeUndefined();
     });
@@ -224,7 +225,7 @@ describe('PhotosService', () => {
       dogs.setProfilePhoto.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
       dogs.findOwned.mockResolvedValue(makeDogRecord());
       await expect(service.setProfilePhoto(USER_ID, DOG_ID, null)).resolves.toMatchObject({ profilePhoto: null });
-      await expect(service.setProfilePhoto(USER_ID, DOG_ID, PHOTO_ID)).rejects.toThrow('Fotot ei leitud');
+      await expect(service.setProfilePhoto(USER_ID, DOG_ID, PHOTO_ID)).rejects.toMatchObject({ key: 'errors.photoNotFound' });
     });
   });
 });
@@ -296,7 +297,7 @@ describe('HealthRecordsService', () => {
     ['remove', () => service.remove(USER_ID, DOG_ID, RECORD_ID)],
   ])("%s on someone else's dog is 404 and touches no record", async (_case, call) => {
     dogs.ownedIds.mockResolvedValue([]);
-    await expect(call()).rejects.toThrow('Koera ei leitud');
+    await expect(call()).rejects.toMatchObject({ key: 'errors.dogNotFound' });
     for (const fn of Object.values(records)) expect(fn).not.toHaveBeenCalled();
   });
 
@@ -305,7 +306,7 @@ describe('HealthRecordsService', () => {
     ['only nextDue, equal to the stored date', { nextDue: '2026-03-01' }],
     ['only date, after the stored nextDue', { date: '2027-04-01' }],
   ])('PATCH %s is 400 and nothing is written', async (_case, patch) => {
-    await expect(service.update(USER_ID, DOG_ID, RECORD_ID, patch)).rejects.toThrow('järgmine tähtaeg peab olema pärast kuupäeva');
+    await expect(service.update(USER_ID, DOG_ID, RECORD_ID, patch)).rejects.toMatchObject({ key: 'errors.nextDueBeforeDate' });
     expect(records.update).not.toHaveBeenCalled();
   });
 
@@ -318,7 +319,7 @@ describe('HealthRecordsService', () => {
 
   it('PATCH of a missing record is 404', async () => {
     records.findById.mockResolvedValue(null);
-    await expect(service.update(USER_ID, DOG_ID, RECORD_ID, { title: 'X' })).rejects.toThrow('Tervisekirjet ei leitud');
+    await expect(service.update(USER_ID, DOG_ID, RECORD_ID, { title: 'X' })).rejects.toMatchObject({ key: 'errors.healthRecordNotFound' });
   });
 
   it('a concurrent change caught by the CHECK constraint is 400, other errors pass through', async () => {

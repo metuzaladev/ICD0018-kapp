@@ -1,4 +1,4 @@
-import type { ApiError } from '@kapp/shared';
+import { DEFAULT_LANGUAGE, translate, type ApiError, type Language, type MessageKey, type MessageParams } from '@kapp/shared';
 
 /**
  * Errors that are safe to send to the client.
@@ -6,63 +6,74 @@ import type { ApiError } from '@kapp/shared';
  * Why classes instead of `reply.code(...).send(...)` in every route: routes and services just
  * `throw`, and one error handler (error-handler.ts) turns everything into the same JSON shape.
  * Anything that is NOT an HttpError is treated as a bug and its details never leave the server.
+ *
+ * Why a message key instead of a text: the client chooses the language (Accept-Language), which a
+ * service does not know. The error carries `key` + `params` from packages/shared/src/i18n and the
+ * error handler translates it per request. `Error.message` is the English text, so server logs
+ * stay English whatever the user's language is.
  */
 export class HttpError extends Error {
   constructor(
     readonly statusCode: number,
-    message: string,
+    readonly key: MessageKey,
+    readonly params?: MessageParams,
     /** `cause` is for the server log only; the client never sees it. */
     options?: ErrorOptions,
   ) {
-    super(message, options);
+    super(translate('en', key, params), options);
     this.name = new.target.name;
   }
 
-  toResponse(): ApiError {
-    return { error: true, message: this.message };
+  /** The user-facing text in a language. */
+  localize(language: Language): string {
+    return translate(language, this.key, this.params);
+  }
+
+  toResponse(language: Language = DEFAULT_LANGUAGE): ApiError {
+    return { error: true, message: this.localize(language) };
   }
 }
 
 export class BadRequestError extends HttpError {
-  constructor(message = 'Vigane päring') {
-    super(400, message);
+  constructor(key: MessageKey = 'errors.badRequest', params?: MessageParams) {
+    super(400, key, params);
   }
 }
 
 export class UnauthorizedError extends HttpError {
-  constructor(message = 'Palun logi sisse') {
-    super(401, message);
+  constructor(key: MessageKey = 'errors.unauthorized') {
+    super(401, key);
   }
 }
 
 export class ForbiddenError extends HttpError {
-  constructor(message = 'Sul pole selleks õigust') {
-    super(403, message);
+  constructor(key: MessageKey = 'errors.forbidden') {
+    super(403, key);
   }
 }
 
 export class NotFoundError extends HttpError {
-  constructor(message = 'Ei leitud') {
-    super(404, message);
+  constructor(key: MessageKey = 'errors.notFound') {
+    super(404, key);
   }
 }
 
 /** The request is valid but clashes with current state (e.g. a concurrent duplicate). */
 export class ConflictError extends HttpError {
-  constructor(message = 'Andmed muutusid vahepeal, proovi uuesti') {
-    super(409, message);
+  constructor(key: MessageKey = 'errors.conflict', params?: MessageParams) {
+    super(409, key, params);
   }
 }
 
 export class TooManyRequestsError extends HttpError {
-  constructor(message = 'Liiga palju päringuid, proovi hetke pärast uuesti') {
-    super(429, message);
+  constructor(key: MessageKey = 'errors.tooManyRequests') {
+    super(429, key);
   }
 }
 
 /** Downstream dependency (database, storage, push service) is slow or unreachable. */
 export class ServiceUnavailableError extends HttpError {
-  constructor(message = 'Teenus ei vasta, proovi hetke pärast uuesti', options?: ErrorOptions) {
-    super(503, message, options);
+  constructor(key: MessageKey = 'errors.serviceUnavailable', options?: ErrorOptions) {
+    super(503, key, undefined, options);
   }
 }

@@ -55,7 +55,7 @@ export function createParksService({ repository, timeoutMs }: ParksServiceDeps):
         'parks.findById',
       );
       // Answer 404, not 403, so the API does not reveal that an unmoderated park with this id exists.
-      if (!isPublic(record)) throw new NotFoundError('Parki ei leitud');
+      if (!isPublic(record)) throw new NotFoundError('errors.parkNotFound');
       return roundDistance(record as ParkDetailRecord);
     },
 

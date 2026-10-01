@@ -1,12 +1,13 @@
-import { checkInInputSchema, dogInputSchema, plannedVisitInputSchema, reviewInputSchema } from '@kapp/shared';
+import { checkInInputSchema, dogInputSchema, issueText, plannedVisitInputSchema, reviewInputSchema } from '@kapp/shared';
 import { describe, expect, it } from 'vitest';
+import type { z } from 'zod';
 
 const PARK = '4ddabe8d-7306-4724-a125-ace7ae3a87b9';
 const DOG = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 const inMinutes = (m: number) => new Date(Date.now() + m * 60_000).toISOString();
 
-const messages = (result: { success: boolean; error?: { issues: { message: string }[] } }) =>
-  result.error?.issues.map((i) => i.message) ?? [];
+/** Issue texts as the Estonian user sees them (schemas carry message keys, translated here). */
+const messages = (result: { success: boolean; error?: z.ZodError }) => result.error?.issues.map((i) => issueText(i)) ?? [];
 
 describe('plannedVisitInputSchema', () => {
   const valid = { parkId: PARK, startsAt: inMinutes(60), endsAt: inMinutes(120) };
@@ -64,7 +65,7 @@ describe('dogInputSchema', () => {
 
   it('rejects a birth date in the future', () => {
     const next = `${new Date().getFullYear() + 1}-01-01`;
-    expect(messages(dogInputSchema.safeParse({ name: 'Freddy', birthDate: next }))).toContain('kapp:sünnipäev ei saa olla tulevikus');
+    expect(messages(dogInputSchema.safeParse({ name: 'Freddy', birthDate: next }))).toContain('sünnipäev ei saa olla tulevikus');
   });
 });
 

@@ -82,7 +82,7 @@ describe('GET /api/v1/parks/:parkId', () => {
 
   it('404 when the service does not find the park', async () => {
     ctx = await buildTestApp();
-    ctx.service.getPublicPark.mockRejectedValue(new NotFoundError('Parki ei leitud'));
+    ctx.service.getPublicPark.mockRejectedValue(new NotFoundError('errors.parkNotFound'));
     const res = await ctx.app.inject({ method: 'GET', url: `/api/v1/parks/${PARK_ID}` });
     expect(res.statusCode).toBe(404);
     expectApiError(res, 'Parki ei leitud');

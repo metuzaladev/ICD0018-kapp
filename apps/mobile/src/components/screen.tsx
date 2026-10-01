@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { PawBackground } from '@/components/paw-background';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
@@ -18,6 +19,7 @@ type ScreenProps = {
 export function Screen({ title, subtitle, children, underHeader = false }: ScreenProps) {
   return (
     <ThemedView style={styles.root}>
+      <PawBackground />
       <SafeAreaView edges={underHeader ? [] : ['top']} style={styles.root}>
         <ScrollView
           contentContainerStyle={styles.content}

@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
+import { PawBackground } from '@/components/paw-background';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
@@ -12,6 +13,7 @@ import { Radius, Spacing } from '@/constants/theme';
 export default function WelcomeScreen() {
   return (
     <ThemedView style={styles.root}>
+      <PawBackground />
       <SafeAreaView style={styles.safe}>
         <View style={styles.top}>
           <ThemedText type="label" themeColor="muted">

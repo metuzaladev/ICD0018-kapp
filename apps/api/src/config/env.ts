@@ -17,6 +17,10 @@ const booleanFromString = z
   .default('false')
   .transform((v) => v === 'true');
 
+/** `KEY=` in a .env file arrives as "" — treat it as "not set" so .env.example can be copied as-is. */
+const optional = <T extends z.ZodType>(schema: T) =>
+  z.preprocess((v) => (v === '' ? undefined : v), schema.optional());
+
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   HOST: z.string().default('0.0.0.0'),
@@ -39,7 +43,35 @@ const envSchema = z.object({
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(120),
   /** JSON body limit in bytes. Images never go through the API (presigned uploads), so this stays small. */
   BODY_LIMIT_BYTES: z.coerce.number().int().positive().default(64 * 1024),
+
+  /* ---- authentication (Better Auth) ---- */
+
+  /** Signs session cookies. Must be a long random value in production: `openssl rand -base64 32`. */
+  BETTER_AUTH_SECRET: optional(z.string().min(32)),
+  /** Public URL of this API — used to build links in emails and OAuth callbacks. */
+  API_PUBLIC_URL: z.url().default('http://localhost:3000'),
+  /** Deep-link scheme of the mobile app (app.json → expo.scheme). */
+  APP_SCHEME: z.string().regex(/^[a-z][a-z0-9+.-]*$/).default('kapp'),
+
+  /** Sign in with Apple — enabled only when all three are set (see docs/07-autentimine.md). */
+  APPLE_CLIENT_ID: optional(z.string().min(1)),
+  APPLE_CLIENT_SECRET: optional(z.string().min(1)),
+  APPLE_APP_BUNDLE_ID: optional(z.string().min(1)),
+  /** Google sign-in — enabled only when both are set. */
+  GOOGLE_CLIENT_ID: optional(z.string().min(1)),
+  GOOGLE_CLIENT_SECRET: optional(z.string().min(1)),
 });
 
-export type Env = z.infer<typeof envSchema>;
-export const env: Env = envSchema.parse(process.env);
+/** Fixed dev/test secret so sessions survive restarts locally. Rejected in production below. */
+const DEV_AUTH_SECRET = 'dev-only-insecure-secret-do-not-use-in-production';
+
+function loadEnv() {
+  const parsed = envSchema.parse(process.env);
+  if (parsed.NODE_ENV === 'production' && !parsed.BETTER_AUTH_SECRET) {
+    throw new Error('BETTER_AUTH_SECRET is required in production');
+  }
+  return { ...parsed, BETTER_AUTH_SECRET: parsed.BETTER_AUTH_SECRET ?? DEV_AUTH_SECRET };
+}
+
+export type Env = ReturnType<typeof loadEnv>;
+export const env: Env = loadEnv();

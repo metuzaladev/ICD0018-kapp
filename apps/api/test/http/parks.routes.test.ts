@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { NotFoundError } from '../../src/http/errors';
 import { TimeoutError } from '../../src/lib/timeout';
 import { buildTestApp, fakeAuth, makePark, PARK_ID, USER_ID } from '../helpers';
+import { expectApiError } from './expect-api-error';
 
 type TestApp = Awaited<ReturnType<typeof buildTestApp>>;
 let ctx: TestApp | undefined;
@@ -15,13 +16,6 @@ afterEach(async () => {
 const auth = { authorization: 'Bearer test' };
 const validBody = { name: 'Uus park', lat: 59.4, lng: 24.7 };
 
-function expectApiError(res: { json: () => unknown }, message?: string | RegExp) {
-  const body = res.json() as { error: unknown; message: unknown };
-  expect(Object.keys(body).sort()).toEqual(['error', 'message']);
-  expect(body.error).toBe(true);
-  expect(typeof body.message).toBe('string');
-  if (message) expect(body.message).toMatch(message);
-}
 
 describe('GET /api/v1/parks/nearby', () => {
   it('returns parks from the service', async () => {

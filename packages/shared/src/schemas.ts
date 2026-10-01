@@ -28,7 +28,7 @@ export type ApiError = z.infer<typeof apiErrorSchema>;
 const latitude = z.number().min(-90).max(90);
 const longitude = z.number().min(-180).max(180);
 
-/** Optional free text: trims, turns "" and null into null so the database never stores empty strings. */
+/** Optional free text for create: trims; missing, "" and null all become null (no empty strings in the DB). */
 const optionalText = (max: number) =>
   z
     .string()
@@ -36,6 +36,19 @@ const optionalText = (max: number) =>
     .max(max)
     .nullish()
     .transform((v) => (v ? v : null));
+
+/**
+ * Optional free text for partial updates: a missing field stays undefined (= "do not change"),
+ * while "" or null explicitly clears it. Using optionalText here would wipe fields on every PATCH.
+ */
+const patchText = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .nullish()
+    .transform((v) => (v === undefined ? undefined : v ? v : null))
+    .optional(); // makes the key optional in the inferred type, matching "not sent = unchanged"
 
 /* ---------- parks ---------- */
 
@@ -85,6 +98,63 @@ export const parkSchema = z.object({
   activeDogs: z.number().int().nonnegative().optional(),
 });
 export type Park = z.infer<typeof parkSchema>;
+
+/* ---------- auth & profile (M1) ---------- */
+
+/**
+ * Field rules mirror the Better Auth server config (apps/api/src/modules/auth/auth.ts):
+ * passwords 8–128 characters. Messages prefixed with `kapp:` are shown as-is by `fieldErrors`.
+ */
+export const PASSWORD_MIN = 8;
+export const PASSWORD_MAX = 128;
+
+const email = z.string().trim().toLowerCase().pipe(z.email('kapp:sisesta korrektne e-posti aadress')).pipe(z.string().max(254));
+const password = z
+  .string()
+  .min(PASSWORD_MIN, `kapp:vähemalt ${PASSWORD_MIN} märki`)
+  .max(PASSWORD_MAX, `kapp:kuni ${PASSWORD_MAX} märki`);
+const personName = z.string().trim().min(2, 'kapp:vähemalt 2 märki').max(60, 'kapp:kuni 60 märki');
+
+export const signUpInputSchema = z.object({ name: personName, email, password }).strict();
+export type SignUpInput = z.infer<typeof signUpInputSchema>;
+
+export const signInInputSchema = z.object({ email, password: z.string().min(1, 'kapp:sisesta parool') }).strict();
+export type SignInInput = z.infer<typeof signInInputSchema>;
+
+export const requestPasswordResetInputSchema = z.object({ email }).strict();
+
+export const resetPasswordInputSchema = z.object({ token: z.string().min(1), newPassword: password }).strict();
+
+export const presenceSharingSchema = z.enum(['nobody', 'friends', 'everyone']);
+export type PresenceSharing = z.infer<typeof presenceSharingSchema>;
+
+/** What the signed-in user sees about themselves (GET /api/v1/me). */
+export const profileSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  image: z.string().nullable(),
+  area: z.string().nullable(),
+  bio: z.string().nullable(),
+  presenceSharing: presenceSharingSchema,
+});
+export type Profile = z.infer<typeof profileSchema>;
+
+/**
+ * PATCH /api/v1/me. Every field optional (partial update) but at least one is required.
+ * Email and password are intentionally absent: they change through Better Auth flows that
+ * re-verify the user, never through a plain profile update.
+ */
+export const updateProfileInputSchema = z
+  .object({
+    name: personName.optional(),
+    area: patchText(60),
+    bio: patchText(300),
+    presenceSharing: presenceSharingSchema.optional(),
+  })
+  .strict()
+  .refine((v) => Object.values(v).some((x) => x !== undefined), { message: 'kapp:muuda vähemalt üht välja' });
+export type UpdateProfileInput = z.infer<typeof updateProfileInputSchema>;
 
 /* ---------- dogs & visits (used from M3/M4) ---------- */
 

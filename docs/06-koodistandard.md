@@ -72,6 +72,8 @@ Iga vastus, mis ei ole 2xx, on täpselt kujul:
 | Andmebaas aeglane või kättesaamatu | 503 | `Teenus ei vasta, proovi hetke pärast uuesti` |
 | Ootamatu viga | 500 | `Serveri viga, proovi hiljem uuesti` |
 
+Sama kehtib `/api/v1/auth/*` kohta: Better Authi vastused `{ code, message }` tõlgitakse failis `modules/auth/auth-errors.ts`.
+
 Kuidas lisada: viska teenuses või marsruudis `HttpError` alamklass (`throw new NotFoundError('Koera ei leitud')`). Ära kasuta `reply.code(...).send({...})` vigade jaoks.
 
 ## 6.4 Valideerimine ja turvalisus
@@ -80,7 +82,8 @@ Kuidas lisada: viska teenuses või marsruudis `HttpError` alamklass (`throw new 
 - **Body-skeemid on `.strict()`.** Tundmatud väljad lükatakse tagasi, seega klient ei saa seada serveri välju (`status`, `createdBy`). See kaitseb mass assignment'i eest.
 - **Body tüüpe ei teisendata.** `"59.4"` ei ole number. Query ja params teisendatakse, sest URL kannab ainult teksti.
 - **Igal stringil on maksimumpikkus**, valikuline tekst trimmitakse ja `""` muutub `null`-iks.
-- **Autentimine on vaikimisi suletud.** Kuni Better Auth on ühendatud (M1), vastab iga kaitstud marsruut 401.
+- **Autentimine on vaikimisi suletud.** `requireUser` vastab 401 enne valideerimist, seega anonüümne klient ei saa skeemi kohta midagi teada. Sessiooni andmebaasi viga annab 503, mitte eksitava 401.
+- **„Mina" endpoint'id kasutavad `/me`, mitte `/users/:id`**, seega ei saa klient adresseerida teise kasutaja andmeid.
 - **Mitteavalik ressurss annab 404, mitte 403**, et API ei paljastaks, et selline ID olemas on.
 - **Ajapiirangud:** `statement_timeout` (5 s) Postgres'is, `withTimeout` (8 s) teenuses, `requestTimeout` (15 s) Fastifys, `connectionTimeoutMillis` (3 s) pool'is.
 - **Piirangud:** globaalne rate limit 120 päringut minutis IP kohta, kirjutavatel marsruutidel rangem (pargi lisamine 10 tunnis); body max 64 KB, sest pildid ei käi läbi API.

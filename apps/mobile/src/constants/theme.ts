@@ -4,6 +4,8 @@
  */
 
 import { radius, semanticColors, space, typography, type AccentName } from '@kapp/shared';
+import { DMSans_400Regular, DMSans_500Medium, DMSans_700Bold } from '@expo-google-fonts/dm-sans';
+import { Manrope_700Bold, Manrope_800ExtraBold } from '@expo-google-fonts/manrope';
 import { Platform } from 'react-native';
 
 export const ACCENT: AccentName = 'terracotta';
@@ -26,21 +28,40 @@ export const Colors = {
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
-export const Fonts = Platform.select({
-  ios: { sans: 'system-ui', serif: 'ui-serif', rounded: 'ui-rounded', mono: 'ui-monospace' },
-  default: { sans: 'normal', serif: 'serif', rounded: 'normal', mono: 'monospace' },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
-  },
-});
+/** Font files loaded in the root layout. Only these weights ship, to keep the bundle small. */
+export const FontAssets = {
+  Manrope_700Bold,
+  Manrope_800ExtraBold,
+  DMSans_400Regular,
+  DMSans_500Medium,
+  DMSans_700Bold,
+};
 
-/** Figma text styles without font families until Manrope / DM Sans are bundled (milestone M1). */
+/**
+ * Figma family + weight → loaded font name. Custom fonts on Android ignore fontWeight (and iOS
+ * would fake-bold), so each weight is its own family name instead of a fontWeight value.
+ */
+const FONT_FILE: Record<string, keyof typeof FontAssets> = {
+  'Manrope/700': 'Manrope_700Bold',
+  'Manrope/800': 'Manrope_800ExtraBold',
+  'DM Sans/400': 'DMSans_400Regular',
+  'DM Sans/500': 'DMSans_500Medium',
+  'DM Sans/700': 'DMSans_700Bold',
+};
+
+type TextToken = { fontFamily: string; fontSize: number; lineHeight: number };
+
 export const Type = Object.fromEntries(
-  Object.entries(typography).map(([k, { fontFamily: _family, ...rest }]) => [k, rest]),
-) as { [K in keyof typeof typography]: Omit<(typeof typography)[K], 'fontFamily'> };
+  Object.entries(typography).map(([name, t]) => [
+    name,
+    { fontFamily: FONT_FILE[`${t.fontFamily}/${t.fontWeight}`], fontSize: t.fontSize, lineHeight: t.lineHeight },
+  ]),
+) as Record<keyof typeof typography, TextToken>;
+
+export const Fonts = Platform.select({
+  ios: { mono: 'ui-monospace' },
+  default: { mono: 'monospace' },
+});
 
 export const Spacing = {
   half: 2,

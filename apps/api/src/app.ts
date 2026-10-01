@@ -1,14 +1,17 @@
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
-import Fastify, { type FastifyServerOptions } from 'fastify';
+import Fastify, { type FastifyBaseLogger } from 'fastify';
 
 import { noAuthYet, type ResolveUserId } from './http/auth';
 import { registerErrorHandling } from './http/error-handler';
 import { TooManyRequestsError } from './http/errors';
+import { authRoutes } from './modules/auth/auth.routes';
 import { healthRoutes } from './modules/health/health.routes';
 import { parksRoutes } from './modules/parks/parks.routes';
 import type { ParksService } from './modules/parks/parks.service';
+import { profileRoutes } from './modules/profile/profile.routes';
+import type { ProfileService } from './modules/profile/profile.service';
 
 /**
  * Builds the HTTP application from its dependencies. It never creates database connections
@@ -16,8 +19,12 @@ import type { ParksService } from './modules/parks/parks.service';
  */
 export interface AppDeps {
   parksService: ParksService;
+  profileService: ProfileService;
   checkDatabase: () => Promise<boolean>;
+  /** Reads the user id from the session; defaults to "nobody is signed in". */
   resolveUserId?: ResolveUserId;
+  /** Better Auth fetch handler; when absent /api/v1/auth/* is not mounted (unit/HTTP tests). */
+  authHandler?: (request: Request) => Promise<Response>;
 }
 
 export interface AppConfig {
@@ -25,7 +32,8 @@ export interface AppConfig {
   trustProxy: boolean;
   rateLimitMax: number;
   bodyLimitBytes: number;
-  logger: FastifyServerOptions['logger'];
+  /** false in tests; the composition root passes a configured pino instance. */
+  logger: false | FastifyBaseLogger;
 }
 
 export const defaultAppConfig: AppConfig = {
@@ -41,7 +49,7 @@ export const API_PREFIX = '/api/v1';
 
 export async function buildApp(deps: AppDeps, config: AppConfig = defaultAppConfig) {
   const app = Fastify({
-    logger: config.logger,
+    ...(config.logger ? { loggerInstance: config.logger } : { logger: false }),
     trustProxy: config.trustProxy,
     bodyLimit: config.bodyLimitBytes,
     // Drops connections that send their request too slowly (slowloris protection).
@@ -62,12 +70,14 @@ export async function buildApp(deps: AppDeps, config: AppConfig = defaultAppConf
     errorResponseBuilder: () => new TooManyRequestsError(),
   });
 
+  const resolveUserId = deps.resolveUserId ?? noAuthYet;
+
   await app.register(healthRoutes, { checkDatabase: deps.checkDatabase });
-  await app.register(parksRoutes, {
-    prefix: API_PREFIX,
-    service: deps.parksService,
-    resolveUserId: deps.resolveUserId ?? noAuthYet,
-  });
+  if (deps.authHandler) {
+    await app.register(authRoutes, { prefix: API_PREFIX, handler: deps.authHandler });
+  }
+  await app.register(profileRoutes, { prefix: API_PREFIX, service: deps.profileService, resolveUserId });
+  await app.register(parksRoutes, { prefix: API_PREFIX, service: deps.parksService, resolveUserId });
 
   return app;
 }

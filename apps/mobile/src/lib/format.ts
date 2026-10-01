@@ -49,3 +49,31 @@ export function reviewsLabel(n: number): string {
 export function dogsLabel(n: number): string {
   return `${n} ${n === 1 ? 'koer' : 'koera'}`;
 }
+
+export const DOG_SEX_LABEL = { male: 'isane', female: 'emane' } as const;
+
+/** A calendar date ("2026-03-01") as a local Date — never `new Date(iso)`, which is UTC and can shift a day. */
+function localDate(isoDate: string): Date {
+  const [y, m, d] = isoDate.split('-').map(Number);
+  return new Date(y!, m! - 1, d!);
+}
+
+/** "1. märts 2026" */
+export function formatDate(isoDate: string): string {
+  return localDate(isoDate).toLocaleDateString(LOCALE, { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+/** A moment as "AAAA-KK-PP" in the device's time zone (default: today, e.g. a new health record). */
+export function localIsoDate(now = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
+/** "täna", "homme", "5 päeva pärast", "1 päev hilinenud", "12 päeva hilinenud" for a due date. */
+export function dueLabel(isoDate: string, now = new Date()): string {
+  const days = Math.round((localDate(isoDate).getTime() - startOfDay(now)) / 86_400_000);
+  if (days === 0) return 'täna';
+  if (days === 1) return 'homme';
+  if (days > 1) return `${days} päeva pärast`;
+  return `${-days} ${days === -1 ? 'päev' : 'päeva'} hilinenud`;
+}

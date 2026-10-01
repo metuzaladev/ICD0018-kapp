@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { StyleSheet } from 'react-native';
 
 import { Button } from '@/components/button';
+import { ListRow } from '@/components/list-row';
 import { OfflineBanner } from '@/components/offline-banner';
 import { ParkRow } from '@/components/park-row';
 import { Screen } from '@/components/screen';
@@ -9,13 +10,17 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
 import { useDeviceLocation } from '@/hooks/use-device-location';
+import { useHealthReminders } from '@/hooks/use-health';
 import { useNearbyParks } from '@/hooks/use-parks';
 import { useActiveCheckIn, usePlannedVisits } from '@/hooks/use-visits';
 import { authClient } from '@/lib/auth-client';
-import { formatDay, formatTime } from '@/lib/format';
+import { dueLabel, formatDate, formatDay, formatTime } from '@/lib/format';
 import { useParkFilters } from '@/state/park-filters';
 
-/** Figma 02 / Home / Today: current visit, own plans, nearby parks. Friends' plans arrive in M5. */
+/**
+ * Figma 02 / Home / Today: current visit, own plans, health reminders (due within 30 days or
+ * overdue), nearby parks. Friends' plans arrive in M5.
+ */
 export default function HomeScreen() {
   const { data: session } = authClient.useSession();
   const location = useDeviceLocation();
@@ -23,6 +28,7 @@ export default function HomeScreen() {
   const { data: parks = [] } = useNearbyParks(location.origin, useParkFilters());
   const { data: active } = useActiveCheckIn();
   const { data: plans = [] } = usePlannedVisits();
+  const { data: reminders = [] } = useHealthReminders();
   const firstName = session?.user.name.split(' ')[0];
   const openPark = (parkId: string) => router.push({ pathname: '/parks/[parkId]', params: { parkId } });
 
@@ -57,6 +63,21 @@ export default function HomeScreen() {
           </ThemedText>
         </ThemedView>
       ))}
+
+      {reminders.length > 0 ? (
+        <>
+          <ThemedText type="heading">Tervise meeldetuletused</ThemedText>
+          {reminders.slice(0, 3).map((r) => (
+            <ListRow
+              key={r.recordId}
+              title={`${r.dog.name} · ${r.title}`}
+              subtitle={`Tähtaeg ${formatDate(r.nextDue)} · ${dueLabel(r.nextDue)}`}
+              alert={r.overdue}
+              onPress={() => router.push({ pathname: '/dogs/[dogId]/health', params: { dogId: r.dog.id } })}
+            />
+          ))}
+        </>
+      ) : null}
 
       <Button label="Leia lähim park" onPress={() => router.navigate('/map')} />
 

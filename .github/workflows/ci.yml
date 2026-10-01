@@ -33,6 +33,6 @@ jobs:
       - run: npm test
       # MinIO (+ bucket) from docker-compose.yml, so CI and development use the same setup. Not a job
       # service: service containers cannot pass the `server /data` command MinIO needs.
-      - run: docker compose up -d --wait minio minio-setup
+      - run: docker compose up -d --wait minio && docker compose run --rm minio-setup
       - run: npm run db:migrate
       - run: npm run test:integration -w @kapp/api

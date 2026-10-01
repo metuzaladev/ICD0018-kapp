@@ -36,16 +36,17 @@ services:
     volumes:
       - minio-data:/data
 
-  # One-shot: creates the private photo bucket (idempotent). The image has no shell, so the server
-  # address and credentials come from MC_HOST_<alias>. `restart: "no"` lets `up --wait` treat
-  # its successful exit as done instead of as a failed service.
+  # One-shot: creates the private photo bucket (idempotent). Run explicitly after `up`
+  # (`npm run db:up` does: docker compose run --rm minio-setup) — in a profile because some
+  # Compose versions treat a finished one-shot as a failed service under `up --wait`.
+  # The image has no shell, so the server address and credentials come from MC_HOST_<alias>.
   minio-setup:
     image: chainguard/minio-client:latest
+    profiles: [setup]
     depends_on: [minio]
     environment:
       MC_HOST_local: http://kapp:kapp-dev-secret@minio:9000
     command: ['mb', '--ignore-existing', 'local/kapp-photos']
-    restart: "no"
 
 volumes:
   db-data:

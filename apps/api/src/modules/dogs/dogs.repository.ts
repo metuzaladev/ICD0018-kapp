@@ -28,8 +28,9 @@ const columns = {
 };
 
 /** numeric comes back from Postgres as a string (exact decimal); the API speaks numbers. */
-function toDog(row: Omit<Dog, 'weightKg'> & { weightKg: string | null }): Dog {
-  return { ...row, weightKg: row.weightKg === null ? null : Number(row.weightKg) };
+function toDog(row: Omit<Dog, 'weightKg' | 'profilePhoto'> & { weightKg: string | null }): Dog {
+  // profilePhoto: filled in by the M4 photos module (see docs/10-koerad-ja-tervis.md).
+  return { ...row, weightKg: row.weightKg === null ? null : Number(row.weightKg), profilePhoto: null };
 }
 
 const toNumeric = (n: number | null | undefined) => (n === undefined ? undefined : n === null ? null : n.toFixed(2));

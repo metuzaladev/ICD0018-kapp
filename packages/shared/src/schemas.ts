@@ -211,6 +211,10 @@ export type UpdateDogInput = z.infer<typeof updateDogInputSchema>;
 
 export const dogIdParamsSchema = z.object({ dogId: z.uuid() });
 
+/** Short-lived signed URLs (photos are private): `url` ~1600 px, `thumbnailUrl` ~400 px. */
+export const imageUrlsSchema = z.object({ url: z.url(), thumbnailUrl: z.url() });
+export type ImageUrls = z.infer<typeof imageUrlsSchema>;
+
 export const dogSchema = z.object({
   id: z.uuid(),
   name: z.string(),
@@ -219,11 +223,130 @@ export const dogSchema = z.object({
   birthDate: z.string().nullable(),
   weightKg: z.number().nullable(),
   temperament: z.string().nullable(),
+  /** The photo chosen as profile picture, or null. (M4) */
+  profilePhoto: imageUrlsSchema.nullable(),
 });
 export type Dog = z.infer<typeof dogSchema>;
 
 /** Upper bound per owner: protects the API and covers every real household. */
 export const MAX_DOGS_PER_USER = 10;
+
+/* ---------- dog photos (M4) ----------
+ * Upload flow (images never pass through the API body — 64 KB limit):
+ *   1. POST /me/dogs/:dogId/photos/uploads  {contentType, byteSize}  → PhotoUpload (presigned PUT)
+ *   2. client PUTs the file bytes to `url` with `headers`
+ *   3. POST /me/dogs/:dogId/photos {uploadKey, caption?} → DogPhoto
+ *      The server checks the object (owner prefix, size, real image), re-encodes it (which strips
+ *      EXIF incl. GPS — a dog photo must not reveal the owner's home), stores 1600 px + 400 px
+ *      versions and deletes the raw upload.
+ */
+
+export const PHOTO_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'] as const;
+export const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
+export const MAX_PHOTOS_PER_DOG = 50;
+
+export const createPhotoUploadInputSchema = z
+  .object({
+    contentType: z.enum(PHOTO_CONTENT_TYPES, 'kapp:toetatud on JPEG, PNG, WebP ja HEIC'),
+    byteSize: z.number().int().positive().max(MAX_PHOTO_BYTES, 'kapp:pilt võib olla kuni 10 MB'),
+  })
+  .strict();
+export type CreatePhotoUploadInput = z.infer<typeof createPhotoUploadInputSchema>;
+
+export const photoUploadSchema = z.object({
+  /** Opaque key of the raw upload, scoped to the user: `uploads/<userId>/<uuid>`. */
+  uploadKey: z.string(),
+  url: z.url(),
+  /** Headers the PUT must send exactly (they are part of the signature). */
+  headers: z.record(z.string(), z.string()),
+  expiresAt: z.string(),
+});
+export type PhotoUpload = z.infer<typeof photoUploadSchema>;
+
+export const addDogPhotoInputSchema = z
+  .object({
+    uploadKey: z.string().regex(/^uploads\/[A-Za-z0-9_-]{1,64}\/[0-9a-f-]{36}$/, 'kapp:vigane üleslaadimise võti'),
+    caption: optionalText(200),
+  })
+  .strict();
+export type AddDogPhotoInput = z.infer<typeof addDogPhotoInputSchema>;
+
+export const dogPhotoParamsSchema = z.object({ dogId: z.uuid(), photoId: z.uuid() });
+
+export const dogPhotoSchema = imageUrlsSchema.extend({
+  id: z.uuid(),
+  caption: z.string().nullable(),
+  createdAt: z.string(),
+});
+export type DogPhoto = z.infer<typeof dogPhotoSchema>;
+
+/** PUT /me/dogs/:dogId/profile-photo — null removes the profile picture. */
+export const setProfilePhotoInputSchema = z.object({ photoId: z.uuid().nullable() }).strict();
+
+/* ---------- health records (M4) — private to the owner, never exposed elsewhere ---------- */
+
+export const healthRecordKindSchema = z.enum(['vaccination', 'vet_visit']);
+export type HealthRecordKind = z.infer<typeof healthRecordKindSchema>;
+
+const today = () => new Date().toISOString().slice(0, 10);
+const recordDate = z.iso.date('kapp:kuupäev kujul AAAA-KK-PP');
+
+const healthFields = {
+  kind: healthRecordKindSchema,
+  title: z.string().trim().min(1, 'kapp:sisesta nimetus').max(120, 'kapp:kuni 120 märki'),
+  /** When it happened — a record of the past, so not in the future. */
+  date: recordDate.refine((d) => d <= today(), 'kapp:kuupäev ei saa olla tulevikus'),
+  /** Next vaccination / check-up; drives the reminders list. */
+  nextDue: recordDate.nullish().transform((v) => v ?? null),
+  clinic: optionalText(120),
+  notes: optionalText(2000),
+};
+
+export const healthRecordInputSchema = z
+  .object(healthFields)
+  .strict()
+  .refine((v) => !v.nextDue || v.nextDue > v.date, { path: ['nextDue'], message: 'kapp:järgmine tähtaeg peab olema pärast kuupäeva' });
+export type HealthRecordInput = z.infer<typeof healthRecordInputSchema>;
+
+export const updateHealthRecordInputSchema = z
+  .object({
+    kind: healthFields.kind.optional(),
+    title: healthFields.title.optional(),
+    date: healthFields.date.optional(),
+    nextDue: recordDate.nullish(),
+    clinic: patchText(120),
+    notes: patchText(2000),
+  })
+  .strict()
+  .refine((v) => Object.values(v).some((x) => x !== undefined), { message: 'kapp:muuda vähemalt üht välja' });
+export type UpdateHealthRecordInput = z.infer<typeof updateHealthRecordInputSchema>;
+
+export const healthRecordParamsSchema = z.object({ dogId: z.uuid(), recordId: z.uuid() });
+
+export const healthRecordSchema = z.object({
+  id: z.uuid(),
+  dogId: z.uuid(),
+  kind: healthRecordKindSchema,
+  title: z.string(),
+  date: z.string(),
+  nextDue: z.string().nullable(),
+  clinic: z.string().nullable(),
+  notes: z.string().nullable(),
+  createdAt: z.string(),
+});
+export type HealthRecord = z.infer<typeof healthRecordSchema>;
+
+/** GET /me/health-reminders — due within REMINDER_WINDOW_DAYS or overdue, across all own dogs. */
+export const REMINDER_WINDOW_DAYS = 30;
+export const healthReminderSchema = z.object({
+  recordId: z.uuid(),
+  dog: z.object({ id: z.uuid(), name: z.string() }),
+  kind: healthRecordKindSchema,
+  title: z.string(),
+  nextDue: z.string(),
+  overdue: z.boolean(),
+});
+export type HealthReminder = z.infer<typeof healthReminderSchema>;
 
 /* ---------- visits: check-ins, plans, history (M3) ---------- */
 

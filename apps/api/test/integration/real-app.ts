@@ -7,12 +7,7 @@ import { db } from '../../src/db/client';
 import { createAuth } from '../../src/modules/auth/auth';
 import type { Mailer } from '../../src/modules/auth/mailer';
 import { createSessionResolver } from '../../src/modules/auth/session-resolver';
-import { createFavoritesRepository } from '../../src/modules/favorites/favorites.repository';
-import { createFavoritesService } from '../../src/modules/favorites/favorites.service';
-import { createParksRepository } from '../../src/modules/parks/parks.repository';
-import { createParksService } from '../../src/modules/parks/parks.service';
-import { createProfileRepository } from '../../src/modules/profile/profile.repository';
-import { createProfileService } from '../../src/modules/profile/profile.service';
+import { createServices } from '../../src/services';
 
 export async function buildRealApp(mailer: Mailer = { sendPasswordReset: async () => {} }) {
   const auth = createAuth({
@@ -26,12 +21,9 @@ export async function buildRealApp(mailer: Mailer = { sendPasswordReset: async (
       rateLimit: false,
     },
   });
-  const parksRepository = createParksRepository(db);
   return buildApp(
     {
-      parksService: createParksService({ repository: parksRepository, timeoutMs: 5000 }),
-      profileService: createProfileService({ repository: createProfileRepository(db), timeoutMs: 5000 }),
-      favoritesService: createFavoritesService({ favorites: createFavoritesRepository(db), parks: parksRepository, timeoutMs: 5000 }),
+      ...createServices(db, 5000),
       checkDatabase: async () => true,
       resolveUserId: createSessionResolver(auth),
       authHandler: auth.handler,

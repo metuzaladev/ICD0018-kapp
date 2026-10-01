@@ -5,16 +5,12 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-
-/** Distance in Estonian format: "1,2 km". */
-export function formatKm(km: number | undefined): string | null {
-  return km === undefined ? null : `${km.toLocaleString('et-EE', { maximumFractionDigits: 1 })} km`;
-}
+import { dogsLabel, formatKm } from '@/lib/format';
 
 /** Figma "List Row" for a park: name, distance and dogs present; opens the park detail. */
 export function ParkRow({ park, highlighted = false }: { park: Park; highlighted?: boolean }) {
   const c = useTheme();
-  const meta = [formatKm(park.distanceKm), `${park.activeDogs ?? 0} koera praegu`].filter(Boolean).join(' · ');
+  const meta = [formatKm(park.distanceKm), `${dogsLabel(park.activeDogs ?? 0)} praegu`].filter(Boolean).join(' · ');
 
   return (
     <Pressable

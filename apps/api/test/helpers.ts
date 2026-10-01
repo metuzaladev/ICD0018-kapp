@@ -8,6 +8,13 @@ import type { ParkDetailRecord, ParkRecord, ParksRepository } from '../src/modul
 import type { ParksService } from '../src/modules/parks/parks.service';
 import type { ProfileRepository } from '../src/modules/profile/profile.repository';
 import type { ProfileService } from '../src/modules/profile/profile.service';
+import type { DogsRepository } from '../src/modules/dogs/dogs.repository';
+import type { DogsService } from '../src/modules/dogs/dogs.service';
+import type { ReportsService } from '../src/modules/reports/reports.service';
+import type { ReviewsRepository } from '../src/modules/reviews/reviews.repository';
+import type { ReviewsService } from '../src/modules/reviews/reviews.service';
+import type { VisitsRepository } from '../src/modules/visits/visits.repository';
+import type { VisitsService } from '../src/modules/visits/visits.service';
 
 export const PARK_ID = '4ddabe8d-7306-4724-a125-ace7ae3a87b9';
 export const USER_ID = 'user_test_1';
@@ -93,23 +100,45 @@ export function mockFavoritesService(): { [K in keyof FavoritesService]: ReturnT
   } as never;
 }
 
+/** Every method of T replaced by a vi.fn(), still typed as T for the code under test. */
+export type Mocked<T> = { [K in keyof T]: ReturnType<typeof vi.fn> } & T;
+export function mockAll<T>(keys: (keyof T)[]): Mocked<T> {
+  return Object.fromEntries(keys.map((k) => [k, vi.fn()])) as never;
+}
+
+export const mockDogsRepository = () =>
+  mockAll<DogsRepository>(['listByOwner', 'countByOwner', 'create', 'update', 'remove', 'ownedIds']);
+export const mockVisitsRepository = () =>
+  mockAll<VisitsRepository>(['createCheckIn', 'findActive', 'endCheckIn', 'listVisitors', 'history', 'createPlan', 'listUpcomingPlans', 'deletePlan']);
+export const mockReviewsRepository = () => mockAll<ReviewsRepository>(['hasVisited', 'upsert', 'listForPark']);
+
 /** App with mocked dependencies — no database, no network. */
 export async function buildTestApp(deps: Partial<AppDeps> = {}, config: Partial<AppConfig> = {}) {
   const service = (deps.parksService as ReturnType<typeof mockService> | undefined) ?? mockService();
   const profile = (deps.profileService as ReturnType<typeof mockProfileService> | undefined) ?? mockProfileService();
   const favorites = (deps.favoritesService as ReturnType<typeof mockFavoritesService> | undefined) ?? mockFavoritesService();
+  const dogs = (deps.dogsService as Mocked<DogsService> | undefined) ?? mockAll<DogsService>(['list', 'create', 'update', 'remove']);
+  const visits =
+    (deps.visitsService as Mocked<VisitsService> | undefined) ??
+    mockAll<VisitsService>(['checkIn', 'getActive', 'endCheckIn', 'listVisitors', 'history', 'planVisit', 'listPlans', 'cancelPlan']);
+  const reviews = (deps.reviewsService as Mocked<ReviewsService> | undefined) ?? mockAll<ReviewsService>(['submit', 'list']);
+  const reports = (deps.reportsService as Mocked<ReportsService> | undefined) ?? mockAll<ReportsService>(['reportPark']);
   const app = await buildApp(
     {
       parksService: service,
       profileService: profile,
       favoritesService: favorites,
+      dogsService: dogs,
+      visitsService: visits,
+      reviewsService: reviews,
+      reportsService: reports,
       checkDatabase: deps.checkDatabase ?? (async () => true),
       resolveUserId: deps.resolveUserId,
       authHandler: deps.authHandler,
     },
     { ...defaultAppConfig, ...config },
   );
-  return { app, service, profile, favorites };
+  return { app, service, profile, favorites, dogs, visits, reviews, reports };
 }
 
 /** Resolver that treats `Authorization: Bearer test` as USER_ID — stands in for Better Auth. */

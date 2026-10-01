@@ -172,28 +172,178 @@ export const updateProfileInputSchema = z
   .refine((v) => Object.values(v).some((x) => x !== undefined), { message: 'kapp:muuda vähemalt üht välja' });
 export type UpdateProfileInput = z.infer<typeof updateProfileInputSchema>;
 
-/* ---------- dogs & visits (used from M3/M4) ---------- */
+/* ---------- dogs (basic profile in M3; photos and health in M4) ---------- */
 
 export const dogSexSchema = z.enum(['male', 'female']);
+export type DogSex = z.infer<typeof dogSexSchema>;
 
-export const dogInputSchema = z
-  .object({
-    name: z.string().trim().min(1).max(40),
-    breed: optionalText(80),
-    sex: dogSexSchema.nullish(),
-    birthDate: z.iso.date().nullish(),
-    weightKg: z.number().positive().max(120).nullish(),
-    temperament: optionalText(500),
-  })
-  .strict();
+/** Not in the future and not older than 30 years — catches typos like 2062 or 1925. */
+const birthDate = z.iso
+  .date('kapp:kuupäev kujul AAAA-KK-PP')
+  .refine((d) => d <= new Date().toISOString().slice(0, 10), 'kapp:sünnipäev ei saa olla tulevikus')
+  .refine((d) => Number(d.slice(0, 4)) >= new Date().getFullYear() - 30, 'kapp:kontrolli aastat');
+
+const dogFields = {
+  name: z.string().trim().min(1, 'kapp:sisesta nimi').max(40, 'kapp:kuni 40 märki'),
+  breed: optionalText(80),
+  sex: dogSexSchema.nullish().transform((v) => v ?? null),
+  birthDate: birthDate.nullish().transform((v) => v ?? null),
+  weightKg: z.number().positive('kapp:kaal peab olema positiivne').max(120, 'kapp:kontrolli kaalu').nullish().transform((v) => v ?? null),
+  temperament: optionalText(500),
+};
+
+export const dogInputSchema = z.object(dogFields).strict();
 export type DogInput = z.infer<typeof dogInputSchema>;
 
-/** Check-ins expire automatically; the app offers 15–180 minutes (design default 60). */
+/** PATCH: every field optional; same "missing = unchanged, null = clear" rule as the profile. */
+export const updateDogInputSchema = z
+  .object({
+    name: dogFields.name.optional(),
+    breed: patchText(80),
+    sex: dogSexSchema.nullish(),
+    birthDate: birthDate.nullish(),
+    weightKg: z.number().positive().max(120).nullish(),
+    temperament: patchText(500),
+  })
+  .strict()
+  .refine((v) => Object.values(v).some((x) => x !== undefined), { message: 'kapp:muuda vähemalt üht välja' });
+export type UpdateDogInput = z.infer<typeof updateDogInputSchema>;
+
+export const dogIdParamsSchema = z.object({ dogId: z.uuid() });
+
+export const dogSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  breed: z.string().nullable(),
+  sex: dogSexSchema.nullable(),
+  birthDate: z.string().nullable(),
+  weightKg: z.number().nullable(),
+  temperament: z.string().nullable(),
+});
+export type Dog = z.infer<typeof dogSchema>;
+
+/** Upper bound per owner: protects the API and covers every real household. */
+export const MAX_DOGS_PER_USER = 10;
+
+/* ---------- visits: check-ins, plans, history (M3) ---------- */
+
+export const CHECK_IN_DURATIONS = [30, 60, 90, 120] as const;
+
+/** "Märgi kohalolek". Always time-boxed (15–180 min, design default 60) so presence never goes stale. */
 export const checkInInputSchema = z
   .object({
     parkId: z.uuid(),
-    dogIds: z.array(z.uuid()).min(1).max(10),
+    dogIds: z
+      .array(z.uuid())
+      .min(1, 'kapp:vali vähemalt üks koer')
+      .max(MAX_DOGS_PER_USER)
+      .refine((ids) => new Set(ids).size === ids.length, 'kapp:sama koer on valitud kaks korda'),
     durationMinutes: z.number().int().min(15).max(180).default(60),
   })
   .strict();
 export type CheckInInput = z.infer<typeof checkInInputSchema>;
+
+export const checkInIdParamsSchema = z.object({ checkInId: z.uuid() });
+
+const dogSummary = z.object({ id: z.uuid(), name: z.string(), breed: z.string().nullable() });
+
+export const activeCheckInSchema = z.object({
+  id: z.uuid(),
+  park: z.object({ id: z.uuid(), name: z.string() }),
+  dogs: z.array(dogSummary),
+  startedAt: z.string(),
+  expiresAt: z.string(),
+});
+export type ActiveCheckIn = z.infer<typeof activeCheckInSchema>;
+
+/** Someone currently in a park, as the viewer is allowed to see them. */
+export const parkVisitorSchema = z.object({
+  checkInId: z.uuid(),
+  isMe: z.boolean(),
+  /** First name only — enough to recognise a park friend, less personal data shown to strangers. */
+  ownerFirstName: z.string(),
+  dogs: z.array(dogSummary),
+  until: z.string(),
+});
+export type ParkVisitor = z.infer<typeof parkVisitorSchema>;
+
+export const parkVisitorsSchema = z.object({
+  visitors: z.array(parkVisitorSchema),
+  /** Dogs of people who do not share their presence with the viewer — counted, never named. */
+  hiddenDogs: z.number().int().nonnegative(),
+});
+export type ParkVisitors = z.infer<typeof parkVisitorsSchema>;
+
+export const visitHistoryItemSchema = z.object({
+  id: z.uuid(),
+  park: z.object({ id: z.uuid(), name: z.string() }),
+  startedAt: z.string(),
+  endedAt: z.string(),
+  durationMinutes: z.number().int().nonnegative(),
+  dogs: z.array(dogSummary),
+  hasReview: z.boolean(),
+});
+export type VisitHistoryItem = z.infer<typeof visitHistoryItemSchema>;
+
+/** Planning horizon and length limits keep plans meaningful ("today 17–18", not "next year"). */
+export const PLAN_MAX_DAYS_AHEAD = 30;
+export const PLAN_MAX_HOURS = 4;
+
+export const plannedVisitInputSchema = z
+  .object({
+    parkId: z.uuid(),
+    startsAt: z.iso.datetime({ offset: true, message: 'kapp:vigane algusaeg' }),
+    endsAt: z.iso.datetime({ offset: true, message: 'kapp:vigane lõpuaeg' }),
+    note: optionalText(200),
+  })
+  .strict()
+  .superRefine((v, ctx) => {
+    const start = Date.parse(v.startsAt);
+    const end = Date.parse(v.endsAt);
+    // 5 minutes of slack: "now" on the phone and on the server are never exactly equal.
+    if (start < Date.now() - 5 * 60_000) ctx.addIssue({ code: 'custom', path: ['startsAt'], message: 'kapp:algus ei saa olla minevikus' });
+    if (start > Date.now() + PLAN_MAX_DAYS_AHEAD * 86_400_000)
+      ctx.addIssue({ code: 'custom', path: ['startsAt'], message: `kapp:planeeri kuni ${PLAN_MAX_DAYS_AHEAD} päeva ette` });
+    if (end <= start) ctx.addIssue({ code: 'custom', path: ['endsAt'], message: 'kapp:lõpp peab olema pärast algust' });
+    if (end - start > PLAN_MAX_HOURS * 3_600_000)
+      ctx.addIssue({ code: 'custom', path: ['endsAt'], message: `kapp:kuni ${PLAN_MAX_HOURS} tundi` });
+  });
+export type PlannedVisitInput = z.infer<typeof plannedVisitInputSchema>;
+
+export const plannedVisitIdParamsSchema = z.object({ planId: z.uuid() });
+
+export const plannedVisitSchema = z.object({
+  id: z.uuid(),
+  park: z.object({ id: z.uuid(), name: z.string() }),
+  startsAt: z.string(),
+  endsAt: z.string(),
+  note: z.string().nullable(),
+});
+export type PlannedVisit = z.infer<typeof plannedVisitSchema>;
+
+/* ---------- reviews & reports (M3) ---------- */
+
+export const reviewInputSchema = z
+  .object({
+    rating: z.number().int().min(1, 'kapp:vali 1–5').max(5, 'kapp:vali 1–5'),
+    body: optionalText(1000),
+  })
+  .strict();
+export type ReviewInput = z.infer<typeof reviewInputSchema>;
+
+export const reviewSchema = z.object({
+  id: z.uuid(),
+  authorFirstName: z.string(),
+  rating: z.number().int(),
+  body: z.string().nullable(),
+  createdAt: z.string(),
+});
+export type Review = z.infer<typeof reviewSchema>;
+
+/** "Märkasid probleemi?" — hazard report; long enough to be actionable for a moderator. */
+export const parkReportInputSchema = z
+  .object({
+    description: z.string().trim().min(10, 'kapp:kirjelda vähemalt 10 märgiga').max(1000, 'kapp:kuni 1000 märki'),
+  })
+  .strict();
+export type ParkReportInput = z.infer<typeof parkReportInputSchema>;

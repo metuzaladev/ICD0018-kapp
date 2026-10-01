@@ -65,7 +65,9 @@ Iga vastus, mis ei ole 2xx, on täpselt kujul:
 | ID ei ole UUID | 400 | `Väli "parkId" on vales vormingus` |
 | Tundmatud väljad (nt `status`) | 400 | `Tundmatud väljad: status` |
 | Pole sisse logitud | 401 | `Palun logi sisse` |
+| Pole lubatud (nt hinnang ilma külastuseta) | 403 | `Hinnata saab parki, mida oled külastanud` |
 | Ei leitud (ka mitteavalik) | 404 | `Parki ei leitud` |
+| Vastuolu hetkeolukorraga (samaaegne check-in, koerte limiit) | 409 | `Kohalolek on juba märgitud, värskenda vaadet` |
 | Sisu liiga suur (> 64 KB) | 413 | `Päringu sisu on liiga suur` |
 | Ei ole JSON | 415 | `Toetatud on ainult application/json` |
 | Liiga palju päringuid | 429 | `Liiga palju päringuid, proovi hetke pärast uuesti` |
@@ -91,7 +93,9 @@ Kuidas lisada: viska teenuses või marsruudis `HttpError` alamklass (`throw new 
 - **Logid** ei sisalda `Authorization` ega cookie päiseid.
 - **SQL** ainult Drizzle'i või parameetritega `sql`-mallide kaudu, mitte kunagi stringide liitmisega.
 - **Korrelatsiooniga alampäringus viita välisele reale selgesõnaliselt** (`"parks"."id"`). Drizzle kirjutab ühe tabeli päringus `${parks.id}` kujul `"id"` ja alampäringus seob Postgres selle sisemise tabeliga, mis annab vaikselt vale tulemuse (vt docs/08).
-- **Idempotentsed muutused on `PUT`/`DELETE`** (nt lemmikud), et korduspäringud oleksid ohutud.
+- **Idempotentsed muutused on `PUT`/`DELETE`** (nt lemmikud, `PUT …/reviews/mine`), et korduspäringud oleksid ohutud.
+- **Ärireeglid, mis peavad kehtima ka samaaegsete päringute korral, on andmebaasis** (unikaalsed/osalised indeksid, CHECK). Teenus kontrollib neid ka ise sõbraliku veateate jaoks ja tõlgib unikaalsusrikkumise (`isUniqueViolation`) koodiks 409.
+- **Võõra ressursi ID annab 404, mitte 403** (koerad, kohalolekud, plaanid), et ID-de olemasolu ei saaks kinnitada.
 
 ## 6.5 Testid
 

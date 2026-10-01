@@ -25,7 +25,7 @@ Tabelid on tuletatud Figma vaadetest (leht *03 · Screens*, sektsioonid 01–08)
 - **Broneeringud:** ühele teenusele ühele ajale saab olla üks aktiivne broneering (osaline unikaalne indeks, tühistatud vabastavad aja).
 - **Hinnang:** `reviews.rating` vahemikus 1–5 (CHECK-piirang); üks hinnang kasutaja ja pargi kohta (`reviews_user_park_uq`); hinnata saab ainult külastatud parki; pargi lehel keskmine ühe komakohaga.
 - **Lemmikud:** `favorite_parks` (user_id + park_id liitvõti); nimekirjas ainult `approved` pargid, tagasi lükatud park kaob nimekirjast, aga rida jääb alles.
-- **Pildid:** tabelites ainult objektivõtmed (`photo_key`, `image_key`, `document_key`), failid R2-s.
+- **Pildid:** tabelites ainult objektivõtmed (`photo_key`, `image_key`, `thumbnail_key`, `document_key`), failid privaatses S3-hoidlas (R2 / arenduses MinIO). Koera profiilipilt on viide `dogs.profile_photo_id → dog_photos.id` (`on delete set null`), vt [10-koerad-ja-tervis.md](10-koerad-ja-tervis.md).
 
 ## Avatud küsimused
 

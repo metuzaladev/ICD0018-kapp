@@ -14,16 +14,18 @@ apps/api/src
     validate.ts          parseRequest(schema, data, 'body' | 'query' | 'params')
     auth.ts              requireUser() preHandler
   lib/                   Raamistikust sõltumatud abivahendid (withTimeout)
+  storage/               Objektihoidla: ObjectStorage liides ja S3 teostus (MinIO / R2)
   modules/<valdkond>/    Üks kaust ärivaldkonna kohta
     <valdkond>.routes.ts       HTTP: valideeri → kutsu teenust → vali staatuskood
     <valdkond>.service.ts      Ärireeglid; ei tea HTTP-st ega SQL-ist
     <valdkond>.repository.ts   Ainus koht, kus on SQL / Drizzle / PostGIS
   app.ts                 buildApp(deps, config): rakendus sõltuvustest
-  index.ts               Kompositsioonijuur: loob päris andmebaasi ja logija
+  services.ts            createServices(db, storage): sama objektigraaf serverile ja integratsioonitestidele
+  index.ts               Kompositsioonijuur: loob päris andmebaasi, hoidla ja logija
 apps/api/test
   unit/                  Puhtad funktsioonid ja teenused mock'idega
   http/                  Marsruudid app.inject() kaudu, teenus mock'itud
-  integration/           Repositooriumid päris PostGIS-i vastu (opt-in)
+  integration/           Repositooriumid päris PostGIS-i (ja MinIO) vastu (opt-in)
 ```
 
 | Otsus | Põhjus |
@@ -72,6 +74,8 @@ Iga vastus, mis ei ole 2xx, on täpselt kujul:
 | Ei ole JSON | 415 | `Toetatud on ainult application/json` |
 | Liiga palju päringuid | 429 | `Liiga palju päringuid, proovi hetke pärast uuesti` |
 | Andmebaas aeglane või kättesaamatu | 503 | `Teenus ei vasta, proovi hetke pärast uuesti` |
+| Objektihoidla viga (võrk, võtmed, 5xx) | 503 | `Pildihoidla ei vasta, proovi hetke pärast uuesti` |
+| Üles laaditud fail ei ole sisu järgi pilt / on üle 10 MB | 400 | `Faili ei saanud pildina lugeda, proovi JPEG- või PNG-pildiga` / `Pilt võib olla kuni 10 MB` |
 | Ootamatu viga | 500 | `Serveri viga, proovi hiljem uuesti` |
 
 Sama kehtib `/api/v1/auth/*` kohta: Better Authi vastused `{ code, message }` tõlgitakse failis `modules/auth/auth-errors.ts`.
@@ -95,7 +99,9 @@ Kuidas lisada: viska teenuses või marsruudis `HttpError` alamklass (`throw new 
 - **Korrelatsiooniga alampäringus viita välisele reale selgesõnaliselt** (`"parks"."id"`). Drizzle kirjutab ühe tabeli päringus `${parks.id}` kujul `"id"` ja alampäringus seob Postgres selle sisemise tabeliga, mis annab vaikselt vale tulemuse (vt docs/08).
 - **Idempotentsed muutused on `PUT`/`DELETE`** (nt lemmikud, `PUT …/reviews/mine`), et korduspäringud oleksid ohutud.
 - **Ärireeglid, mis peavad kehtima ka samaaegsete päringute korral, on andmebaasis** (unikaalsed/osalised indeksid, CHECK). Teenus kontrollib neid ka ise sõbraliku veateate jaoks ja tõlgib unikaalsusrikkumise (`isUniqueViolation`) koodiks 409.
-- **Võõra ressursi ID annab 404, mitte 403** (koerad, kohalolekud, plaanid), et ID-de olemasolu ei saaks kinnitada.
+- **Võõra ressursi ID annab 404, mitte 403** (koerad, kohalolekud, plaanid, fotod, tervisekirjed), et ID-de olemasolu ei saaks kinnitada.
+- **Failid ei käi läbi API.** Klient saab allkirjastatud PUT-URL-i (tüüp ja suurus on allkirjas), server kontrollib hiljem, et võti on kasutaja oma (`uploads/<userId>/…`, muidu 404), ja usaldab ainult faili **sisu**, mitte `Content-Type`'i. Pildid kodeeritakse ümber, mis eemaldab EXIF-i (sh GPS). Bucket on privaatne, välja antakse ainult lühiajalised allkirjastatud URL-id.
+- **Andmebaas + hoidla:** objektid kirjutatakse enne rida ja ebaõnnestumisel kustutatakse (poolikut rida ei teki); kustutamisel rida enne, objektid pärast (parima tahte järgi — orvuks jäänud privaatne objekt maksab ainult ruumi, ülestõusnud rida oleks viga).
 
 ## 6.5 Testid
 

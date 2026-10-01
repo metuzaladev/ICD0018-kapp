@@ -45,7 +45,7 @@ API sisemine ülesehitus (kihid, nimed, vigade leping, turvalisus) on kirjas dok
 
 1. **Üks tõe allikas lepingutele.** Iga API sisend ja väljund on Zod-skeem `packages/shared`-is. Server valideerib, äpp kasutab tüüpe.
 2. **Õigused serveris.** Äpp ei otsusta, mida kasutaja näha tohib. Tervisekirjed ainult omanikule; kohalolekut näevad vastavalt kasutaja seadele `presence_sharing` (`nobody` / `friends` / `everyone`); blokeeritud kasutajad ei näe teineteist.
-3. **Pildid ei käi läbi API.** API annab ajutise üleslaadimislingi (presigned URL), äpp laeb pildi otse R2-sse, taustatöö teeb pisipildid. Andmebaasis on ainult võti (`*_key`).
+3. **Pildid ei käi läbi API.** API annab ajutise üleslaadimislingi (presigned URL), äpp laeb pildi otse R2-sse. Pisipildid ja EXIF-i eemaldamine tehakse M4-s päringu ajal (`sharp`, alla sekundi), mitte taustatöös, et foto oleks kohe pärast vastust nähtav ega jääks kunagi töötlemata kujul hoidlasse. Andmebaasis on ainult võti (`*_key`).
 4. **Kõik ajutine aegub serveris.** Kohalolek (`check_ins.expires_at`) lõpeb taustatööga, mitte äpi taha jätmisega.
 5. **Asukoht on PostGIS-is.** `geometry(Point, 4326)` + GiST-indeks; kauguspäringud `ST_DWithin` / `ST_Distance` `geography` peal (meetrites).
 6. **Disain ja kood kasutavad samu nimesid.** Figma muutujad → `packages/shared/src/tokens.ts` → `apps/mobile/src/constants/theme.ts`.

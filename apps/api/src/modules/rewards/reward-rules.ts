@@ -198,7 +198,7 @@ export function computeAwards(facts: RewardFacts): Award[] {
 /* ---------- levels, streaks, badges ---------- */
 
 export function levelFor(lifetimeEarned: number): RewardLevel {
-  const earned = Math.max(0, Math.floor(lifetimeEarned));
+  const earned = Number.isFinite(lifetimeEarned) ? Math.max(0, Math.floor(lifetimeEarned)) : 0;
   let index = 0;
   for (let i = 0; i < LEVELS.length; i++) if (earned >= LEVELS[i]!.minPoints) index = i;
   const current = LEVELS[index]!;

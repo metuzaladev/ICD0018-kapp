@@ -4,9 +4,10 @@ import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useColorScheme } from 'react-native';
 
 import { Colors, FontAssets } from '@/constants/theme';
+import { appearance } from '@/hooks/use-appearance';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useCommunityRuntime } from '@/hooks/use-community-runtime';
 // Initialises i18next before any screen renders.
 import '@/i18n';
@@ -30,7 +31,7 @@ function CommunityRuntime({ signedIn }: { signedIn: boolean }) {
  */
 export default function RootLayout() {
   const { t } = useTranslation();
-  const scheme = useColorScheme() === 'light' ? 'light' : 'dark';
+  const scheme = useColorScheme();
   const c = Colors[scheme];
   const [fontsLoaded, fontError] = useFonts(FontAssets);
   const { data: session, isPending } = authClient.useSession();
@@ -38,8 +39,9 @@ export default function RootLayout() {
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
 
   useEffect(() => {
-    // Both never reject; the onboarding flag decides whether Welcome redirects to the intro.
-    Promise.all([loadLanguagePreference(), onboarding.load()]).finally(() => setPreferencesLoaded(true));
+    // All never reject; the onboarding flag decides whether Welcome redirects to the intro, and the
+    // appearance (default light) is applied before the splash hides so the wrong scheme never flashes.
+    Promise.all([loadLanguagePreference(), onboarding.load(), appearance.load()]).finally(() => setPreferencesLoaded(true));
   }, []);
 
   // "Has an account → skip the intro after signing out" is handled in lib/auth-client.ts on a

@@ -9,11 +9,12 @@ import {
 } from '@maplibre/maplibre-react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, useColorScheme, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Radius } from '@/constants/theme';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTheme } from '@/hooks/use-theme';
 import { dogsLabel } from '@/lib/format';
 
@@ -50,7 +51,7 @@ export function ParkMap({ parks, center, showUserLocation, selectedId, onSelect 
   // Camera moves jump instead of gliding when Reduce Motion is on.
   const cameraDuration = useReduceMotion() ? 0 : 600;
   const { t } = useTranslation();
-  const scheme = useColorScheme() === 'light' ? 'light' : 'dark';
+  const scheme = useColorScheme();
   const camera = useRef<CameraRef>(null);
   // Camera commands sent before the style has loaded are dropped by the native map.
   const [loaded, setLoaded] = useState(false);

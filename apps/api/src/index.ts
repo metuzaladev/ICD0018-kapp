@@ -17,14 +17,20 @@ import { createPushTokensRepository } from './modules/notifications/notification
 import { createPushQueue, startPushWorker } from './modules/notifications/push-queue';
 import { createExpoPushClient, createPushProcessor } from './modules/notifications/push-worker';
 import { createSocketGateway } from './realtime/socket-gateway';
+import { createShutdown, type ShutdownStep } from './lib/graceful-shutdown';
+import { serializeReply, serializeRequest } from './lib/log-serializers';
+import { createRateLimitRedis, createRealtimeRedisAdapter } from './lib/redis-clients';
 import { createServices, createStorageFromEnv } from './services';
 
 const isProduction = env.NODE_ENV === 'production';
+// JSON lines on stdout: the container platform collects them (docs/15). No personal data:
+// request logs keep method + path only (lib/log-serializers.ts), credentials are redacted anyway.
 const logger = pino({
-  level: isProduction ? 'info' : 'debug',
-  // Never write credentials to logs.
+  level: env.LOG_LEVEL ?? (isProduction ? 'info' : 'debug'),
+  serializers: { req: serializeRequest, res: serializeReply },
   redact: ['req.headers.authorization', 'req.headers.cookie', 'res.headers["set-cookie"]'],
 });
+for (const warning of env.CONFIG_WARNINGS) logger.warn(warning);
 
 const auth = createAuth({
   db,
@@ -47,7 +53,10 @@ const auth = createAuth({
 });
 
 // M5: realtime (Socket.IO on the same server) and the push pipeline (BullMQ + Expo), docs/12.
-const realtime = createSocketGateway();
+// Several instances share emits through Redis (REALTIME_ADAPTER=redis), see lib/redis-clients.ts.
+const realtimeAdapter = env.REALTIME_ADAPTER === 'redis' ? createRealtimeRedisAdapter(env.REDIS_URL, logger, `${env.PUSH_QUEUE_PREFIX}:socket.io`) : null;
+const realtime = createSocketGateway({ adapter: realtimeAdapter?.adapter });
+const rateLimitRedis = env.RATE_LIMIT_STORE === 'redis' ? createRateLimitRedis(env.REDIS_URL, logger) : undefined;
 const queueConnection = { url: env.REDIS_URL, prefix: env.PUSH_QUEUE_PREFIX };
 const pushQueue = createPushQueue(queueConnection);
 const pushWorker = env.PUSH_WORKER_ENABLED
@@ -85,21 +94,30 @@ const app = await buildApp(
     corsOrigins: env.CORS_ORIGINS,
     trustProxy: env.TRUST_PROXY,
     rateLimitMax: env.RATE_LIMIT_MAX,
+    rateLimitRedis,
     bodyLimitBytes: env.BODY_LIMIT_BYTES,
     logger,
   },
 );
 
-async function shutdown(signal: string) {
-  app.log.info({ signal }, 'shutting down');
-  await app.close(); // stops accepting requests and waits for in-flight ones (and closes sockets)
-  await pushWorker?.close(); // lets the running push job finish; unfinished jobs stay in Redis
-  await reminderWorker?.close();
-  await pushQueue.close();
-  await bookingReminders.close();
-  await pool.end();
-  process.exit(0);
-}
+// Order matters (lib/graceful-shutdown.ts): stop HTTP + sockets first, then let running jobs
+// finish, then close queues and connections. Steps for disabled features are left out.
+const steps: (ShutdownStep | null)[] = [
+  { name: 'http', close: () => app.close() }, // stops accepting, waits for in-flight requests, closes sockets
+  pushWorker && { name: 'push worker', close: () => pushWorker.close() }, // unfinished jobs stay in Redis
+  reminderWorker && { name: 'reminder worker', close: () => reminderWorker.close() },
+  { name: 'push queue', close: () => pushQueue.close() },
+  { name: 'reminder queue', close: () => bookingReminders.close() },
+  realtimeAdapter && { name: 'realtime redis', close: () => realtimeAdapter.close() },
+  rateLimitRedis ? { name: 'rate limit redis', close: () => rateLimitRedis.quit() } : null,
+  { name: 'database', close: () => pool.end() },
+];
+const shutdown = createShutdown({
+  steps: steps.filter((s): s is ShutdownStep => s !== null),
+  timeoutMs: env.SHUTDOWN_TIMEOUT_MS,
+  log: logger,
+  exit: (code) => process.exit(code),
+});
 process.on('SIGINT', () => void shutdown('SIGINT'));
 process.on('SIGTERM', () => void shutdown('SIGTERM'));
 

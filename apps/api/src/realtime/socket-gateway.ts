@@ -1,7 +1,7 @@
 import type { Server as HttpServer } from 'node:http';
 
 import { REALTIME_PATH, type RealtimeEvents } from '@kapp/shared';
-import { Server } from 'socket.io';
+import { Server, type ServerOptions } from 'socket.io';
 
 import type { ResolveUserId } from '../http/auth';
 
@@ -22,8 +22,9 @@ import type { ResolveUserId } from '../http/auth';
  * Better Auth session cookie as REST, and events are emitted only to the rooms of the users they
  * concern (conversation members, notification recipient).
  *
- * One API instance is assumed. With several instances, add `@socket.io/redis-adapter` (Redis is
- * already there for the push queue) so an emit reaches sockets connected to the other instances.
+ * One instance needs nothing else. With several instances pass the Redis adapter
+ * (REALTIME_ADAPTER=redis → lib/redis-clients.ts) so an emit reaches sockets connected to the
+ * other instances; room joins and `fetchSockets` then work across instances too (docs/15).
  */
 export interface RealtimeGateway {
   emitToUsers<E extends keyof RealtimeEvents>(userIds: string[], event: E, payload: Parameters<RealtimeEvents[E]>[0]): void;
@@ -55,7 +56,7 @@ interface SocketData {
  * Created before the HTTP app (services need something to emit to) and attached to the server in
  * buildApp. Emitting before `attach` is a no-op: there cannot be any connected clients yet.
  */
-export function createSocketGateway(): SocketGateway {
+export function createSocketGateway(options: { adapter?: ServerOptions['adapter'] } = {}): SocketGateway {
   let io: Server<Record<string, never>, RealtimeEvents, Record<string, never>, SocketData> | null = null;
 
   return {
@@ -67,6 +68,7 @@ export function createSocketGateway(): SocketGateway {
         // Clients never send events, so big frames are never legitimate.
         maxHttpBufferSize: 16 * 1024,
         serveClient: false,
+        ...(options.adapter ? { adapter: options.adapter } : {}),
       });
 
       io.use(async (socket, next) => {

@@ -1,4 +1,3 @@
-import type { UnreadCount } from '@kapp/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
@@ -16,7 +15,12 @@ import { notificationKeys } from './use-notifications';
 /** Where a tapped push leads, from the `data` the server put into it. */
 function openFromPush(data: Record<string, unknown> | undefined) {
   if (!data) return;
-  if (typeof data.bookingId === 'string') {
+  if (typeof data.postId === 'string') {
+    // place_post_approved (M9b): the approved recommendation.
+    router.push({ pathname: '/place-posts/[postId]', params: { postId: data.postId } });
+  } else if (data.type === 'reward_level_up' || data.type === 'reward_badge') {
+    router.push('/rewards');
+  } else if (typeof data.bookingId === 'string') {
     router.push('/bookings');
   } else if (typeof data.conversationId === 'string') {
     router.push({ pathname: '/messages/[conversationId]', params: { conversationId: data.conversationId } });
@@ -46,8 +50,10 @@ export function useCommunityRuntime(signedIn: boolean) {
         addMessageToCache(client, message);
         client.invalidateQueries({ queryKey: conversationKeys.list });
       },
-      onNotification: ({ unreadCount }) => {
-        client.setQueryData<UnreadCount>(notificationKeys.unread, { count: unreadCount });
+      onNotification: () => {
+        // The socket's count leaves out the M9b reward rows (they are opt-in with include=rewards),
+        // so the badge is refetched with them instead of taking the pushed number.
+        client.invalidateQueries({ queryKey: notificationKeys.unread });
         client.invalidateQueries({ queryKey: notificationKeys.feed });
         // A request or acceptance changes the friends lists too.
         client.invalidateQueries({ queryKey: ['friends'] });

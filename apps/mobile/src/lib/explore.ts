@@ -181,6 +181,35 @@ export function toggleCategory(filters: FeedFilters, category: PlaceCategory): F
   return { ...filters, category: filters.category === category ? null : category };
 }
 
+/* ---------- optimistic like / save ---------- */
+
+type PostLike = { id: string; liked: boolean; saved: boolean; likeCount: number };
+type PostPages<P> = { pages: { items: P[]; nextCursor: string | null }[]; pageParams: unknown[] };
+
+/**
+ * Applies a like/save change to one cached query's data, whatever its shape: a single post (detail)
+ * or an infinite list (feed, mine, saved). Returns the same object when the post is not in it, so
+ * TanStack Query does not notify unrelated screens.
+ */
+export function patchPostData<P extends PostLike, D extends P | PostPages<P> | undefined>(data: D, postId: string, patch: Partial<PostLike>): D {
+  if (!data) return data;
+  if ('pages' in data) {
+    let changed = false;
+    const pages = data.pages.map((page) => {
+      if (!page.items.some((p) => p.id === postId)) return page;
+      changed = true;
+      return { ...page, items: page.items.map((p) => (p.id === postId ? { ...p, ...patch } : p)) };
+    });
+    return (changed ? { ...data, pages } : data) as D;
+  }
+  return ((data as P).id === postId ? { ...data, ...patch } : data) as D;
+}
+
+/** The optimistic state after tapping the heart. */
+export function toggledLike(post: PostLike): Pick<PostLike, 'liked' | 'likeCount'> {
+  return post.liked ? { liked: false, likeCount: Math.max(0, post.likeCount - 1) } : { liked: true, likeCount: post.likeCount + 1 };
+}
+
 /** Amenity chip toggle in "Soovita kohta", kept in the schema's order so the request is stable. */
 export function toggleAmenity(list: readonly PlaceAmenity[], amenity: PlaceAmenity, order: readonly PlaceAmenity[]): PlaceAmenity[] {
   const set = new Set(list);

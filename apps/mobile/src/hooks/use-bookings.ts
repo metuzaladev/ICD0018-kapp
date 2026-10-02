@@ -1,10 +1,12 @@
-import type { Booking, BookingInput } from '@kapp/shared';
+import type { Booking, BookingWithDiscount, BookingWithRedemptionInput } from '@kapp/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { apiGet, apiSend } from '@/lib/api';
 
 import { notificationKeys } from './use-notifications';
+import { rewardKeys } from './use-rewards';
 import { serviceKeys } from './use-services';
+import { shopKeys } from './use-shop';
 
 /** "Minu broneeringud". A booking changes both the user's lists and the provider's free times. */
 export const bookingKeys = {
@@ -23,13 +25,17 @@ function useInvalidateBookings() {
     client.invalidateQueries({ queryKey: serviceKeys.all });
     // Booking and cancelling write a row into the activity feed.
     client.invalidateQueries({ queryKey: notificationKeys.all });
+    // A paw-discount code is marked used by a booking and released by its cancellation (M9b).
+    client.invalidateQueries({ queryKey: shopKeys.redemptions });
+    client.invalidateQueries({ queryKey: rewardKeys.all });
   };
 }
 
 export function useCreateBooking() {
   const invalidate = useInvalidateBookings();
   return useMutation({
-    mutationFn: (input: BookingInput) => apiSend<Booking>('POST', '/me/bookings', input),
+    // Optional `redemptionId` (M9b "Kasuta käppi"): the answer carries the discount, still no payment.
+    mutationFn: (input: BookingWithRedemptionInput) => apiSend<BookingWithDiscount>('POST', '/me/bookings', input),
     // Also on error: a 409 means the free times shown are out of date.
     onSettled: invalidate,
   });

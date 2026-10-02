@@ -1,4 +1,4 @@
-import type { NotificationPage, NotificationPreferences, UnreadCount } from '@kapp/shared';
+import type { AnyNotificationPage, NotificationPreferencesInput, NotificationPreferencesWithRewards, UnreadCount } from '@kapp/shared';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { apiGet, apiSend } from '@/lib/api';
@@ -12,10 +12,17 @@ export const notificationKeys = {
   preferences: ['notification-preferences'] as const,
 };
 
+/**
+ * `include=rewards` (M9b) adds reward_level_up, reward_badge and place_post_approved rows; the API
+ * leaves them out for older app builds that cannot render them (docs/16). They have no realtime
+ * event, so they appear on the next refetch (focus, pull to refresh, the unread poll).
+ */
+const INCLUDE = { include: 'rewards' } as const;
+
 export function useNotificationFeed() {
   return useInfiniteQuery({
     queryKey: notificationKeys.feed,
-    queryFn: ({ pageParam }) => apiGet<NotificationPage>('/me/notifications', pageParam ? { before: pageParam } : undefined),
+    queryFn: ({ pageParam }) => apiGet<AnyNotificationPage>('/me/notifications', pageParam ? { ...INCLUDE, before: pageParam } : INCLUDE),
     initialPageParam: null as string | null,
     getNextPageParam: (last) => last.nextCursor,
   });
@@ -26,8 +33,9 @@ export function useUnreadCount() {
   const live = useRealtimeConnected();
   return useQuery({
     queryKey: notificationKeys.unread,
-    queryFn: () => apiGet<UnreadCount>('/me/notifications/unread-count'),
-    refetchInterval: live ? false : 60_000,
+    queryFn: () => apiGet<UnreadCount>('/me/notifications/unread-count', INCLUDE),
+    // Reward rows are not pushed over the socket, so poll slowly even while it is connected.
+    refetchInterval: live ? 5 * 60_000 : 60_000,
   });
 }
 
@@ -48,13 +56,13 @@ export function useMarkAllNotificationsRead() {
 }
 
 export function useNotificationPreferences() {
-  return useQuery({ queryKey: notificationKeys.preferences, queryFn: () => apiGet<NotificationPreferences>('/me/notification-preferences') });
+  return useQuery({ queryKey: notificationKeys.preferences, queryFn: () => apiGet<NotificationPreferencesWithRewards>('/me/notification-preferences') });
 }
 
 export function useSaveNotificationPreferences() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: (preferences: NotificationPreferences) => apiSend<NotificationPreferences>('PUT', '/me/notification-preferences', preferences),
+    mutationFn: (preferences: NotificationPreferencesInput) => apiSend<NotificationPreferencesWithRewards>('PUT', '/me/notification-preferences', preferences),
     onSuccess: (saved) => client.setQueryData(notificationKeys.preferences, saved),
   });
 }

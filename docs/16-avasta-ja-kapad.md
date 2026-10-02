@@ -1,8 +1,8 @@
-# 16. Avasta, Käpad ja Pood (M9b-api)
+# 16. Avasta, Käpad ja Pood (M9b)
 
 Figma leht **„09 / Explore & Rewards"**: kasutajad soovitavad koerasõbralikke kohti (Avasta), kaardil on kohad siltide kaupa, tegevuse eest kogub kasutaja **Käppasid** (punkte, tasemed, seeria, märgid) ja saab neid partnerite juures soodustuseks vahetada (Pood).
 
-See etapp on **ainult API** (`feature/m9b-api`). Äpi vaated tulevad etapis M9b-app; M9a värskendab samal ajal äpi visuaali. Seepärast on uued lepingud eraldi failis `packages/shared/src/explore.ts` ja kõik muudatused olemasolevates voogudes on tagasiühilduvad (vt [Ühilduvus praeguse äpiga](#ühilduvus-praeguse-äpiga)).
+API tuli harus `feature/m9b-api`, äpi vaated harus `feature/m9b-app` (vt [Äpp (M9b-app)](#äpp-m9b-app)); M9a värskendas samal ajal äpi visuaali. Seepärast on uued lepingud eraldi failis `packages/shared/src/explore.ts` ja kõik muudatused olemasolevates voogudes on tagasiühilduvad (vt [Ühilduvus praeguse äpiga](#ühilduvus-praeguse-äpiga)).
 
 > **Makseid ei ole.** Pood ei müü midagi: Käpad vahetatakse ühekordse sooduskoodi vastu, mida partner kontrollib kohapeal. Hinnad on informatiivsed nagu M6-s.
 >
@@ -177,6 +177,45 @@ Vastuses on `level.next.pointsToGo` ja `progress` (0…1). Nimed tõlgib äpp (`
 
 `kind` (`park` / `post` / `provider`) ütleb, millise detail-endpoint'iga ID avada. Kast on kuni 1° ja vastus kuni 300 kohta.
 
+## Äpp (M9b-app)
+
+| Vaade | Fail | Figma |
+|---|---|---|
+| Kaart (kohad siltidega, pakkuja kaart) | `app/(tabs)/map.tsx`, `components/park-map.tsx`, `components/provider-sheet.tsx` | 81:7510, 81:7764 |
+| Avasta voog | `components/explore-feed.tsx`, `components/place-post-card.tsx` | 84:7825, 58:152 |
+| Postitus, Minu soovitused, Teavita postitusest | `app/place-posts/[postId].tsx`, `app/place-posts/mine.tsx`, `app/report-post.tsx` | — |
+| Soovita kohta | `app/suggest-place.tsx`, `components/location-picker.tsx` | 85:8637 |
+| Käpad, ajalugu | `app/rewards/index.tsx`, `app/rewards/history.tsx` | 84:8169 |
+| Pood, toode, Minu koodid, kood | `app/shop/index.tsx`, `app/shop/[productId].tsx`, `app/redemptions/*` | 85:8362, 58:136 |
+
+Andmed käivad ainult hookide kaudu: `hooks/use-explore.ts`, `use-rewards.ts`, `use-shop.ts` (+ `use-redeem-once.ts`, `use-place-post-actions.ts`). `usePointsBalance()` loeb nüüd `GET /me/rewards` saldot, seega Points Badge ilmub avalehel (→ Käpad), kaardi otsingus (→ Käpad) ja Poes. Allkirjastatud pildi-URL-id (postitused, tooted) on 5 minuti pärast „vananenud" ja värskenevad fookusel enne 15 minuti aegumist, nagu koerafotod. Puhas loogika on `lib/explore.ts`, `lib/rewards.ts`, `lib/idempotency.ts`, `lib/upload-order.ts` (unit-testid `apps/mobile/test`).
+
+### Kaart ja Avasta
+
+Kaardi vahekaardil on kaks poolt: täisekraankaart ja Avasta voog. Valik on vahekaardi enda olek (`state/explore-view.ts`, `useSyncExternalStore` nagu pargifiltritel), mitte uus ekraan ega route'i parameeter:
+
+- Avasta ülaosas on Figma Segmented Control **Kaart / Avasta**. Kaardil (Figmas seal lülitit pole) viib Avastasse ujuv nupp **„Kogukonna soovitused"** lokaliseerimisnupu kõrval.
+- Vahetus ei lisa navigeerimisajalugu: tagasi-žest ei hüppa kaardi ja voo vahel.
+- Teised vaated juhivad vahekaarti ühe kutsega: postituse **„Kaardil"** → `focusMap({lat, lng, category})` (kaart avaneb, kaamera liigub kohale, õige kiip valitakse); Poe **„Ava kaart"** → `focusMap({category: 'services'})`; „Soovita kohta" õnnestumine → voog. Fookus on ühekordne (`nonce`), kaart kustutab selle pärast rakendamist, nii et vahekaardile naastes seda ei korrata.
+
+Kaardil tulevad lähimad pargid endiselt `/parks/nearby`-st (koerte arv, filtrid); kõik muu (`kind` `post` / `provider` ja ülejäänud pargid) `GET /map/places`-ist nähtava ala järgi. Ala võrgustatakse 0,02° sammuga väljapoole ja kärbitakse keskpunkti ümber ≤ 1°-ni (`bboxFromRegion`), nii et väike liigutus kasutab vahemälu ja suumitud välja vaade ei anna 400. Päring tehakse alles siis, kui kaamera peatub (`onRegionDidChange`), ja kaart ei sobita end kohtade järgi (see tekitaks tsükli kaamera → ala → kohad → kaamera). Teenuse/kliiniku nööpnõel avab pakkuja kaardi (foto, hinnang, kolm lähimat vaba aega M6-st, käppade soodustus Poe partneritest, Teenused / Broneeri valitud ajaga); postitus avab postituse, park pargi lehe.
+
+### Soovita kohta: asukoht
+
+Väike kaart, mille keskel on liikumatu nööpnõel: kasutaja liigutab kaarti, kuni nõel on koha peal (punkt = kaardi keskpunkt pärast kasutaja liigutust, 5 komakohta). Algpunkt on seadme asukoht; „Kasuta minu asukohta" küsib täpse asukoha (luba vajadusel). Aadress on vaba tekst, mida kaardil näidatakse. **Miks mitte aadressi geokodeerimine:** stack'is pole geokodeerijat (uus teenus, kuhu aadress saadetaks); nõel annab kaardile täpse punkti. Kui asukohaluba pole ja kasutaja kaarti ei liigutanud, ei saa postitada (muidu läheks postitus Tallinna kesklinna). Kaart ise pole VoiceOverile valik — ligipääsetav tee on nupp ja aadressiväli.
+
+Fotod (≤ 5, esimene on kaanepilt, „Tee kaanepildiks") kodeeritakse seadmes ümber nagu M4 (`preparePhoto`: JPEG ≤ 2048 px, ≤ 10 MB), laaditakse **ükshaaval ja kasutaja järjekorras** üles (`POST /me/place-posts/uploads` → PUT allkirjastatud päistega; edenemine „Laen fotot 2/5…") ja postitus saadetakse võtmetega samas järjekorras. Enne üleslaadimist valideeritakse vorm jagatud skeemiga (`createPlacePostInputSchema`), serveri vead näidatakse. Õnnestumisel naaseb kasutaja Avastasse, kus uus postitus on ülal sildiga „Ootab kinnitust".
+
+### Lunastamine ja idempotentsus
+
+Iga „Lunasta" vajutus saab ühe UUID-võtme (`createIdempotencyTracker`): võrguvea või 5xx korral jääb võti alles ja kordus saab sama koodi (punkte ei võeta kaks korda); õnnestumine või 4xx (409 „Käppasid ei ole piisavalt…", juba kasutaja keeles) unustab võtme. UUID tuleb `crypto.getRandomValues`-ist, kui see on olemas, muidu `Math.random`-ist: võti pole saladus ja server seob selle kasutajaga, seepärast uut natiivset krüptomoodulit ei lisatud.
+
+Broneerimisel (`book.tsx`) on partneri juures lüliti **„Kasuta käppi"**: kasutatakse sama pakkuja kasutamata broneeringukoodi või lunastatakse uus vahetult enne broneeringut; kui aeg vahepeal võetakse (409), jääb kood alles ja järgmine katse kasutab seda. Soodushind tuleb serveri vastusest (`discount`), makset pole.
+
+### Teavitused
+
+Teated küsivad nüüd `?include=rewards`; kolm uut tüüpi (`reward_level_up`, `reward_badge`, `place_post_approved`) joonistatakse ja avavad Käpad / postituse, push'i puudutus samuti. Reaalajasündmust neil pole, seega lugemata arvu küsitakse ka ühenduse ajal iga 5 minuti järel ja sokli `unreadCount` asemel värskendatakse arvu päringuga (sokli arv ei sisalda uusi tüüpe). Seaded → Teavitused: lüliti **„Käpad ja märgid"** (`rewards`).
+
 ## Ühilduvus praeguse äpiga
 
 - Uued teavitusetüübid ei ole `notificationTypeSchema`-s (community.ts): praegune äpp käib selle läbi `switch`-iga ja ei oskaks uusi ridu joonistada. **Voog ja lugemata arv annavad need ainult `?include=rewards`-iga** ja reaalajasündmust (`notification:new`) nende jaoks ei saadeta. M9b-app lisab tüübid oma vaatesse, hakkab saatma `include=rewards` ja siis saab tüübid ühendada.
@@ -192,7 +231,7 @@ Vastuses on `level.next.pointsToGo` ja `progress` (0…1). Nimed tõlgib äpp (`
 
 ## Väljaspool skoopi
 
-Äpi vaated (M9b-app), admin-vaade ja -endpoint'id (modereerimine, teadete lahendamine, partnerite haldus), partneri koodikontroll (`POST /partner/redemptions/:code/use` oleks järgmine samm: tingimuslik `UPDATE … status = 'used'`), kommentaarid, jalutuskäikude punktid, geotara check-in'il, punktide aegumine, maksed ja kassa, toodete pildid seemnes.
+Admin-vaade ja -endpoint'id (modereerimine, teadete lahendamine, partnerite haldus), partneri koodikontroll (`POST /partner/redemptions/:code/use` oleks järgmine samm: tingimuslik `UPDATE … status = 'used'`), kommentaarid, jalutuskäikude punktid, geotara check-in'il, punktide aegumine, maksed ja kassa, toodete pildid seemnes.
 
 ## Testid
 
@@ -202,6 +241,6 @@ Vastuses on `level.next.pointsToGo` ja `progress` (0…1). Nimed tõlgib äpp (`
 
 ## Mida pole kontrollitud
 
-- Äpi vaateid pole (M9b-app). Push'e pole seadmes nähtud (Expo-d testides ei kutsuta).
+- Äpi vaateid pole simulaatoris ega seadmes nähtud (arenduskeskkonnas simulaatorit polnud): kontrollitud on `tsc` (ka tüübitud route'idega), lint, unit-testid, `i18n:check`, `a11y:check` ja `expo export` (iOS bundle). Push'e pole seadmes nähtud (Expo-d testides ei kutsuta).
 - Inglis- ja venekeelsed tekstid vajavad emakeelse kõneleja ülevaatust.
 - Koormust (palju postitusi kaardil) pole mõõdetud; kast ≤ 1° ja 300 kohta hoiavad vastuse piiratud.

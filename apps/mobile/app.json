@@ -40,6 +40,12 @@
         }
       ],
       "expo-secure-store",
+      [
+        "expo-notifications",
+        {
+          "color": "#C8643C"
+        }
+      ],
       "@maplibre/maplibre-react-native",
       [
         "expo-location",

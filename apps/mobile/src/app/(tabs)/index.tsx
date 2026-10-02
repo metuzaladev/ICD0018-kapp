@@ -12,6 +12,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
 import { useDeviceLocation } from '@/hooks/use-device-location';
 import { useMyDogs } from '@/hooks/use-dogs';
+import { useFriendPlans } from '@/hooks/use-friends';
 import { useHealthReminders } from '@/hooks/use-health';
 import { useNearbyParks } from '@/hooks/use-parks';
 import { useActiveCheckIn, usePlannedVisits } from '@/hooks/use-visits';
@@ -21,7 +22,7 @@ import { useParkFilters } from '@/state/park-filters';
 
 /**
  * Figma 02 / Home / Today: current visit, own plans, health reminders (due within 30 days or
- * overdue), nearby parks. Friends' plans arrive in M5.
+ * overdue), friends' plans (M5), nearby parks.
  */
 export default function HomeScreen() {
   const { t } = useTranslation();
@@ -33,6 +34,7 @@ export default function HomeScreen() {
   const { data: plans = [] } = usePlannedVisits();
   const { data: reminders = [] } = useHealthReminders();
   const { data: dogs } = useMyDogs();
+  const { data: friendPlans = [] } = useFriendPlans();
   // Figma asks the dog ("Õue, Freddy?"); with several dogs (or none) the owner is greeted instead.
   const greetName = dogs?.length === 1 ? dogs[0]!.name : session?.user.name.split(' ')[0];
   const openPark = (parkId: string) => router.push({ pathname: '/parks/[parkId]', params: { parkId } });
@@ -68,6 +70,21 @@ export default function HomeScreen() {
           </ThemedText>
         </ThemedView>
       ))}
+
+      {/* Figma "Täna võiks koos mängida": friends' plans in the next 48 hours (M5). */}
+      <ThemedView type="soft" style={styles.card}>
+        <ThemedText type="heading">{t('home.friendsPlansTitle')}</ThemedText>
+        {friendPlans.length === 0 ? <ThemedText themeColor="muted">{t('home.friendsPlansEmpty')}</ThemedText> : null}
+        {friendPlans.slice(0, 3).map((p) => (
+          <ListRow
+            key={p.id}
+            title={p.park.name}
+            subtitle={t('home.friendPlan', { name: p.friend.firstName, day: formatDay(p.startsAt), from: formatTime(p.startsAt), to: formatTime(p.endsAt) })}
+            onPress={() => openPark(p.park.id)}
+          />
+        ))}
+        <Button label={t('home.findFriends')} variant="secondary" onPress={() => router.push('/friends')} />
+      </ThemedView>
 
       {reminders.length > 0 ? (
         <>

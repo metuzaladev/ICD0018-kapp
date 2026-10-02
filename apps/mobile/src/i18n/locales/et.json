@@ -68,7 +68,8 @@
     "dogEdit": "Muuda koera",
     "vaccinationAdd": "Lisa vaktsineerimine",
     "vetVisitAdd": "Loomaarsti külastus",
-    "healthRecordEdit": "Muuda kirjet"
+    "healthRecordEdit": "Muuda kirjet",
+    "reportUser": "Teavita või blokeeri"
   },
   "auth": {
     "email": "E-post",
@@ -153,7 +154,11 @@
     "remindersTitle": "Tervise meeldetuletused",
     "reminderDue": "Tähtaeg {{date}} · {{due}}",
     "findPark": "Leia lähim park",
-    "nearby": "Teie lähedal"
+    "nearby": "Teie lähedal",
+    "friendsPlansTitle": "Sõbrad lähevad parki",
+    "friendsPlansEmpty": "Lähima kahe päeva jooksul pole sõpradel plaane.",
+    "friendPlan": "{{name}} · {{day}} {{from}}–{{to}}",
+    "findFriends": "Leia mängusõbrad"
   },
   "map": {
     "title": "Avastame Tallinna.",
@@ -216,7 +221,8 @@
     "reviewA11y": "{{name}}, hinne {{rating}} viiest",
     "reviewsEmpty": "Ole esimene, kes parki hindab.",
     "addReview": "Lisa oma kogemus",
-    "report": "Märkasid probleemi?"
+    "report": "Märkasid probleemi?",
+    "visitorHint": "Ava profiil ja saada sõbrakutse"
   },
   "checkIn": {
     "title": "Oletegi kohal!",
@@ -406,7 +412,15 @@
     "favorites": "Lemmikpargid",
     "favoritesSub": "Alati hea tagasi tulla",
     "settings": "Seaded",
-    "settingsSub": "Tee Käpp enda omaks"
+    "settingsSub": "Tee Käpp enda omaks",
+    "friends": "Oma kamp",
+    "friendsSub": "Sõbrad ja sõbrakutsed",
+    "friendRequests_one": "{{count}} uus sõbrakutse",
+    "friendRequests_other": "{{count}} uut sõbrakutset",
+    "messages": "Sõnumid",
+    "messagesSub": "Väikesed tere’d",
+    "unreadMessages_one": "{{count}} lugemata sõnum",
+    "unreadMessages_other": "{{count}} lugemata sõnumit"
   },
   "settings": {
     "title": "Sinu Käpp.",
@@ -421,7 +435,11 @@
       "en": "English",
       "ru": "русский"
     },
-    "signOut": "Logi välja"
+    "signOut": "Logi välja",
+    "notifications": "Teavitused",
+    "notificationsSub": "Sõbrad, sõnumid ja plaanid",
+    "privacy": "Privaatsus",
+    "privacySub": "Nähtavus ja turvalisus"
   },
   "profileEdit": {
     "title": "Täpselt sinu moodi.",
@@ -442,6 +460,133 @@
   "notifications": {
     "title": "Mis uut?",
     "subtitle": "Head uudised sinu väikesele kambale.",
-    "body": "Siia jõuavad sõprade plaanid, sõbrakutsed ja pargiteated."
+    "body": "Siia jõuavad sõprade plaanid, sõbrakutsed ja sõnumid.",
+    "someone": "Keegi",
+    "friendRequest": "Uus sõbrakutse",
+    "friendRequestBody": "{{name}} tahab sõbraks saada",
+    "friendAccepted": "{{name}} on nüüd sinu sõber",
+    "message": "{{name}} saatis sõnumi",
+    "friendPlan": "{{name}} läheb parki",
+    "filters": {
+      "all": "Kõik",
+      "friends": "Sõbrad",
+      "messages": "Sõnumid"
+    },
+    "markAll": "Märgi kõik loetuks",
+    "unreadHint": "Lugemata",
+    "more": "Näita vanemaid"
+  },
+  "community": {
+    "nameWithDogs": "{{name}} ja {{dogs}}"
+  },
+  "friends": {
+    "title": "Oma kamp",
+    "subtitle": "Järgmine jalutuskäik võiks olla koos.",
+    "search": "Otsi sõpru",
+    "searchPlaceholder": "Nimi või koera nimi",
+    "searchHint": "Sisesta vähemalt {{min}} tähte.",
+    "noResults": "Kedagi ei leitud. Proovi teist nime või koera nime.",
+    "requestSent": "Kutse saadetud",
+    "accept": "Võta vastu",
+    "decline": "Keeldu",
+    "requestsOff": "Ei võta sõbrakutseid vastu",
+    "add": "Saada sõbrakutse",
+    "incoming": "Sõbrakutsed",
+    "outgoing": "Saadetud kutsed",
+    "cancelRequest": "Tühista kutse",
+    "myFriends": "Sõbrad",
+    "emptyTitle": "Uued tutvused algavad pargist",
+    "emptyBody": "Ava koera profiil ja saada omanikule sõbrakutse."
+  },
+  "userProfile": {
+    "friendsSince": "sõbrad alates {{date}}",
+    "message": "Saada sõnum",
+    "invite": "Kutsu parki",
+    "addFriend": "Saada sõbrakutse",
+    "acceptRequest": "Võta sõbrakutse vastu",
+    "dogProfile": "Koer {{name}}",
+    "friendsOnlyDetails": "Tutvustust ja koerte iseloomu näevad ainult sõbrad.",
+    "reportOrBlock": "Teavita või blokeeri",
+    "reportOrBlockSub": "Halda oma suhtluse piire",
+    "unfriend": "Eemalda sõprade hulgast",
+    "unfriendTitle": "Eemaldada {{name}} sõprade hulgast?",
+    "unfriendBody": "Vestlus jääb alles, aga uusi sõnumeid saata ei saa."
+  },
+  "safety": {
+    "title": "Hoiame kampa sõbralikuna.",
+    "subtitle": "Teavita kasutajast või piira suhtlust.",
+    "selectedUser": "Valitud kasutaja",
+    "reasons": {
+      "spam": "Rämpspost",
+      "harassment": "Ahistamine",
+      "other": "Muu"
+    },
+    "what": "Mis juhtus?",
+    "whatPlaceholder": "Kirjelda olukorda võimalikult täpselt",
+    "privateTitle": "Sinu teavitus on privaatne",
+    "privateBody": "Vaatame olukorra üle. Blokeerimisel ei saa see kasutaja sulle enam sõnumeid saata.",
+    "send": "Saada teavitus",
+    "block": "Blokeeri kasutaja",
+    "blockTitle": "Blokeerida kasutaja?",
+    "blockBody": "Te ei näe enam teineteist otsingus, pargis ega sõnumites ning sõprus lõpeb. Blokeeringu saad eemaldada privaatsusseadetes.",
+    "thanksTitle": "Aitäh!",
+    "thanksBody": "Vaatame teavituse üle. Kasutaja ei saa teada, kes teavitas."
+  },
+  "inbox": {
+    "title": "Väikesed tere’d",
+    "subtitle": "Suhtle oma pargisõpradega.",
+    "search": "Otsi vestlust",
+    "searchPlaceholder": "Sõbra nimi",
+    "empty": "Vestlusi veel pole. Ava sõbra profiil ja vajuta „Saada sõnum“.",
+    "noMessages": "Sõnumeid veel pole",
+    "unread_one": "{{count}} lugemata sõnum",
+    "unread_other": "{{count}} lugemata sõnumit"
+  },
+  "conversation": {
+    "empty": "Ütle tere!",
+    "a11y": "{{who}}, {{time}}: {{text}}",
+    "message": "Sõnum",
+    "placeholder": "Kirjuta sõnum…",
+    "send": "Saada",
+    "notFriends": "Te pole enam sõbrad, seega uusi sõnumeid saata ei saa."
+  },
+  "privacy": {
+    "title": "Sinu piirid loevad.",
+    "subtitle": "Vali, millist infot teistega jagad.",
+    "healthTitle": "Sinu koera terviseinfo on privaatne",
+    "healthBody": "Vaktsiine ja arstivisiite näed ainult sina.",
+    "allowRequests": "Luba sõbrakutseid",
+    "allowRequestsHint": "Välja lülitatuna ei saa keegi sulle uut sõbrakutset saata.",
+    "presence": "Kohaloleku jagamine",
+    "presenceHint": "Kes näeb, kui oled pargis. Sõbrad näevad ka sinu plaane.",
+    "blocked": "Blokeeritud kasutajad",
+    "blockedHint": "Halda oma suhtluse piire",
+    "blockedEmpty": "Sa pole kedagi blokeerinud.",
+    "unblock": "Eemalda blokeering"
+  },
+  "notificationSettings": {
+    "title": "Ainult head märguanded.",
+    "subtitle": "Vali, millest soovid kuulda.",
+    "messages": "Sõnumid sõpradelt",
+    "friendPlans": "Sõbrad lähevad parki",
+    "friendRequests": "Sõbrakutsed",
+    "feedNote": "Teadete vahekaardil näed alati kõike; need lülitid puudutavad ainult tõuketeavitusi.",
+    "save": "Salvesta eelistused"
+  },
+  "invite": {
+    "title": "Kutsu parki: {{name}}",
+    "subtitle": "Vali park, siis aeg. Kutse läheb sõbrale sõnumina.",
+    "favorite": "Lemmikpark",
+    "message": "Lähen {{day}} kell {{from}} parki {{park}}. Tule ka!"
+  },
+  "pushPrompt": {
+    "title": "Kas anname märku?",
+    "body": "Teatame, kui sõber kirjutab, saadab sõbrakutse või läheb parki. Märguannete jaoks küsib telefon kohe luba.",
+    "deniedBody": "Märguanded on telefoni seadetes välja lülitatud. Luba need seadetes, kui soovid sõpradelt teateid.",
+    "allow": "Luba märguanded",
+    "notNow": "Mitte praegu"
+  },
+  "push": {
+    "channelName": "Sõbrad ja sõnumid"
   }
 }

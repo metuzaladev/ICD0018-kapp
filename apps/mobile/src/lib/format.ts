@@ -146,3 +146,20 @@ export function ageLabel(birthDate: string, now = new Date()): string {
   if (months === 0) return i18n.t('dates.ageNewborn');
   return i18n.t('dates.ageMonths', { count: months });
 }
+
+/** Figma "Mari ja Luna": the owner's first name with their dogs; just the name without dogs. */
+export function personTitle(firstName: string, dogNames: string[]): string {
+  if (dogNames.length === 0) return firstName;
+  return i18n.t('community.nameWithDogs', { name: firstName, dogs: dogNames.join(', ') });
+}
+
+/** "september 2026" — "sõbrad alates …" on a friend's profile. */
+export function formatMonthYear(iso: string): string {
+  return new Date(iso).toLocaleDateString(currentLocaleTag(), { month: 'long', year: 'numeric' });
+}
+
+/** A chat timestamp: the time today, otherwise the day and the time. */
+export function formatMessageTime(iso: string, now = new Date()): string {
+  const sameDay = startOfDay(new Date(iso)) === startOfDay(now);
+  return sameDay ? formatTime(iso) : `${formatDay(iso, now)} ${formatTime(iso)}`;
+}

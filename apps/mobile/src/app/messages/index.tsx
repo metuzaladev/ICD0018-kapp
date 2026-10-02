@@ -1,0 +1,65 @@
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { StyleSheet, View } from 'react-native';
+
+import { FormError } from '@/components/form-error';
+import { ListRow } from '@/components/list-row';
+import { OfflineBanner } from '@/components/offline-banner';
+import { Screen } from '@/components/screen';
+import { TextField } from '@/components/text-field';
+import { ThemedText } from '@/components/themed-text';
+import { Radius, Spacing } from '@/constants/theme';
+import { useConversations } from '@/hooks/use-messages';
+import { useTheme } from '@/hooks/use-theme';
+import { errorMessage } from '@/lib/api';
+import { formatMessageTime, personTitle } from '@/lib/format';
+
+/** Figma 05 / Messages / Inbox. The search filters loaded conversations by the friend's or dog's name. */
+export default function InboxScreen() {
+  const { t } = useTranslation();
+  const c = useTheme();
+  const { data, error } = useConversations();
+  const [filter, setFilter] = useState('');
+  const needle = filter.trim().toLocaleLowerCase();
+  const shown = (data ?? []).filter(
+    (conv) => !needle || [conv.other.firstName, ...conv.other.dogNames].some((n) => n.toLocaleLowerCase().includes(needle)),
+  );
+
+  return (
+    <Screen underHeader title={t('inbox.title')} subtitle={t('inbox.subtitle')}>
+      <OfflineBanner />
+      {error && !data ? <FormError message={errorMessage(error)} /> : null}
+      {data && data.length > 0 ? (
+        <TextField label={t('inbox.search')} placeholder={t('inbox.searchPlaceholder')} value={filter} onChangeText={setFilter} maxLength={50} />
+      ) : null}
+      {data?.length === 0 ? <ThemedText themeColor="muted">{t('inbox.empty')}</ThemedText> : null}
+      {shown.map((conv) => {
+        const last = conv.lastMessage;
+        const subtitle = last ? `${last.body} · ${formatMessageTime(last.createdAt)}` : t('inbox.noMessages');
+        return (
+          <ListRow
+            key={conv.id}
+            title={personTitle(conv.other.firstName, conv.other.dogNames)}
+            subtitle={subtitle}
+            accessibilityHint={conv.unreadCount > 0 ? t('inbox.unread', { count: conv.unreadCount }) : undefined}
+            leading={
+              conv.unreadCount > 0 ? (
+                <View style={[styles.badge, { backgroundColor: c.brand }]} accessibilityElementsHidden>
+                  <ThemedText type="micro" style={{ color: c.onBrand }}>
+                    {String(conv.unreadCount)}
+                  </ThemedText>
+                </View>
+              ) : null
+            }
+            onPress={() => router.push({ pathname: '/messages/[conversationId]', params: { conversationId: conv.id } })}
+          />
+        );
+      })}
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  badge: { minWidth: 24, height: 24, borderRadius: Radius.full, alignItems: 'center', justifyContent: 'center', paddingHorizontal: Spacing.one },
+});

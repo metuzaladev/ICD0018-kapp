@@ -13,12 +13,13 @@ import { useTheme } from '@/hooks/use-theme';
 import { currentLanguage } from '@/i18n';
 import { setLanguagePreference, useLanguagePreference, type LanguagePreference } from '@/i18n/language-preference';
 import { authClient } from '@/lib/auth-client';
+import { unregisterPushToken } from '@/lib/push';
 
 const OPTIONS: LanguagePreference[] = ['auto', ...LANGUAGES];
 
 /**
- * Figma 07 / Settings / Overview: edit profile, language, sign out. Notifications, privacy and
- * location settings from Figma arrive with the features they control.
+ * Figma 07 / Settings / Overview: edit profile, notifications, privacy, language, sign out.
+ * Location, help and "add a park" from Figma arrive with the features they control.
  */
 export default function SettingsScreen() {
   const { t } = useTranslation();
@@ -28,6 +29,8 @@ export default function SettingsScreen() {
 
   async function signOut() {
     setSigningOut(true);
+    // This phone must stop receiving this account's pushes (needs the session, so before sign-out).
+    await unregisterPushToken();
     // Clears the session server-side and in SecureStore; the root layout then shows Welcome.
     await authClient.signOut();
   }
@@ -41,6 +44,8 @@ export default function SettingsScreen() {
   return (
     <Screen underHeader title={t('settings.title')} subtitle={t('settings.subtitle')}>
       <ListRow title={t('settings.editProfile')} subtitle={t('settings.editProfileSub')} onPress={() => router.push('/profile-edit')} />
+      <ListRow title={t('settings.notifications')} subtitle={t('settings.notificationsSub')} onPress={() => router.push('/settings-notifications')} />
+      <ListRow title={t('settings.privacy')} subtitle={t('settings.privacySub')} onPress={() => router.push('/settings-privacy')} />
 
       <ThemedText type="heading" accessibilityRole="header">
         {t('settings.language')}

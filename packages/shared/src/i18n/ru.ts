@@ -51,6 +51,16 @@ export const ru: Messages = {
   'validation.messageEmpty': 'напишите сообщение',
   'validation.pushToken': 'не является push-токеном Expo',
   'validation.bothCoordinates': 'укажите и lat, и lng',
+
+  /* ---------- M9b validation (docs/16-avasta-ja-kapad.md) ---------- */
+  'validation.duplicateAmenity': 'удобство указано несколько раз',
+  'validation.maxPhotos': 'не более {{max}} фото',
+  'validation.duplicatePhoto': 'одно и то же фото указано несколько раз',
+  'validation.outsideEstonia': 'место должно находиться в Эстонии',
+  'validation.mapTags': 'неизвестная метка карты',
+  'validation.bboxOrder': 'верхняя граница должна быть больше нижней',
+  'validation.bboxTooLarge': 'область карты может быть не более {{max}} градусов',
+  'validation.inviteCode': 'код приглашения состоит из 8 букв или цифр',
   'validation.maxDogs': 'максимальное число собак: {{max}}',
 
   'errors.badRequest': 'Неверный запрос',
@@ -97,6 +107,19 @@ export const ru: Messages = {
   'errors.slotTaken': 'Это время только что заняли, выберите другое',
   'errors.cancelTooLate': 'Отменить запись можно не позднее чем за {{hours}} ч до начала',
 
+  /* ---------- M9b errors (docs/16-avasta-ja-kapad.md) ---------- */
+  'errors.placePostNotFound': 'Публикация не найдена',
+  'errors.productNotFound': 'Товар не найден',
+  'errors.offerNotFound': 'Предложение не найдено',
+  'errors.notEnoughPoints': 'Недостаточно лапок: нужно {{cost}}, у вас {{balance}}',
+  'errors.redemptionNotFound': 'Код скидки не найден',
+  'errors.redemptionUnavailable': 'Этот код скидки нельзя использовать для этой записи',
+  'errors.redemptionNotCancellable': 'Использованный или просроченный код скидки нельзя отменить',
+  'errors.inviteNotFound': 'Код приглашения не найден',
+  'errors.inviteOwnCode': 'Нельзя использовать собственный код приглашения',
+  'errors.inviteTooLate': 'Код приглашения можно ввести в течение {{days}} дней после регистрации',
+  'errors.inviteAlreadyClaimed': 'Вы уже ввели код приглашения',
+
   'push.friendRequest.title': 'Новый запрос в друзья',
   'push.friendRequest.body': '{{name}} хочет добавить вас в друзья',
   'push.friendAccepted.title': 'Новый друг',
@@ -108,6 +131,22 @@ export const ru: Messages = {
   'push.bookingCancelled.title': 'Запись отменена',
   'push.bookingReminder.title': 'Скоро увидимся!',
   'push.booking.body': '{{service}} · {{provider}} · {{when}}',
+
+  /* ---------- M9b push texts and reward names (docs/16-avasta-ja-kapad.md) ---------- */
+  'push.rewardLevelUp.title': 'Новый уровень!',
+  'push.rewardLevelUp.body': 'Ваш новый уровень: {{level}}',
+  'push.rewardBadge.title': 'Новый значок!',
+  'push.rewardBadge.body': 'Вы открыли значок «{{badge}}»',
+  'push.placePostApproved.title': 'Ваша рекомендация опубликована',
+  'push.placePostApproved.body': '{{place}} · +{{points}} лапок',
+  'rewards.level.puppy': 'Щенок',
+  'rewards.level.park_friend': 'Друг парка',
+  'rewards.level.park_legend': 'Легенда парка',
+  'rewards.level.pack_leader': 'Вожак стаи',
+  'rewards.badge.early_bird': 'Ранняя пташка',
+  'rewards.badge.ten_parks': '10 парков',
+  'rewards.badge.explorer': 'Исследователь',
+  'rewards.badge.kadriorg_legend': 'Завсегдатай парка',
 
   'auth.userExists': 'Аккаунт с этим адресом эл. почты уже существует',
   'auth.invalidCredentials': 'Неверный адрес эл. почты или пароль',

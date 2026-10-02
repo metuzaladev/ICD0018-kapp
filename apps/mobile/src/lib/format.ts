@@ -153,9 +153,17 @@ export function personTitle(firstName: string, dogNames: string[]): string {
   return i18n.t('community.nameWithDogs', { name: firstName, dogs: dogNames.join(', ') });
 }
 
-/** "september 2026" — "sõbrad alates …" on a friend's profile. */
-export function formatMonthYear(iso: string): string {
-  return new Date(iso).toLocaleDateString(currentLocaleTag(), { month: 'long', year: 'numeric' });
+/**
+ * The date in "Sõbrad alates …" on a friend's profile. A month name after "since" needs a case
+ * ending Intl cannot produce ("alates oktoobrist", "с октября"), so: Russian/English use the long
+ * date, where Intl itself declines the month ("2 октября 2026 г."); Estonian uses the numeric date
+ * ("02.10.2026"), the usual written form after "alates".
+ */
+export function formatFriendsSince(iso: string): string {
+  const date = new Date(iso);
+  return currentLanguage() === 'et'
+    ? date.toLocaleDateString(currentLocaleTag(), { day: '2-digit', month: '2-digit', year: 'numeric' })
+    : date.toLocaleDateString(currentLocaleTag(), { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 /** A chat timestamp: the time today, otherwise the day and the time. */

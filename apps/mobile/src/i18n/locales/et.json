@@ -499,7 +499,7 @@
     "emptyBody": "Ava koera profiil ja saada omanikule sõbrakutse."
   },
   "userProfile": {
-    "friendsSince": "sõbrad alates {{date}}",
+    "friendsSince": "Sõbrad alates {{date}}",
     "message": "Saada sõnum",
     "invite": "Kutsu parki",
     "addFriend": "Saada sõbrakutse",

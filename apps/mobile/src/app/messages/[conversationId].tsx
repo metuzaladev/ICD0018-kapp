@@ -133,6 +133,7 @@ const styles = StyleSheet.create({
   theirs: { alignSelf: 'flex-start' },
   composer: { flexDirection: 'row', alignItems: 'flex-end', gap: Spacing.two, padding: Spacing.three, borderTopWidth: StyleSheet.hairlineWidth },
   input: { ...Type.body, flex: 1, minHeight: 44, maxHeight: 120, borderWidth: 1, borderRadius: Radius[16], paddingHorizontal: Spacing.three, paddingVertical: 10 },
-  send: { width: 96 },
+  // Grows with the label ("Отправить" is longer than "Saada") instead of wrapping mid-word.
+  send: { minWidth: 96, flexShrink: 0 },
   notice: { padding: Spacing.three, textAlign: 'center' },
 });

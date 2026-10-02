@@ -13,7 +13,7 @@ import { Radius, Spacing } from '@/constants/theme';
 import { useAcceptFriendRequest, useDeleteFriendRequest, useRemoveFriend, useSendFriendRequest, useUserProfile } from '@/hooks/use-friends';
 import { useStartConversation } from '@/hooks/use-messages';
 import { errorMessage } from '@/lib/api';
-import { ageLabel, formatMonthYear, personTitle } from '@/lib/format';
+import { ageLabel, formatFriendsSince, personTitle } from '@/lib/format';
 
 /** Figma 05 / Community / Friend Profile — also the profile of anyone found in search or in a park. */
 export default function UserProfileScreen() {
@@ -42,7 +42,7 @@ export default function UserProfileScreen() {
   }
 
   const subtitle = person
-    ? [person.area, person.friendsSince ? t('userProfile.friendsSince', { date: formatMonthYear(person.friendsSince) }) : null]
+    ? [person.area, person.friendsSince ? t('userProfile.friendsSince', { date: formatFriendsSince(person.friendsSince) }) : null]
         .filter(Boolean)
         .join(' · ')
     : undefined;

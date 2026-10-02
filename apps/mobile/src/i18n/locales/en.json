@@ -499,7 +499,7 @@
     "emptyBody": "Open a dog’s profile and send its human a friend request."
   },
   "userProfile": {
-    "friendsSince": "friends since {{date}}",
+    "friendsSince": "Friends since {{date}}",
     "message": "Send a message",
     "invite": "Invite to the park",
     "addFriend": "Send friend request",

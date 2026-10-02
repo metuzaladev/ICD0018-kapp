@@ -1,0 +1,51 @@
+# Example production setup for a single EU VM (e.g. Hetzner Falkenstein/Helsinki), see
+# docs/15-pakendamine-ja-levitamine.md. Not used in development (that is docker-compose.yml).
+#
+# Postgres + PostGIS and Redis are expected to be managed services in the EU (backups, upgrades);
+# their URLs come from api.env. Photos live in Cloudflare R2 (EU jurisdiction). TLS is terminated
+# by Caddy, which gets Let's Encrypt certificates automatically.
+#
+#   cp apps/api/.env.production.example api.env   # fill in real values, never commit it
+#   docker compose -f docker-compose.prod.yml build
+#   docker compose -f docker-compose.prod.yml run --rm migrate      # once per release
+#   docker compose -f docker-compose.prod.yml up -d api caddy
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    image: kapp-api:latest
+    env_file: api.env
+    environment:
+      # Caddy is the only proxy in front of the API (one hop).
+      TRUST_PROXY: '1'
+    restart: unless-stopped
+    # Longer than SHUTDOWN_TIMEOUT_MS (9 s default) so the API can finish in-flight work.
+    stop_grace_period: 15s
+    expose: ['3000']
+    read_only: true
+    security_opt: ['no-new-privileges:true']
+    cap_drop: [ALL]
+    logging:
+      driver: json-file
+      options: { max-size: '10m', max-file: '5' }
+
+  # One-off release step: applies new SQL migrations, then exits. Not run on API start (docs/15).
+  migrate:
+    image: kapp-api:latest
+    env_file: api.env
+    command: ['node', 'dist/migrate.js']
+    profiles: [release]
+    restart: 'no'
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports: ['80:80', '443:443']
+    command: ['caddy', 'reverse-proxy', '--from', '${API_DOMAIN:?set API_DOMAIN, e.g. api.example.ee}', '--to', 'api:3000']
+    volumes:
+      - caddy-data:/data
+    depends_on: [api]
+
+volumes:
+  caddy-data:

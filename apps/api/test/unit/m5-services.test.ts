@@ -271,7 +271,7 @@ describe('notifier', () => {
     notifications.upsertMessageNotification.mockResolvedValue(notification());
     notifications.create.mockResolvedValue(notification({ type: 'friend_request', data: {} }));
     notifications.unreadCount.mockResolvedValue(3);
-    notifications.pushContext.mockResolvedValue({ language, preferences: { messages: messagesOn, friendRequests: true, friendPlans: true } });
+    notifications.pushContext.mockResolvedValue({ language, preferences: { messages: messagesOn, friendRequests: true, friendPlans: true, bookings: true } });
     const realtime = { emitToUsers: vi.fn() };
     const pushQueue = { enqueue: vi.fn().mockResolvedValue(undefined) };
     const log = { warn: vi.fn() };

@@ -218,7 +218,7 @@ describe('M5 community flow', () => {
   });
 
   it('respects the push preference', async () => {
-    await api('liis', 'PUT', '/me/notification-preferences', { messages: false, friendRequests: true, friendPlans: true });
+    await api('liis', 'PUT', '/me/notification-preferences', { messages: false, friendRequests: true, friendPlans: true, bookings: true });
     const before = (await queue.queue.getJobs(['waiting', 'delayed', 'active'])).filter((j) => j.data.userId === people.liis.id).length;
     await api('mari', 'POST', `/me/conversations/${conversationId}/messages`, { body: 'Vaikne sõnum' });
     const after = (await queue.queue.getJobs(['waiting', 'delayed', 'active'])).filter((j) => j.data.userId === people.liis.id).length;

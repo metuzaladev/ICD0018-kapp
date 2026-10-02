@@ -1,4 +1,9 @@
 import type { Env } from './config/env';
+import { noBookingReminders, type BookingReminders } from './modules/bookings/booking-reminders';
+import { createBookingsRepository } from './modules/bookings/bookings.repository';
+import { createBookingsService } from './modules/bookings/bookings.service';
+import { createProvidersRepository } from './modules/providers/providers.repository';
+import { createProvidersService } from './modules/providers/providers.service';
 import type { Db } from './db/client';
 import { createDogsRepository } from './modules/dogs/dogs.repository';
 import { createDogsService } from './modules/dogs/dogs.service';
@@ -54,6 +59,8 @@ export interface CommunityDeps {
   realtime?: RealtimeGateway;
   /** BullMQ push queue; when absent pushes are not sent (seed scripts, some tests). */
   pushQueue?: Pick<PushQueue, 'enqueue'>;
+  /** M6 booking reminder queue (BullMQ); when absent no reminders are scheduled. */
+  bookingReminders?: BookingReminders;
   log?: Logger;
 }
 
@@ -73,7 +80,18 @@ export function createServices(db: Db, storage: ObjectStorage, timeoutMs: number
     timeoutMs,
   });
   const friendsService = createFriendsService({ repository: friendsRepository, notifier, timeoutMs });
+  const providers = createProvidersRepository(db);
   return {
+    providersService: createProvidersService({ repository: providers, storage, timeoutMs }),
+    bookingsService: createBookingsService({
+      bookings: createBookingsRepository(db),
+      providers,
+      dogs,
+      notifier,
+      reminders: community.bookingReminders ?? noBookingReminders,
+      log: community.log ?? silentLogger,
+      timeoutMs,
+    }),
     friendsService,
     messagesService: createMessagesService({
       messages: createMessagesRepository(db),

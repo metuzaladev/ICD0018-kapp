@@ -7,6 +7,10 @@ import { noAuthYet, type ResolveUserId } from './http/auth';
 import { registerErrorHandling } from './http/error-handler';
 import { TooManyRequestsError } from './http/errors';
 import { authRoutes } from './modules/auth/auth.routes';
+import { bookingsRoutes } from './modules/bookings/bookings.routes';
+import type { BookingsService } from './modules/bookings/bookings.service';
+import { providersRoutes } from './modules/providers/providers.routes';
+import type { ProvidersService } from './modules/providers/providers.service';
 import { dogsRoutes } from './modules/dogs/dogs.routes';
 import type { DogsService } from './modules/dogs/dogs.service';
 import { favoritesRoutes } from './modules/favorites/favorites.routes';
@@ -54,6 +58,8 @@ export interface AppDeps {
   messagesService: MessagesService;
   notificationsService: NotificationsService;
   safetyService: SafetyService;
+  providersService: ProvidersService;
+  bookingsService: BookingsService;
   /** Socket.IO gateway attached to this app's HTTP server (M5); absent in HTTP tests. */
   realtime?: SocketGateway;
   checkDatabase: () => Promise<boolean>;
@@ -125,6 +131,8 @@ export async function buildApp(deps: AppDeps, config: AppConfig = defaultAppConf
   await app.register(messagesRoutes, { prefix: API_PREFIX, service: deps.messagesService, resolveUserId });
   await app.register(notificationsRoutes, { prefix: API_PREFIX, service: deps.notificationsService, resolveUserId });
   await app.register(safetyRoutes, { prefix: API_PREFIX, service: deps.safetyService, resolveUserId });
+  await app.register(providersRoutes, { prefix: API_PREFIX, service: deps.providersService });
+  await app.register(bookingsRoutes, { prefix: API_PREFIX, service: deps.bookingsService, resolveUserId });
 
   if (deps.realtime) {
     const realtime = deps.realtime;

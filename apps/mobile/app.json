@@ -109,6 +109,9 @@
             ]
           }
         ]
+      },
+      "config": {
+        "usesNonExemptEncryption": false
       }
     },
     "android": {

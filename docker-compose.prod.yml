@@ -1,14 +1,14 @@
 # Example production setup for a single EU VM (e.g. Hetzner Falkenstein/Helsinki), see
 # docs/15-pakendamine-ja-levitamine.md. Not used in development (that is docker-compose.yml).
 #
-# Postgres + PostGIS and Redis are expected to be managed services in the EU (backups, upgrades);
-# their URLs come from api.env. Photos live in Cloudflare R2 (EU jurisdiction). TLS is terminated
-# by Caddy, which gets Let's Encrypt certificates automatically.
+# Postgres + PostGIS is expected to be a managed EU service (backups, PITR, upgrades); its URL comes
+# from api.env. Redis runs here (REDIS_URL=redis://redis:6379 in api.env). Photos live in
+# Cloudflare R2 (EU jurisdiction). TLS is terminated by Caddy (automatic Let's Encrypt).
 #
 #   cp apps/api/.env.production.example api.env   # fill in real values, never commit it
 #   docker compose -f docker-compose.prod.yml build
 #   docker compose -f docker-compose.prod.yml run --rm migrate      # once per release
-#   docker compose -f docker-compose.prod.yml up -d api caddy
+#   docker compose -f docker-compose.prod.yml up -d redis api caddy
 services:
   api:
     build:
@@ -20,6 +20,7 @@ services:
       # Caddy is the only proxy in front of the API (one hop).
       TRUST_PROXY: '1'
     restart: unless-stopped
+    depends_on: [redis]
     # Longer than SHUTDOWN_TIMEOUT_MS (9 s default) so the API can finish in-flight work.
     stop_grace_period: 15s
     expose: ['3000']
@@ -38,6 +39,16 @@ services:
     profiles: [release]
     restart: 'no'
 
+  # Redis on the same VM is enough for one instance (queues, rate limits). Append-only file so
+  # queued pushes/reminders survive a restart; noeviction so BullMQ jobs are never dropped.
+  # With several VMs use a managed EU Redis instead and set REDIS_URL to it.
+  redis:
+    image: redis:7-alpine
+    command: ['redis-server', '--appendonly', 'yes', '--maxmemory-policy', 'noeviction']
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
   caddy:
     image: caddy:2
     restart: unless-stopped
@@ -49,3 +60,4 @@ services:
 
 volumes:
   caddy-data:
+  redis-data:

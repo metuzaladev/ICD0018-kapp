@@ -7,6 +7,7 @@ import {
   geometry,
   index,
   integer,
+  jsonb,
   numeric,
   pgEnum,
   pgTable,
@@ -43,8 +44,15 @@ export const user = pgTable('user', {
   area: text('area'),
   bio: text('bio'),
   presenceSharing: presenceSharing('presence_sharing').notNull().default('friends'),
+  /** Settings / Privacy "Luba sõbrakutseid" (M5). Off = nobody can send this user a friend request. */
+  allowFriendRequests: boolean('allow_friend_requests').notNull().default(true),
+  /**
+   * The app's language (M5). Push notifications are composed on the server, away from any
+   * request, so the recipient's language must be stored; the app sends it with its push token.
+   */
+  language: text('language').$type<'et' | 'en' | 'ru'>().notNull().default('et'),
   ...timestamps,
-});
+}, (t) => [check('user_language_supported', sql`${t.language} in ('et', 'en', 'ru')`)]);
 
 export const session = pgTable('session', {
   id: text('id').primaryKey(),
@@ -238,7 +246,11 @@ export const plannedVisits = pgTable(
     note: text('note'),
     ...timestamps,
   },
-  (t) => [index('planned_visits_park_time_idx').on(t.parkId, t.startsAt)],
+  (t) => [
+    index('planned_visits_park_time_idx').on(t.parkId, t.startsAt),
+    // Friends' plans on Home (M5): "plans of these users in the next 48 hours".
+    index('planned_visits_user_time_idx').on(t.userId, t.startsAt),
+  ],
 );
 
 export const reviews = pgTable(
@@ -297,6 +309,10 @@ export const parkReports = pgTable('park_reports', {
 
 export const friendshipStatus = pgEnum('friendship_status', ['pending', 'accepted']);
 
+/**
+ * Mutual friendship with a request (M5): a row is a pending request from requester to addressee
+ * until the addressee accepts it. Either side can delete it (decline, cancel or unfriend).
+ */
 export const friendships = pgTable(
   'friendships',
   {
@@ -309,11 +325,28 @@ export const friendships = pgTable(
     status: friendshipStatus('status').notNull().default('pending'),
     ...timestamps,
   },
-  (t) => [primaryKey({ columns: [t.requesterId, t.addresseeId] })],
+  (t) => [
+    primaryKey({ columns: [t.requesterId, t.addresseeId] }),
+    // One row per pair in EITHER direction: A→B and B→A can never both exist, so two people who
+    // ask each other at the same moment cannot end up with two requests (the second insert fails
+    // and the service accepts the first one instead).
+    uniqueIndex('friendships_pair_uq').on(
+      sql`least(${t.requesterId}, ${t.addresseeId})`,
+      sql`greatest(${t.requesterId}, ${t.addresseeId})`,
+    ),
+    index('friendships_addressee_idx').on(t.addresseeId),
+    check('friendships_not_self', sql`${t.requesterId} <> ${t.addresseeId}`),
+  ],
 );
 
 export const conversations = pgTable('conversations', {
   id: uuid('id').primaryKey().defaultRandom(),
+  /**
+   * `least(a,b) + ':' + greatest(a,b)` for a 1:1 conversation (M5). Unique, so two friends always
+   * share exactly one conversation, even when both open it for the first time simultaneously.
+   * Null is reserved for group conversations, which do not exist yet.
+   */
+  directKey: text('direct_key').unique(),
   ...timestamps,
 });
 
@@ -326,9 +359,10 @@ export const conversationMembers = pgTable(
     userId: text('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
+    /** Messages after this are unread for the member; null = never opened. */
     lastReadAt: timestamp('last_read_at', { withTimezone: true }),
   },
-  (t) => [primaryKey({ columns: [t.conversationId, t.userId] })],
+  (t) => [primaryKey({ columns: [t.conversationId, t.userId] }), index('conversation_members_user_idx').on(t.userId)],
 );
 
 export const messages = pgTable(
@@ -344,7 +378,11 @@ export const messages = pgTable(
     body: text('body').notNull(),
     createdAt: timestamps.createdAt,
   },
-  (t) => [index('messages_conversation_time_idx').on(t.conversationId, t.createdAt)],
+  (t) => [
+    index('messages_conversation_time_idx').on(t.conversationId, t.createdAt),
+    // Same limits as messageInputSchema, also for writes that bypass the API.
+    check('messages_body_length', sql`char_length(${t.body}) between 1 and 2000`),
+  ],
 );
 
 export const userBlocks = pgTable(
@@ -358,20 +396,35 @@ export const userBlocks = pgTable(
       .references(() => user.id, { onDelete: 'cascade' }),
     createdAt: timestamps.createdAt,
   },
-  (t) => [primaryKey({ columns: [t.blockerId, t.blockedId] })],
+  (t) => [
+    primaryKey({ columns: [t.blockerId, t.blockedId] }),
+    // "Has anyone blocked anyone" is checked in both directions in many queries.
+    index('user_blocks_blocked_idx').on(t.blockedId),
+    check('user_blocks_not_self', sql`${t.blockerId} <> ${t.blockedId}`),
+  ],
 );
 
-export const userReports = pgTable('user_reports', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  reporterId: text('reporter_id').references(() => user.id, { onDelete: 'set null' }),
-  reportedId: text('reported_id')
-    .notNull()
-    .references(() => user.id, { onDelete: 'cascade' }),
-  reason: text('reason').notNull(),
-  status: reportStatus('status').notNull().default('open'),
-  ...timestamps,
-});
+export const userReports = pgTable(
+  'user_reports',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    reporterId: text('reporter_id').references(() => user.id, { onDelete: 'set null' }),
+    reportedId: text('reported_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    reason: text('reason').notNull(),
+    /** "Mis juhtus?" — free text for the moderator (M5). */
+    details: text('details'),
+    status: reportStatus('status').notNull().default('open'),
+    ...timestamps,
+  },
+  (t) => [check('user_reports_reason', sql`${t.reason} in ('spam', 'harassment', 'other')`)],
+);
 
+/**
+ * Activity feed rows (M5). No texts are stored: the app renders each type in its own language
+ * from `actor_id` and `data`, and the push worker does the same in the recipient's language.
+ */
 export const notifications = pgTable(
   'notifications',
   {
@@ -380,24 +433,40 @@ export const notifications = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
     type: text('type').notNull(),
-    title: text('title').notNull(),
-    body: text('body'),
-    data: text('data'),
+    /** Who caused it (sender, requester, friend who planned); deleting the account removes the row. */
+    actorId: text('actor_id').references(() => user.id, { onDelete: 'cascade' }),
+    data: jsonb('data').$type<Record<string, string>>().notNull().default({}),
     readAt: timestamp('read_at', { withTimezone: true }),
     createdAt: timestamps.createdAt,
   },
-  (t) => [index('notifications_user_time_idx').on(t.userId, t.createdAt)],
+  (t) => [
+    index('notifications_user_time_idx').on(t.userId, t.createdAt),
+    check('notifications_type', sql`${t.type} in ('friend_request', 'friend_accepted', 'message', 'friend_plan')`),
+  ],
 );
+
+/** Per-type push preferences (Settings / Notifications). A missing row means "everything on". */
+export const notificationPreferences = pgTable('notification_preferences', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  messages: boolean('messages').notNull().default(true),
+  friendRequests: boolean('friend_requests').notNull().default(true),
+  friendPlans: boolean('friend_plans').notNull().default(true),
+  updatedAt: timestamps.updatedAt,
+});
 
 export const pushTokens = pgTable(
   'push_tokens',
   {
+    /** Expo push token; one device = one token, re-registering on another account moves it. */
     token: text('token').primaryKey(),
     userId: text('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
     platform: text('platform').notNull(),
     createdAt: timestamps.createdAt,
+    updatedAt: timestamps.updatedAt,
   },
   (t) => [index('push_tokens_user_idx').on(t.userId)],
 );

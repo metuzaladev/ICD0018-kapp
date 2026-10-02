@@ -9,8 +9,10 @@ import { Button } from '@/components/button';
 import { Entering } from '@/components/entering';
 import { ErrorState } from '@/components/error-state';
 import { FormError } from '@/components/form-error';
+import { Icon } from '@/components/icon';
+import { ListRow } from '@/components/list-row';
 import { OfflineBanner } from '@/components/offline-banner';
-import { PressableScale } from '@/components/pressable-scale';
+import { PhotoTile } from '@/components/photo-tile';
 import { Screen } from '@/components/screen';
 import { SkeletonList } from '@/components/skeleton';
 import { ThemedText } from '@/components/themed-text';
@@ -42,11 +44,7 @@ function openDirections(park: ParkDetail) {
 function Heart({ filled }: { filled: boolean }) {
   const c = useTheme();
   const reduceMotion = useReduceMotion();
-  const glyph = (
-    <ThemedText type="hero" style={{ color: c.brand }}>
-      {filled ? '♥' : '♡'}
-    </ThemedText>
-  );
+  const glyph = <Icon name={filled ? 'heart-filled' : 'heart'} size={26} color={c.brand} />;
   if (reduceMotion) return glyph;
   return (
     <Animated.View
@@ -184,20 +182,16 @@ export default function ParkDetailScreen() {
                   });
                   return (
                     <Entering key={v.checkInId} index={i}>
-                      <PressableScale
-                        // Figma: "Ava koera profiil ja saada omanikule sõbrakutse" — a visitor opens their profile.
-                        disabled={v.isMe}
-                        dimWhenDisabled={false}
-                        accessibilityRole={v.isMe ? 'text' : 'button'}
-                        accessibilityLabel={`${title}, ${details}`}
+                      {/* Figma Current Visitors: rounded-square dog photo. Visitors' dog photos are not in
+                          the API (names only), so the first dog's initial stands in. The own row is not
+                          tappable; others open the profile ("Ava koera profiil ja saada omanikule sõbrakutse"). */}
+                      <ListRow
+                        title={title}
+                        subtitle={details}
+                        photo={{ name: v.dogs[0]?.name ?? v.ownerFirstName }}
                         accessibilityHint={v.isMe ? undefined : t('park.visitorHint')}
-                        onPress={() => router.push({ pathname: '/users/[userId]', params: { userId: v.userId } })}
-                        style={[styles.row, { backgroundColor: c.surface, borderColor: c.border }]}>
-                        <ThemedText type="label">{title}</ThemedText>
-                        <ThemedText type="caption" themeColor="muted">
-                          {details}
-                        </ThemedText>
-                      </PressableScale>
+                        onPress={v.isMe ? undefined : () => router.push({ pathname: '/users/[userId]', params: { userId: v.userId } })}
+                      />
                     </Entering>
                   );
                 })}
@@ -222,14 +216,17 @@ export default function ParkDetailScreen() {
                 key={r.id}
                 accessible
                 accessibilityLabel={[t('park.reviewA11y', { name: r.authorFirstName, rating: r.rating }), r.body].filter(Boolean).join('. ')}
-                style={[styles.row, { backgroundColor: c.surface, borderColor: c.border }]}>
-                <ThemedText type="label">
-                  {r.authorFirstName} · {'★'.repeat(r.rating)}
-                  <ThemedText type="label" style={{ color: c.border }}>
-                    {'★'.repeat(5 - r.rating)}
-                  </ThemedText>
-                </ThemedText>
-                {r.body ? <ThemedText type="caption">{r.body}</ThemedText> : null}
+                style={[styles.review, { backgroundColor: c.surface, borderColor: c.border }]}>
+                <PhotoTile name={r.authorFirstName} size={44} radius={14} />
+                <View style={styles.reviewText}>
+                  <View style={styles.stars}>
+                    <ThemedText type="label">{r.authorFirstName}</ThemedText>
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <Icon key={n} name={n <= r.rating ? 'star-filled' : 'star'} size={14} color={n <= r.rating ? c.accent : c.border} />
+                    ))}
+                  </View>
+                  {r.body ? <ThemedText type="caption">{r.body}</ThemedText> : null}
+                </View>
               </View>
             ))}
             <Button label={t('park.addReview')} variant="tertiary" onPress={() => router.push({ pathname: '/review', params: parkParams })} />
@@ -246,7 +243,9 @@ const styles = StyleSheet.create({
   header: { gap: Spacing.one },
   summary: { padding: Spacing.three, borderRadius: Radius[16], gap: 2 },
   features: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  row: { minHeight: 44, padding: Spacing.three, borderRadius: Radius[16], borderWidth: StyleSheet.hairlineWidth, gap: 2 },
+  review: { flexDirection: 'row', gap: Spacing.three, padding: Spacing.three, borderRadius: Radius[16], borderWidth: StyleSheet.hairlineWidth },
+  reviewText: { flex: 1, gap: 2 },
+  stars: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 2 },
   badge: { minHeight: 32, paddingHorizontal: 12, borderRadius: Radius.full, borderWidth: StyleSheet.hairlineWidth, justifyContent: 'center' },
   heart: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
 });

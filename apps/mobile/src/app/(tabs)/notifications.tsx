@@ -118,6 +118,9 @@ export default function NotificationsScreen() {
             <ListRow
               title={title}
               subtitle={subtitle}
+              // People get their initial in a rounded square; bookings (no person) the scissors icon.
+              photo={n.actor ? { name: n.actor.firstName } : undefined}
+              icon={n.actor ? undefined : 'scissors'}
               accessibilityHint={n.readAt ? undefined : t('notifications.unreadHint')}
               leading={<View style={[styles.dot, { backgroundColor: n.readAt ? 'transparent' : c.brand }]} accessibilityElementsHidden />}
               onPress={() => open(n)}

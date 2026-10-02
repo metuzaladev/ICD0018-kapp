@@ -87,9 +87,9 @@ export default function SettingsScreen() {
 
   return (
     <Screen underHeader title={t('settings.title')} subtitle={t('settings.subtitle')}>
-      <ListRow title={t('settings.editProfile')} subtitle={t('settings.editProfileSub')} onPress={() => router.push('/profile-edit')} />
-      <ListRow title={t('settings.notifications')} subtitle={t('settings.notificationsSub')} onPress={() => router.push('/settings-notifications')} />
-      <ListRow title={t('settings.privacy')} subtitle={t('settings.privacySub')} onPress={() => router.push('/settings-privacy')} />
+      <ListRow icon="user" title={t('settings.editProfile')} subtitle={t('settings.editProfileSub')} onPress={() => router.push('/profile-edit')} />
+      <ListRow icon="bell" title={t('settings.notifications')} subtitle={t('settings.notificationsSub')} onPress={() => router.push('/settings-notifications')} />
+      <ListRow icon="lock" title={t('settings.privacy')} subtitle={t('settings.privacySub')} onPress={() => router.push('/settings-privacy')} />
 
       <ThemedText type="heading" accessibilityRole="header">
         {t('settings.language')}

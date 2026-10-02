@@ -4,11 +4,14 @@
  * Park names are real areas with approximate coordinates — sample data, not a verified registry.
  * Providers are invented (the app says so on the Services screen); any likeness to a real business
  * name is unintended.
+ * M9b adds paw discounts and invented products for those providers and a few approved demo place
+ * posts (invented café/shop names, approximate coordinates) by a system author that cannot sign in.
+ * Insert-only and idempotent: re-running never deletes or overwrites anything.
  */
-import { inArray } from 'drizzle-orm';
+import { and, eq, inArray, isNull } from 'drizzle-orm';
 
 import { db, pool } from './client';
-import { parks, providerHours, serviceProviders, services } from './schema';
+import { partnerProducts, parks, placePosts, providerHours, serviceProviders, services, user } from './schema';
 
 const samples = [
   { name: 'Kadrioru koerapark', address: 'Kadriorg, Tallinn', x: 24.7925, y: 59.4389, fenced: true, smallDogArea: true, water: true, lighting: true },
@@ -160,4 +163,115 @@ for (const { x, y, hours, services: list, ...provider } of providers) {
   created++;
 }
 console.log(`Seeded ${created} service providers (${existing.size} already existed)`);
+
+/* ---------- M9b: paw discounts, partner products, demo place posts (docs/16) ---------- */
+// Same rule as above: insert what is missing, never delete or overwrite what someone changed.
+
+const pawDiscounts: Record<string, number> = { Käpakoda: 15, 'Kalamaja Karvastuudio': 10, 'Hea Kutsu koerakool': 10, 'Saba ja Sõbrad loomakliinik': 5 };
+for (const [name, percent] of Object.entries(pawDiscounts)) {
+  await db
+    .update(serviceProviders)
+    .set({ pawDiscountPercent: percent })
+    .where(and(eq(serviceProviders.name, name), isNull(serviceProviders.pawDiscountPercent)));
+}
+
+// Invented products for the invented providers.
+const productSamples: { provider: string; name: string; description: string; category: 'food' | 'treats' | 'toys' | 'accessories' | 'care'; priceCents: number; discountPercent: number }[] = [
+  { provider: 'Käpakoda', name: 'Kaerahelbešampoon tundlikule nahale', description: 'Lõhnatu, 250 ml.', category: 'care', priceCents: 1490, discountPercent: 15 },
+  { provider: 'Käpakoda', name: 'Pehme harjake', description: 'Lühikesele ja keskmisele karvale.', category: 'care', priceCents: 1190, discountPercent: 10 },
+  { provider: 'Kalamaja Karvastuudio', name: 'Käpavaha talveks', description: 'Kaitseb käpapatju soola ja külma eest.', category: 'care', priceCents: 990, discountPercent: 10 },
+  { provider: 'Hea Kutsu koerakool', name: 'Treeningmaiused lõhega', description: 'Väikesed pehmed palad, 150 g.', category: 'treats', priceCents: 690, discountPercent: 10 },
+  { provider: 'Hea Kutsu koerakool', name: 'Treeningkott vööle', description: 'Magnetsulgurega maiusekott.', category: 'accessories', priceCents: 1890, discountPercent: 10 },
+  { provider: 'Hea Kutsu koerakool', name: 'Nuputamismänguasi', description: 'Peida maius, lase koeral otsida.', category: 'toys', priceCents: 2290, discountPercent: 15 },
+  { provider: 'Saba ja Sõbrad loomakliinik', name: 'Hambahoolduse närimispulgad', description: '7 tk pakis.', category: 'treats', priceCents: 850, discountPercent: 5 },
+  { provider: 'Saba ja Sõbrad loomakliinik', name: 'Tundliku kõhu täissööt', description: 'Kalkun ja riis, 2 kg.', category: 'food', priceCents: 2490, discountPercent: 5 },
+];
+const providerIds = new Map(
+  (await db.select({ id: serviceProviders.id, name: serviceProviders.name }).from(serviceProviders).where(inArray(serviceProviders.name, Object.keys(pawDiscounts)))).map(
+    (r) => [r.name, r.id],
+  ),
+);
+const existingProducts = new Set(
+  (await db.select({ name: partnerProducts.name, providerId: partnerProducts.providerId }).from(partnerProducts)).map((r) => `${r.providerId}|${r.name}`),
+);
+const missingProducts = productSamples
+  .filter((p) => providerIds.has(p.provider) && !existingProducts.has(`${providerIds.get(p.provider)}|${p.name}`))
+  .map(({ provider, ...p }) => ({ ...p, providerId: providerIds.get(provider)! }));
+if (missingProducts.length > 0) await db.insert(partnerProducts).values(missingProducts);
+console.log(`Seeded ${missingProducts.length} partner products`);
+
+// Demo posts need an author: a system user without any login method (no account row, so nobody can
+// sign in as it). Places are invented, with approximate Tallinn coordinates — sample data only.
+const SEED_AUTHOR_ID = 'seed_kapp_community';
+await db
+  .insert(user)
+  .values({ id: SEED_AUTHOR_ID, name: 'Käpp kogukond', email: 'kogukond@seed.kapp.invalid', emailVerified: true, allowFriendRequests: false })
+  .onConflictDoNothing();
+const postSamples: {
+  name: string;
+  category: 'cafe' | 'park' | 'beach' | 'shop' | 'other';
+  address: string;
+  x: number;
+  y: number;
+  amenities: ('dogs_inside' | 'water_bowl' | 'terrace' | 'dog_treats' | 'fenced_area' | 'off_leash' | 'shade' | 'stream')[];
+  body: string;
+}[] = [
+  {
+    name: 'Kohvik Käpajälg',
+    category: 'cafe',
+    address: 'Kalamaja, Tallinn',
+    x: 24.734,
+    y: 59.447,
+    amenities: ['dogs_inside', 'water_bowl', 'dog_treats', 'terrace'],
+    body: 'Koerad on oodatud ka sisse, veekauss ukse juures ja letis on koeraküpsised.',
+  },
+  {
+    name: 'Rannakohvik Sabaliputus',
+    category: 'cafe',
+    address: 'Pirita, Tallinn',
+    x: 24.836,
+    y: 59.465,
+    amenities: ['terrace', 'water_bowl', 'shade'],
+    body: 'Suur terrass mere ääres, varjuline nurk koertele. Hommikuti vaikne.',
+  },
+  {
+    name: 'Männiku metsarada',
+    category: 'park',
+    address: 'Nõmme, Tallinn',
+    x: 24.69,
+    y: 59.375,
+    amenities: ['off_leash', 'shade', 'stream'],
+    body: 'Pehme rada männimetsas ja oja, kus koer saab jalad märjaks teha.',
+  },
+  {
+    name: 'Stroomi koerte rannaosa',
+    category: 'beach',
+    address: 'Pelguranna, Tallinn',
+    x: 24.692,
+    y: 59.449,
+    amenities: ['water_bowl', 'off_leash'],
+    body: 'Hooajavälisel ajal hea koht ujumiseks. Suvel järgi kohalikke reegleid.',
+  },
+  {
+    name: 'Lemmikloomapood Krõbe',
+    category: 'shop',
+    address: 'Kesklinn, Tallinn',
+    x: 24.752,
+    y: 59.435,
+    amenities: ['dogs_inside', 'dog_treats', 'water_bowl'],
+    body: 'Lahke teenindus, koer võib kaasa tulla ja maiust proovida.',
+  },
+];
+const existingPosts = new Set(
+  (await db.select({ name: placePosts.name }).from(placePosts).where(and(eq(placePosts.authorId, SEED_AUTHOR_ID), inArray(placePosts.name, postSamples.map((p) => p.name))))).map(
+    (r) => r.name,
+  ),
+);
+const missingPosts = postSamples.filter((p) => !existingPosts.has(p.name));
+if (missingPosts.length > 0) {
+  await db
+    .insert(placePosts)
+    .values(missingPosts.map(({ x, y, ...p }) => ({ ...p, authorId: SEED_AUTHOR_ID, location: { x, y }, status: 'approved' as const, moderatedAt: new Date() })));
+}
+console.log(`Seeded ${missingPosts.length} demo place posts (${existingPosts.size} already existed)`);
 await pool.end();

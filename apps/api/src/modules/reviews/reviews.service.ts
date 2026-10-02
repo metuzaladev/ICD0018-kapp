@@ -4,6 +4,7 @@ import { ForbiddenError, NotFoundError } from '../../http/errors';
 import { withTimeout } from '../../lib/timeout';
 import type { ParksRepository } from '../parks/parks.repository';
 import { isPublic } from '../parks/parks.service';
+import type { RewardsService } from '../rewards/rewards.service';
 import type { ReviewsRepository } from './reviews.repository';
 
 export interface ReviewsService {
@@ -18,10 +19,13 @@ export function createReviewsService({
   reviews,
   parks,
   timeoutMs,
+  rewards,
 }: {
   reviews: ReviewsRepository;
   parks: Pick<ParksRepository, 'findById'>;
   timeoutMs: number;
+  /** M9b: the first review of a park earns Käpad (settle never throws). */
+  rewards?: Pick<RewardsService, 'settle'>;
 }): ReviewsService {
   const t = <T>(p: Promise<T>, label: string) => withTimeout(p, timeoutMs, label);
 
@@ -36,7 +40,9 @@ export function createReviewsService({
       if (!(await t(reviews.hasVisited(userId, parkId), 'reviews.hasVisited'))) {
         throw new ForbiddenError('errors.reviewNeedsVisit');
       }
-      return t(reviews.upsert(userId, parkId, input), 'reviews.upsert');
+      const review = await t(reviews.upsert(userId, parkId, input), 'reviews.upsert');
+      await rewards?.settle(userId);
+      return review;
     },
 
     async list(parkId, viewerId) {

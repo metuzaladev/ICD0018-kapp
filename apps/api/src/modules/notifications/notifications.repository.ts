@@ -1,10 +1,12 @@
-import type {
-  AppNotification,
-  Language,
-  NotificationData,
-  NotificationPage,
-  NotificationPreferences,
-  NotificationType,
+import {
+  REWARD_NOTIFICATION_TYPES,
+  type AnyNotification,
+  type AnyNotificationPage,
+  type AnyNotificationType,
+  type Language,
+  type NotificationPreferencesInput,
+  type NotificationPreferencesWithRewards,
+  type RewardNotificationData,
 } from '@kapp/shared';
 import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 
@@ -14,31 +16,35 @@ import { firstName, notBlockedBetween } from '../safety/block-sql';
 
 export interface NewNotification {
   userId: string;
-  type: NotificationType;
+  type: AnyNotificationType;
   actorId: string | null;
-  data: NotificationData;
+  data: RewardNotificationData;
 }
 
 /** Activity feed rows, push preferences and push tokens (all per user). */
 export interface NotificationsRepository {
-  create(input: NewNotification): Promise<AppNotification>;
+  create(input: NewNotification): Promise<AnyNotification>;
   /**
    * One unread "new message" row per conversation: a second message updates it (preview, time)
    * instead of filling the feed with one row per message.
    */
-  upsertMessageNotification(input: NewNotification & { data: { conversationId: string } }): Promise<AppNotification>;
-  /** Newest first; rows caused by someone either side has blocked are left out. */
-  list(userId: string, before: string | undefined, limit: number): Promise<NotificationPage>;
-  unreadCount(userId: string): Promise<number>;
+  upsertMessageNotification(input: NewNotification & { data: { conversationId: string } }): Promise<AnyNotification>;
+  /**
+   * Newest first; rows caused by someone either side has blocked are left out. M9b reward types
+   * only with `includeRewards` (the current app cannot render them, docs/16).
+   */
+  list(userId: string, before: string | undefined, limit: number, includeRewards?: boolean): Promise<AnyNotificationPage>;
+  unreadCount(userId: string, includeRewards?: boolean): Promise<number>;
   /** false if the notification is not the user's (→ 404). Idempotent for already read rows. */
   markRead(userId: string, notificationId: string): Promise<boolean>;
   markAllRead(userId: string): Promise<void>;
   /** Opening a conversation also clears its "new message" notification. */
   markConversationRead(userId: string, conversationId: string): Promise<void>;
-  getPreferences(userId: string): Promise<NotificationPreferences>;
-  setPreferences(userId: string, preferences: NotificationPreferences): Promise<NotificationPreferences>;
+  getPreferences(userId: string): Promise<NotificationPreferencesWithRewards>;
+  /** A missing `rewards` keeps the stored value (the current app sends only the M6 switches). */
+  setPreferences(userId: string, preferences: NotificationPreferencesInput): Promise<NotificationPreferencesWithRewards>;
   /** Language and preferences of a push recipient; null when the account is gone. */
-  pushContext(userId: string): Promise<{ language: Language; preferences: NotificationPreferences } | null>;
+  pushContext(userId: string): Promise<{ language: Language; preferences: NotificationPreferencesWithRewards } | null>;
 }
 
 export interface PushTokensRepository {
@@ -51,13 +57,14 @@ export interface PushTokensRepository {
   removeTokens(tokens: string[]): Promise<void>;
 }
 
-const DEFAULT_PREFERENCES: NotificationPreferences = { messages: true, friendRequests: true, friendPlans: true, bookings: true };
+const DEFAULT_PREFERENCES: NotificationPreferencesWithRewards = { messages: true, friendRequests: true, friendPlans: true, bookings: true, rewards: true };
 
 const preferenceColumns = {
   messages: notificationPreferences.messages,
   friendRequests: notificationPreferences.friendRequests,
   friendPlans: notificationPreferences.friendPlans,
   bookings: notificationPreferences.bookings,
+  rewards: notificationPreferences.rewards,
 };
 
 const actor = sql.raw('"notifications"."actor_id"');
@@ -75,16 +82,16 @@ export function createNotificationsRepository(db: Db): NotificationsRepository {
   };
   type Row = { id: string; type: string; actorId: string | null; actorName: string | null; data: Record<string, string>; readAt: Date | null; createdAt: Date };
 
-  const toNotification = (r: Row): AppNotification => ({
+  const toNotification = (r: Row): AnyNotification => ({
     id: r.id,
-    type: r.type as NotificationType,
+    type: r.type as AnyNotificationType,
     actor: r.actorId && r.actorName ? { id: r.actorId, firstName: firstName(r.actorName) } : null,
     data: r.data,
     readAt: r.readAt?.toISOString() ?? null,
     createdAt: r.createdAt.toISOString(),
   });
 
-  async function findOne(id: string): Promise<AppNotification> {
+  async function findOne(id: string): Promise<AnyNotification> {
     const [row] = await db.select(columns).from(notifications).leftJoin(user, eq(user.id, notifications.actorId)).where(eq(notifications.id, id));
     if (!row) throw new Error('Notification not readable after write');
     return toNotification(row);
@@ -92,6 +99,8 @@ export function createNotificationsRepository(db: Db): NotificationsRepository {
 
   const unreadOwn = (userId: string) => and(eq(notifications.userId, userId), isNull(notifications.readAt));
   const visible = sql`(${actor} is null or ${notBlockedBetween(recipient, actor)})`;
+  const rewardTypes = sql.join(REWARD_NOTIFICATION_TYPES.map((t) => sql`${t}`), sql`, `);
+  const typeFilter = (includeRewards: boolean) => (includeRewards ? sql`true` : sql`${notifications.type} not in (${rewardTypes})`);
 
   return {
     async create({ userId, type, actorId, data }) {
@@ -110,7 +119,7 @@ export function createNotificationsRepository(db: Db): NotificationsRepository {
       return findOne(row!.id);
     },
 
-    async list(userId, before, limit) {
+    async list(userId, before, limit, includeRewards = false) {
       // Keyset paging on (created_at, id): stable even when rows are added while scrolling.
       const cursor = before
         ? sql`(${notifications.createdAt}, ${notifications.id}) < (select n2.created_at, n2.id from notifications n2 where n2.id = ${before} and n2.user_id = ${userId})`
@@ -119,18 +128,18 @@ export function createNotificationsRepository(db: Db): NotificationsRepository {
         .select(columns)
         .from(notifications)
         .leftJoin(user, eq(user.id, notifications.actorId))
-        .where(and(eq(notifications.userId, userId), visible, cursor))
+        .where(and(eq(notifications.userId, userId), visible, typeFilter(includeRewards), cursor))
         .orderBy(desc(notifications.createdAt), desc(notifications.id))
         .limit(limit + 1);
       const items = rows.slice(0, limit).map(toNotification);
       return { items, nextCursor: rows.length > limit ? items[items.length - 1]!.id : null };
     },
 
-    async unreadCount(userId) {
+    async unreadCount(userId, includeRewards = false) {
       const [row] = await db
         .select({ count: sql<number>`count(*)::int` })
         .from(notifications)
-        .where(and(unreadOwn(userId), visible));
+        .where(and(unreadOwn(userId), visible, typeFilter(includeRewards)));
       return row?.count ?? 0;
     },
 
@@ -163,10 +172,13 @@ export function createNotificationsRepository(db: Db): NotificationsRepository {
     },
 
     async setPreferences(userId, preferences) {
+      // `rewards: undefined` must not reach the update set (it would mean "keep" anyway, but say so).
+      const { rewards, ...rest } = preferences;
+      const values = rewards === undefined ? rest : { ...rest, rewards };
       const [row] = await db
         .insert(notificationPreferences)
-        .values({ userId, ...preferences })
-        .onConflictDoUpdate({ target: notificationPreferences.userId, set: { ...preferences, updatedAt: new Date() } })
+        .values({ userId, ...values })
+        .onConflictDoUpdate({ target: notificationPreferences.userId, set: { ...values, updatedAt: new Date() } })
         .returning(preferenceColumns);
       return row!;
     },
@@ -188,6 +200,7 @@ export function createNotificationsRepository(db: Db): NotificationsRepository {
           friendRequests: row.friendRequests ?? DEFAULT_PREFERENCES.friendRequests,
           friendPlans: row.friendPlans ?? DEFAULT_PREFERENCES.friendPlans,
           bookings: row.bookings ?? DEFAULT_PREFERENCES.bookings,
+          rewards: row.rewards ?? DEFAULT_PREFERENCES.rewards,
         },
       };
     },

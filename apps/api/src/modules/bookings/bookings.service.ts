@@ -1,23 +1,25 @@
-import { SLOT_STEP_MINUTES, type Booking, type BookingInput, type BookingsQuery } from '@kapp/shared';
+import { SLOT_STEP_MINUTES, type BookingsQuery, type BookingWithDiscount, type BookingWithRedemptionInput } from '@kapp/shared';
 
 import { ConflictError, NotFoundError } from '../../http/errors';
 import { localDate } from '../../lib/calendar';
-import { isExclusionViolation } from '../../lib/db-errors';
+import { isExclusionViolation, isUniqueViolation } from '../../lib/db-errors';
 import { withTimeout } from '../../lib/timeout';
 import type { DogsRepository } from '../dogs/dogs.repository';
 import type { Logger, Notifier } from '../notifications/notifier';
 import type { ProvidersRepository } from '../providers/providers.repository';
 import { type BookingReminders } from './booking-reminders';
 import { bookableWindow, CANCEL_CUTOFF_HOURS, cancelUntil, effectiveStatus, reminderTime } from './booking-rules';
-import type { BookingRecord, BookingsRepository } from './bookings.repository';
+import type { ShopRepository } from '../shop/shop.repository';
+import { RedemptionUnavailableError, type BookingRecord, type BookingsRepository } from './bookings.repository';
 
 /** The user's own bookings: book a free time, list, cancel; plus the reminder the worker sends. */
 export interface BookingsService {
-  create(userId: string, input: BookingInput): Promise<Booking>;
-  list(userId: string, query: BookingsQuery): Promise<Booking[]>;
-  get(userId: string, bookingId: string): Promise<Booking>;
-  /** Idempotent: cancelling a cancelled booking returns it unchanged. */
-  cancel(userId: string, bookingId: string): Promise<Booking>;
+  /** M9b: an optional `redemptionId` applies a paw discount (stored price, still no payment). */
+  create(userId: string, input: BookingWithRedemptionInput): Promise<BookingWithDiscount>;
+  list(userId: string, query: BookingsQuery): Promise<BookingWithDiscount[]>;
+  get(userId: string, bookingId: string): Promise<BookingWithDiscount>;
+  /** Idempotent: cancelling a cancelled booking returns it unchanged. A used paw-discount code is freed. */
+  cancel(userId: string, bookingId: string): Promise<BookingWithDiscount>;
   /** Called by the reminder worker; skips bookings that were cancelled or are already over. */
   sendReminder(bookingId: string): Promise<void>;
 }
@@ -30,6 +32,7 @@ export function createBookingsService({
   bookings,
   providers,
   dogs,
+  redemptions,
   notifier,
   reminders,
   log,
@@ -37,6 +40,8 @@ export function createBookingsService({
   now = () => new Date(),
 }: {
   bookings: BookingsRepository;
+  /** M9b paw-discount codes (only for the friendly pre-check; the claim itself is atomic in SQL). */
+  redemptions?: Pick<ShopRepository, 'findOwn'>;
   providers: Pick<ProvidersRepository, 'findService' | 'findFreeSlots'>;
   dogs: Pick<DogsRepository, 'ownedIds'>;
   notifier: Notifier;
@@ -47,7 +52,7 @@ export function createBookingsService({
 }): BookingsService {
   const t = <T>(p: Promise<T>, label: string, ms = timeoutMs) => withTimeout(p, ms, label);
 
-  function toBooking(record: BookingRecord): Booking {
+  function toBooking(record: BookingRecord): BookingWithDiscount {
     const current = now();
     const status = effectiveStatus(record.status, record.endsAt, current);
     const until = cancelUntil(record.startsAt);
@@ -73,6 +78,7 @@ export function createBookingsService({
       cancelUntil: until.toISOString(),
       cancelledAt: record.cancelledAt?.toISOString() ?? null,
       createdAt: record.createdAt.toISOString(),
+      discount: record.discount ?? null,
     };
   }
 
@@ -95,9 +101,17 @@ export function createBookingsService({
   }
 
   return {
-    async create(userId, { serviceId, startsAt, dogIds, note }) {
+    async create(userId, { serviceId, startsAt, dogIds, note, redemptionId }) {
       const service = await t(providers.findService(serviceId), 'providers.findService');
       if (!service) throw new NotFoundError('errors.serviceNotFound');
+      if (redemptionId) {
+        // Friendly answers first; the repository claims the code atomically with the booking anyway.
+        const code = redemptions ? await t(redemptions.findOwn(userId, redemptionId), 'redemptions.findOwn') : null;
+        if (!code) throw new NotFoundError('errors.redemptionNotFound');
+        const usable =
+          code.status === 'active' && code.offerType === 'booking' && code.provider.id === service.provider.id && code.expiresAt.getTime() > now().getTime();
+        if (!usable) throw new ConflictError('errors.redemptionUnavailable');
+      }
       // Only the user's own dogs; a foreign id is "not found", the same as a missing one.
       const owned = await t(dogs.ownedIds(userId, dogIds), 'dogs.ownedIds');
       if (owned.length !== dogIds.length) throw new NotFoundError('errors.dogNotFound');
@@ -130,6 +144,7 @@ export function createBookingsService({
             priceCents: service.priceCents,
             priceIsFrom: service.priceIsFrom,
             dogIds,
+            ...(redemptionId ? { redemptionId } : {}),
           }),
           'bookings.create',
         );
@@ -137,6 +152,10 @@ export function createBookingsService({
         // Someone booked an overlapping time between our check and the insert: the exclusion
         // constraint lets exactly one through.
         if (isExclusionViolation(error, 'bookings_no_overlap')) throw new ConflictError('errors.slotTaken');
+        // The code was used, cancelled or expired between the check and the insert.
+        if (error instanceof RedemptionUnavailableError || isUniqueViolation(error, 'bookings_redemption_uq')) {
+          throw new ConflictError('errors.redemptionUnavailable');
+        }
         throw error;
       }
 

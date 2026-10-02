@@ -1,4 +1,4 @@
-import type { NotificationData, NotificationType } from '@kapp/shared';
+import { isRewardNotificationType, type AnyNotificationType, type AppNotification, type RewardNotificationData } from '@kapp/shared';
 
 import { withTimeout } from '../../lib/timeout';
 import type { RealtimeGateway } from '../../realtime/socket-gateway';
@@ -7,11 +7,11 @@ import { composePush, PREFERENCE_FOR } from './push-messages';
 import type { PushQueue } from './push-queue';
 
 export interface NotifyEvent {
-  type: NotificationType;
+  type: AnyNotificationType;
   recipientId: string;
   /** Who caused it; null for the user's own bookings (M6), which have no other person. */
   actorId: string | null;
-  data: NotificationData;
+  data: RewardNotificationData;
   /**
    * false = feed row and realtime event only. Used when the recipient caused it on this very phone
    * (booking confirmed / cancelled): a push would just repeat what the screen already shows.
@@ -64,8 +64,12 @@ export function createNotifier({
           type === 'message' && data.conversationId
             ? await t(notifications.upsertMessageNotification({ ...input, data: { ...data, conversationId: data.conversationId } }), 'notifications.upsert')
             : await t(notifications.create(input), 'notifications.create');
-        const unreadCount = await t(notifications.unreadCount(recipientId), 'notifications.unreadCount');
-        realtime.emitToUsers([recipientId], 'notification:new', { notification, unreadCount });
+        // M9b reward types are opt-in for the app (docs/16): the current app's realtime handler only
+        // knows the M5/M6 types, so they get the feed row and the push but no socket event.
+        if (!isRewardNotificationType(type)) {
+          const unreadCount = await t(notifications.unreadCount(recipientId), 'notifications.unreadCount');
+          realtime.emitToUsers([recipientId], 'notification:new', { notification: notification as AppNotification, unreadCount });
+        }
 
         if (!push) return;
         const context = await t(notifications.pushContext(recipientId), 'notifications.pushContext');
@@ -75,6 +79,7 @@ export function createNotifier({
         if (data.conversationId) pushData.conversationId = data.conversationId;
         if (actorId && (type === 'friend_request' || type === 'friend_accepted' || type === 'friend_plan')) pushData.userId = actorId;
         if (data.bookingId) pushData.bookingId = data.bookingId;
+        if (data.postId) pushData.postId = data.postId;
         await t(pushQueue.enqueue({ userId: recipientId, language: context.language, title, body, data: pushData }), 'push.enqueue', ENQUEUE_TIMEOUT_MS);
       } catch (error) {
         log.warn({ err: error, type, recipientId }, 'notification not delivered');

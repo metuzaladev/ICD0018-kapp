@@ -1,5 +1,6 @@
 import {
   FRIEND_PLANS_HOURS,
+  type Invite,
   USER_SEARCH_LIMIT,
   type Friend,
   type FriendPlan,
@@ -10,10 +11,13 @@ import {
   type UserSearchResult,
 } from '@kapp/shared';
 
-import { BadRequestError, ForbiddenError, NotFoundError } from '../../http/errors';
+import { BadRequestError, ConflictError, ForbiddenError, HttpError, NotFoundError } from '../../http/errors';
+import { randomCode } from '../../lib/codes';
 import { isUniqueViolation } from '../../lib/db-errors';
 import { withTimeout } from '../../lib/timeout';
 import type { Notifier } from '../notifications/notifier';
+import { REWARD_RULES } from '../rewards/reward-rules';
+import type { RewardsService } from '../rewards/rewards.service';
 import type { FriendsRepository, FriendshipRow } from './friends.repository';
 
 /**
@@ -34,16 +38,30 @@ export interface FriendsService {
   friendPlans(userId: string): Promise<FriendPlan[]>;
   /** Called after a plan is saved: tells friends (best effort, never throws). */
   announcePlan(userId: string, plan: PlannedVisit): Promise<void>;
+  /** M9b "Kutsu sõber": the user's own invite code and what it earns. */
+  getInvite(userId: string): Promise<Invite>;
+  /**
+   * A new user enters a friend's code: records who invited them and sends the inviter a friend
+   * request. The inviter's Käpad come later, with the invitee's first qualifying check-in.
+   */
+  claimInvite(userId: string, code: string): Promise<void>;
 }
+
+export const INVITE_CODE_LENGTH = 8;
 
 export function createFriendsService({
   repository,
   notifier,
+  rewards,
   timeoutMs,
+  now = () => new Date(),
 }: {
   repository: FriendsRepository;
   notifier: Notifier;
+  /** M9b: settles Käpad after an invite claim (never throws). */
+  rewards?: Pick<RewardsService, 'settle'>;
   timeoutMs: number;
+  now?: () => Date;
 }): FriendsService {
   const t = <T>(p: Promise<T>, label: string) => withTimeout(p, timeoutMs, label);
 
@@ -58,7 +76,7 @@ export function createFriendsService({
     return { status: 'accepted' };
   }
 
-  return {
+  const service: FriendsService = {
     async sendRequest(userId, targetId) {
       if (userId === targetId) throw new BadRequestError('errors.cannotFriendSelf');
       // Missing and blocked (either way) look the same: 404, nothing to learn about the account.
@@ -123,5 +141,44 @@ export function createFriendsService({
         await notifier.notify({ type: 'friend_plan', recipientId: friendId, actorId: userId, data });
       }
     },
+
+    async getInvite(userId) {
+      // ≈40 bits: a collision with another user's code is practically impossible; one retry makes it moot.
+      for (let attempt = 0; ; attempt++) {
+        try {
+          const code = await t(repository.inviteCode(userId, randomCode(INVITE_CODE_LENGTH)), 'friends.inviteCode');
+          return { code, points: REWARD_RULES.invite.points };
+        } catch (error) {
+          if (attempt > 0 || !isUniqueViolation(error, 'invite_codes_code_unique')) throw error;
+        }
+      }
+    },
+
+    async claimInvite(userId, code) {
+      // Missing code and a blocked pair look the same (no account enumeration through codes).
+      const inviter = await t(repository.findInviter(userId, code), 'friends.findInviter');
+      if (!inviter) throw new NotFoundError('errors.inviteNotFound');
+      if (inviter.id === userId) throw new BadRequestError('errors.inviteOwnCode');
+      // Only new accounts: otherwise two long-time users could swap codes for free points.
+      const createdAt = await t(repository.accountCreatedAt(userId), 'friends.accountCreatedAt');
+      const windowDays = REWARD_RULES.invite.claimWindowDays;
+      if (!createdAt || now().getTime() - createdAt.getTime() > windowDays * 86_400_000) {
+        throw new ConflictError('errors.inviteTooLate', { days: windowDays });
+      }
+      try {
+        await t(repository.createReferral(userId, inviter.id), 'friends.createReferral');
+      } catch (error) {
+        if (isUniqueViolation(error)) throw new ConflictError('errors.inviteAlreadyClaimed');
+        throw error;
+      }
+      // The friendship is a nicety on top of the referral: a refused request must not fail the claim.
+      try {
+        await service.sendRequest(userId, inviter.id);
+      } catch (error) {
+        if (!(error instanceof HttpError)) throw error;
+      }
+      await rewards?.settle(userId);
+    },
   };
+  return service;
 }

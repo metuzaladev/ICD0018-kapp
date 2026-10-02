@@ -46,6 +46,16 @@ export const en: Messages = {
   'validation.messageEmpty': 'write a message',
   'validation.pushToken': 'is not an Expo push token',
   'validation.bothCoordinates': 'give both lat and lng',
+
+  /* ---------- M9b validation (docs/16-avasta-ja-kapad.md) ---------- */
+  'validation.duplicateAmenity': 'contains an amenity twice',
+  'validation.maxPhotos': 'at most {{max}} photos',
+  'validation.duplicatePhoto': 'contains the same photo twice',
+  'validation.outsideEstonia': 'the place must be in Estonia',
+  'validation.mapTags': 'unknown map tag',
+  'validation.bboxOrder': 'the upper bound must be greater than the lower bound',
+  'validation.bboxTooLarge': 'the map area can be at most {{max}} degrees',
+  'validation.inviteCode': 'an invite code has 8 letters or digits',
   'validation.maxDogs': 'up to {{max}} dogs',
 
   'errors.badRequest': 'Invalid request',
@@ -92,6 +102,19 @@ export const en: Messages = {
   'errors.slotTaken': 'Someone just booked this time, please choose another',
   'errors.cancelTooLate': 'Bookings can be cancelled up to {{hours}} hours before the start',
 
+  /* ---------- M9b errors (docs/16-avasta-ja-kapad.md) ---------- */
+  'errors.placePostNotFound': 'Post not found',
+  'errors.productNotFound': 'Product not found',
+  'errors.offerNotFound': 'Offer not found',
+  'errors.notEnoughPoints': 'Not enough paws: {{cost}} needed, you have {{balance}}',
+  'errors.redemptionNotFound': 'Discount code not found',
+  'errors.redemptionUnavailable': 'This discount code cannot be used for this booking',
+  'errors.redemptionNotCancellable': 'A used or expired discount code cannot be cancelled',
+  'errors.inviteNotFound': 'Invite code not found',
+  'errors.inviteOwnCode': 'You cannot use your own invite code',
+  'errors.inviteTooLate': 'An invite code can be entered within {{days}} days of joining',
+  'errors.inviteAlreadyClaimed': 'You have already entered an invite code',
+
   'push.friendRequest.title': 'New friend request',
   'push.friendRequest.body': '{{name}} would like to be friends',
   'push.friendAccepted.title': 'New friend',
@@ -103,6 +126,22 @@ export const en: Messages = {
   'push.bookingCancelled.title': 'Booking cancelled',
   'push.bookingReminder.title': 'See you soon!',
   'push.booking.body': '{{service}} · {{provider}} · {{when}}',
+
+  /* ---------- M9b push texts and reward names (docs/16-avasta-ja-kapad.md) ---------- */
+  'push.rewardLevelUp.title': 'New level!',
+  'push.rewardLevelUp.body': 'Your new level: {{level}}',
+  'push.rewardBadge.title': 'New badge!',
+  'push.rewardBadge.body': 'You unlocked “{{badge}}”',
+  'push.placePostApproved.title': 'Your recommendation is live',
+  'push.placePostApproved.body': '{{place}} · +{{points}} paws',
+  'rewards.level.puppy': 'Puppy',
+  'rewards.level.park_friend': 'Park friend',
+  'rewards.level.park_legend': 'Park legend',
+  'rewards.level.pack_leader': 'Pack leader',
+  'rewards.badge.early_bird': 'Early bird',
+  'rewards.badge.ten_parks': '10 parks',
+  'rewards.badge.explorer': 'Explorer',
+  'rewards.badge.kadriorg_legend': 'Park regular',
 
   'auth.userExists': 'An account with this email already exists',
   'auth.invalidCredentials': 'Wrong email or password',

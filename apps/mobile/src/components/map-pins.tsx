@@ -61,8 +61,8 @@ export function PlacePin({ kind, selected = false }: { kind: PlaceKind; selected
 }
 
 type DogPinProps = {
-  /** Up to three faces (signed thumbnail URL or null → paw placeholder). */
-  faces: (string | null)[];
+  /** Up to three faces (signed thumbnail URL, bundled sample image, or null → paw placeholder). */
+  faces: (string | number | null)[];
   /** The "N koera" pill text; omitted for a single dog (Figma Type=Single). */
   countLabel?: string;
   selected?: boolean;

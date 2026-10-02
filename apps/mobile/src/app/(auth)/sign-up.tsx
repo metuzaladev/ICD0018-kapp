@@ -17,6 +17,7 @@ import { Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { authClient, authErrorMessage } from '@/lib/auth-client';
 import { validateForm } from '@/lib/form';
+import { SAMPLE_DOGS } from '@/lib/sample-dogs';
 
 /** Figma "Liitu 1 200 koeraomanikuga Tallinnas" strip, without the number: there is no member count API, and a made-up figure would mislead (docs/11). */
 function SocialProof() {
@@ -26,8 +27,8 @@ function SocialProof() {
     <View style={[styles.proof, { backgroundColor: c.soft }]} accessible accessibilityLabel={t('auth.signUp.socialProof')}>
       <View style={styles.faces}>
         <Image source={require('@/assets/images/welcome-dog.jpg')} style={[styles.face, { borderColor: c.soft }]} contentFit="cover" accessible={false} />
-        {[1, 2].map((i) => (
-          <PhotoTile key={i} size={32} radius={9} border={{ width: 2, color: c.soft }} style={styles.faceOverlap} />
+        {[SAMPLE_DOGS.luna, SAMPLE_DOGS.rex, SAMPLE_DOGS.charlie].map((dog, i) => (
+          <PhotoTile key={i} uri={dog} size={32} radius={9} border={{ width: 2, color: c.soft }} style={styles.faceOverlap} />
         ))}
       </View>
       <ThemedText type="label" style={styles.proofText}>

@@ -9,6 +9,7 @@ import { Button } from '@/components/button';
 import { Entering } from '@/components/entering';
 import { FeatureRow } from '@/components/feature-row';
 import { MapPreview } from '@/components/map-preview';
+import { SAMPLE_DOGS } from '@/lib/sample-dogs';
 import { PawBackground } from '@/components/paw-background';
 import { PhotoTile } from '@/components/photo-tile';
 import { ThemedText } from '@/components/themed-text';
@@ -35,8 +36,8 @@ function PageDots({ index }: { index: number }) {
 }
 
 /**
- * Figma Onboarding / Connect collage: tilted rounded-square photos (the licensed corgi and park
- * photos from docs/05) and a floating invite card. Marketing illustration with sample content, so
+ * Figma Onboarding / Connect collage: tilted rounded-square photos (the corgi and a bundled sample
+ * dog, licences in docs/05) and a floating invite card. Marketing illustration with sample content, so
  * it is hidden from VoiceOver ("Mari ja Luna kutsuvad" would confuse a screen-reader user).
  */
 function Collage() {
@@ -44,10 +45,10 @@ function Collage() {
   const { t } = useTranslation();
   return (
     <View style={styles.collage} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-      <Image source={require('@/assets/images/park-placeholder.jpg')} style={[styles.tile, styles.tileBack]} contentFit="cover" accessible={false} />
+      <Image source={SAMPLE_DOGS.luna} style={[styles.tile, styles.tileBack]} contentFit="cover" accessible={false} />
       <Image source={require('@/assets/images/welcome-dog.jpg')} style={[styles.tile, styles.tileFront]} contentFit="cover" accessible={false} />
       <View style={[styles.invite, { backgroundColor: c.surface, borderColor: c.border }]}>
-        <PhotoTile name={t('onboarding.connect.sampleTitle')} size={40} radius={12} />
+        <PhotoTile uri={SAMPLE_DOGS.luna} size={40} radius={12} />
         <View style={styles.inviteText}>
           <ThemedText type="label">{t('onboarding.connect.sampleTitle')}</ThemedText>
           <ThemedText type="caption" themeColor="muted">

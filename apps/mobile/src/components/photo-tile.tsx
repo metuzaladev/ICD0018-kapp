@@ -7,8 +7,8 @@ import { photoSource } from '@/hooks/use-photos';
 import { useTheme } from '@/hooks/use-theme';
 
 type PhotoTileProps = {
-  /** Signed thumbnail URL (M4 dog profile photo) or null. */
-  uri?: string | null;
+  /** Signed thumbnail URL (M4 dog profile photo), a bundled image (require id, sample illustrations only) or null. */
+  uri?: string | number | null;
   /** Shown as the initial when there is no photo; omitted → a paw placeholder. */
   name?: string | null;
   /** Figma: 44 (list rows), 26 (park card faces), 48/56 (map pins). */
@@ -40,7 +40,7 @@ export function PhotoTile({ uri, name, size = 44, radius, border, style }: Photo
   return (
     <View style={frame} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
       {uri ? (
-        <Image source={photoSource(uri)} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} accessible={false} />
+        <Image source={typeof uri === 'number' ? uri : photoSource(uri)} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} accessible={false} />
       ) : initial ? (
         <ThemedText type={size >= 40 ? 'heading' : 'micro'} style={{ color: c.accent }}>
           {initial}

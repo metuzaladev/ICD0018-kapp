@@ -68,6 +68,7 @@ Figma põhidisain on M9-st **hele**. Seaded → **Välimus**: *Süsteem*, *Hele*
 
 - Koerafoto: Grzegorz Wicher, *Welsh Corgi Cardigan named Flow*, CC BY-SA 4.0, Wikimedia Commons.
 - Pargifoto: Diego Delso, *Parque de Kadriorg*, CC BY-SA 3.0, Wikimedia Commons.
+- Näidiskoerad (`apps/mobile/assets/images/sample-dogs/`, ainult tutvustusvaadetes: sissejuhatuse kaart ja kollaaž, registreerumise riba; mitte kunagi päris kasutajana): Unsplash License (tasuta kasutus, viidet ei nõuta). Allikad: luna `photo-1583511655857-d19b40a7a54e`, rex `photo-1530281700549-e82e7bf110d6`, charlie `photo-1543466835-00a7907e9de1`, pug `photo-1517849845537-4d257902454a`, aussie `photo-1587300003388-59208cc962cb`, bella `photo-1552053831-71594a27632d` (images.unsplash.com). Samad fotod on Figmas.
 - Kaart: © OpenStreetMapi kaastöötajad (ODbL).
 - Ikoonid: Lucide (ISC), `lucide-static` 1.49 SVG-failid kaustas `apps/mobile/assets/icons`.
 

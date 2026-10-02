@@ -93,7 +93,7 @@ export default function WelcomeScreen() {
           <ThemedText type="caption">{t('auth.welcome.region')}</ThemedText>
         </View>
         {/* Pushes the copy down to where the photo fades out; content still scrolls at large text sizes. */}
-        <View style={{ minHeight: heroHeight * 0.38 }} />
+        <View style={{ flexGrow: 1, minHeight: heroHeight * 0.38 }} />
         <LiveCard />
         <ThemedText type="display" accessibilityRole="header">
           käpp
@@ -114,7 +114,7 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   hero: { position: 'absolute', top: 0, left: 0, right: 0 },
-  content: { flexGrow: 1, paddingHorizontal: Spacing.screen, gap: Spacing.three, justifyContent: 'flex-end' },
+  content: { flexGrow: 1, paddingHorizontal: Spacing.screen, gap: Spacing.three },
   tag: {
     alignSelf: 'flex-start',
     flexDirection: 'row',

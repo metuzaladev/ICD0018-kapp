@@ -108,23 +108,35 @@ Figma tekstid on kasutusel kõigil olemasolevatel ekraanidel. Näidisandmed (nim
 | „(valikuline)" | puudub | eemaldatud väljadelt, millel on Figma silt (plaani sõnum, kogemus, järgmine tähtaeg, kliinik, märkmed) | Figma järgi; kohustuslik väli annab vea ise. |
 | Kellaaeg | „17.00" | „17.00" (eesti), „17:00" (en/ru) | Intl annaks eesti keeles „17:00". |
 | Keelevalik | puudub | Seaded → Keel | Mitmekeelsuse nõue. |
+| Välimus (M9) | ainult hele (M9) / ainult tume (varem) | Seaded → Välimus: Süsteem / Hele (vaikimisi) / Tume | Figma põhidisain on hele; tume jääb valikuna. |
+| Käpad (M9) | „320" otsingus, avalehel, profiilis | peidetud; „Käpad" ja „Pood" profiilis puuduvad | Saldo API tuleb M9b-ga; väljamõeldud arvu ei näidata. |
 
 **Ekraanid**
 
 | Ekraan (Figma) | Figma | Äpp | Põhjus |
 |---|---|---|---|
-| Onboarding / Discover | kaardipilt „© OpenStreetMap" | pargi foto (sama, mis pargi lehel) | Staatilist kaardipilti pole; päris kaart vajaks asukohta enne kontot. |
-| Onboarding / Connect | ainult „Loo konto" | „Loo konto" + „Mul on juba konto" (Welcome'i tekst); „Jäta vahele" ainult esimesel lehel | Intro on enne Welcome'i, seega olemasolev kasutaja vajab teed sisselogimisse; viimasel lehel pole midagi vahele jätta. |
-| Onboarding / Connect | kaart „Freddy ootab sõpru / Kadrioru koerapark · täna 17.00–18.00" | sama näidiskaart koera foto peal, VoiceOveri eest peidetud | Näidisandmed segaksid VoiceOveri kasutajat. |
-| Onboarding | — | samm „Samm 1, kokku 2" VoiceOverile („01 / 02" ekraanil) | Numbrid kaldkriipsuga loetakse halvasti ette. |
-| Account / Sign Up | „Jätka Apple’iga" | Apple'i natiivne nupp (tekst süsteemi keeles); lisaks „Jätka Google’iga" | App Store'i juhis 4.8 nõuab Apple'i nuppu; Google on lisavõimalus. |
-| Account / Reset Password | info „Vaata oma postkasti … Link kehtib piiratud aja." | sama vormil; pärast saatmist eraldi ekraan „Vaata oma postkasti" + „Kui selle aadressiga konto on olemas, saatsime sinna lingi. Link kehtib üks tund." | Ei paljasta, kas konto on olemas; täpne kehtivusaeg on teada. |
+| Onboarding / Discover (M9) | kaardipilt koerte nööpnõeltega, „© OpenStreetMap" | päris OpenFreeMapi kaart Tallinna kesklinnast (puutumatu), kolm näidisgruppi „3 / 6 / 2 koera"; näod on käpad | Kaart on nüüd komponent; asukohta pole vaja. Võõraste koerte fotosid ei näidata; illustratsioon on VoiceOveri eest peidetud. |
+| Onboarding / Connect (M9) | ainult „Loo konto" | „Loo konto" + „Mul on juba konto" (Welcome'i tekst); „Jäta vahele" ainult esimesel lehel | Intro on enne Welcome'i, seega olemasolev kasutaja vajab teed sisselogimisse; viimasel lehel pole midagi vahele jätta. |
+| Onboarding / Connect (M9) | kolm kallutatud koerafotot, kutsekaart „Mari ja Luna kutsuvad · Tulen" | kaks kallutatud fotot (litsentsitud corgi ja park, docs/05) + sama kutsekaart, VoiceOveri eest peidetud | Teiste Figma koerafotode litsents pole teada; näidisandmed segaksid VoiceOveri kasutajat. |
+| Onboarding / Connect (M9) | „Teeni käppi", „Iga jalutuskäik … toob soodustusi partneritelt." | sama | Turundustekst; käpad ja soodustused tulevad M9b-ga. Kuni selleni pole äpis Käpad-saldot näha. |
+| Onboarding | „01 / 02" (M9: lehe täpid) | täpid; VoiceOverile „Samm 1, kokku 2" | Täpid ei ütle VoiceOverile midagi. |
+| Account / Sign Up | „Jätka Apple’iga" | Apple'i natiivne nupp (tekst süsteemi keeles) esimesena, siis „või e-postiga"; lisaks „Jätka Google’iga" | App Store'i juhis 4.8 nõuab Apple'i nuppu; Google on lisavõimalus. Ilma Apple'i ja Google'ita jääb jagaja ära. |
+| Account / Sign Up (M9) | „Liitu 1 200 koeraomanikuga Tallinnas" | „Liitu Tallinna koeraomanike kampa" (arvuta) | Liikmete arvu API-t pole; väljamõeldud arv eksitaks. |
+| Account / Log In (M9) | kaart „Freddy ootab juba / Kadriorus on praegu 6 koera." | puudub | Kaart vajab eelmise sessiooni koera; väljalogimisel ei jäeta seadmesse kasutaja andmeid. |
+| Welcome (M9) | „6 koera Kadriorus praegu / Luna, Rex ja Charlie mängivad" | „6 koera pargis praegu" + pargi nimi (tihedaim park Tallinna kesklinna ümber, avalik `/parks/nearby`); peidetud, kui koeri pole | Pargi nime ei käänata; koerte nimed pole enne sisselogimist avalikud. Number on päris. |
+| Account / Reset Password (M9) | luku ikoon, kolmesammuline kaart | sama; pärast saatmist eraldi ekraan „Vaata oma postkasti" + „Kui selle aadressiga konto on olemas, saatsime sinna lingi. Link kehtib üks tund." | Ei paljasta, kas konto on olemas; täpne kehtivusaeg on teada. |
 | — (pole Figmas) | — | „Uus parool" ekraan | Taastamislingi sihtkoht. |
-| Permissions / Location | täisekraan, „Valin piirkonna ise" | kaart kaardiekraanil, „Mitte praegu"; keelatud oleku tekstid „Asukoht on välja lülitatud" | Piirkonna valikut pole veel; kaart ei blokeeri ekraani. |
+| Permissions / Location (M9) | täisekraan, kaardi eelvaade, kolm eelist, „Luba asukoht", „Valin piirkonna ise" | täisekraan Kaardi vahekaardil, kuni luba on otsustamata (sessiooni jooksul „Mitte praegu" peidab); „Mitte praegu"; keelatud olekus näidatakse uuesti alles „Näita minu asukohta" vajutusel | Piirkonna valikut pole veel; keelatud loaga kasutajat ei blokeerita igal käivitusel. |
 | Home / Today | „Õue, Freddy?" | koera nimi, kui koer on üks; muidu omaniku eesnimi | Mitme koera korral ei saa ühte valida. |
+| Home / Today (M9) | suur koerafoto, käpad „320" | kasutaja koera profiilifoto, kui see on olemas, muidu brändi corgi (dekoratiivne); Käpad-märk peidetud | Käpad tulevad M9b-ga; väljamõeldud saldot ei näidata. |
+| Home / Today (M9) | „Lähim park" + „Oleme siin" | sama (lähim park API järjestusest), „Oleme siin" avab check-in'i; seal juba olles „Oled siin" → pargi leht | Olemasolev check-in voog. |
 | Home / Visit / Active | „Freddy on Kadrioru koerapargis.", „Olete nähtavad kuni 18.00" | „Head mängimist!" + pargi nimi + „Freddy · kuni 18.00" / pargi lehel „Oled pargis kuni 18.00" | Pargi nime ei käänata; nähtavus sõltub privaatsusseadest. |
 | Home | vahekaart „Lisa" | puudub | Lisamise voog (park, plaan) pole veel üks ekraan. |
-| Explore / Map + Park List | eraldi nimekirja ekraan, otsing, „Aktiivsed", „Lemmikud" | nimekiri kaardi all („Pargid sinu ümber", „N paika väikesteks seiklusteks."); otsingut ja neid kiipe pole; lisatud „Kaugused on arvutatud Tallinna kesklinnast." | Üks ekraan; otsing hiljem; asukohata kasutaja peab teadma, millest kaugus arvutatakse. |
+| Explore / Map (M9) | täisekraani kaart, otsing + käpad, filtrid, kiibid Kõik / Pargid / Kohvikud / Teenused / Rannad / Kliinikud, „Lähim park" | sama; kiibid **Kõik / Pargid / Teenused / Kliinikud** (Kohvikud ja Rannad peidetud kuni M9b andmeteni); otsing filtreerib kaardil nime järgi; lisatud nimekirja nupp | Andmeteta filter näitaks alati tühja kaarti. Nimekiri on ligipääsetav alternatiiv kaardi nööpnõeltele. |
+| Explore / Map (M9) | koerte nööpnõeltel koerte fotod | käpaga kohatäited; koerte arv on päris | Külastajate koerte fotosid API ei anna (ainult nimed); fotode lisamine oleks uus API funktsioon (M9b+). |
+| Explore / Map (M9) | „Lisa" vahekaart | puudub (neli vahekaarti) | Vt Home. |
+| Explore / Park List (M9) | „Pargid sinu ümber", kiibid Lähedal / Aktiivsed / Lemmikud, Park Card | sama (kiibid lülituvad ja kombineeruvad); kaardi nimekirjanupust ja avalehe „Vaata kõiki parke" alt; lisatud „Kaugused on arvutatud Tallinna kesklinnast." | Asukohata kasutaja peab teadma, millest kaugus arvutatakse. |
+| Park Card (M9) | pargi foto, „Aiaga · vesi", ★ 4,8, „3 sõpra pargis" koerte nägudega | sama foto kõigil parkidel (kohatäide); silt pargi andmetest (kuni kaks omadust); ★ ainult pargi lehel (nimekirja API-s hinnangut pole); sõbrad = pargi külastajad ∩ sõbrad, näod on koera algustähed; silt 15 pt bold (Figmas 13 pt) | Parkidel pole fotosid; valge tekst `map/park` peal on 4,1 : 1, mis väikese teksti jaoks ei piisa — 15 pt bold on „suur tekst" (3 : 1). |
 | Explore / Filters | „Koerte suurus" | puudub; lisatud „Aiaga piiratud" | Parkidel pole suuruse andmeid; aed on andmemudelis. |
 | Park / Overview | vahekaardid Ülevaade / Külastajad / Arvustused | üks keritav leht samade osadega | Lihtsam navigeerimine; sisu sama. |
 | Park / Overview | „6 koera, palju häid tutvusi." | sama; 1 → „1 koer, uus tutvus ootab.", 0 → „Praegu on pargis vaikne." | Figma näitab ainult mitmust. |
@@ -132,6 +144,7 @@ Figma tekstid on kasutusel kõigil olemasolevatel ekraanidel. Näidisandmed (nim
 | Park / Overview | „Aiaga piiratud · eraldi väike ala Vesi · pingid · valgustus" | märgid „Aiaga piiratud", „Eraldi väike ala", „Vesi", „Valgustus" | Pinke andmemudelis pole. |
 | Park / Overview | — | „Juhata kohale" | Kaardirakenduse juhised. |
 | Park / Current Visitors | kiibid Kõik / Väikesed / Rahulikud | puuduvad; rida „Omanik · koerad / tõug · kuni 17.00" | Koera suurust ja meeleolu andmemudelis pole. |
+| Park / Current Visitors, Friends, Inbox (M9) | ümarnurksed koerafotod | ümarnurkne koera (või inimese) algustäht; oma koertel päris foto (M4) | Külastajate, sõprade ja vestluste API annab ainult koerte nimed. |
 | Park / Reviews | „32 külastuse hinnang · näidisandmed" | „4,8 / 5 · 32 arvustust" ülevaates | Näidisandmed. |
 | Visit / Check In | „Mängime / Rahulikult / Tutvume", „Näita meid pargi külastajatele" | puuduvad; lisatud „Kui kauaks?" (30 min – 2 h); „Kohalolek aegub {N} minuti pärast." valitud kestusega | Nähtavus on profiili privaatsusseades; kestus on valitav. |
 | Visit / Plan | „Vali või muuda parki", „Freddy / Tuleb mängima", „Teavita minu sõpru" | pargi nimi sildina; koera ja sõprade valikut pole; lisatud „Kestus"; kuupäev kiipidena | Plaan tehakse pargi lehelt; sõbrad M5. |

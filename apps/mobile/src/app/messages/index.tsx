@@ -73,5 +73,5 @@ export default function InboxScreen() {
 }
 
 const styles = StyleSheet.create({
-  badge: { minWidth: 24, height: 24, borderRadius: Radius.full, alignItems: 'center', justifyContent: 'center', paddingHorizontal: Spacing.one },
+  badge: { minWidth: 24, minHeight: 24, borderRadius: Radius.full, alignItems: 'center', justifyContent: 'center', paddingHorizontal: Spacing.one },
 });

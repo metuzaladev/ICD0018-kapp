@@ -2,15 +2,14 @@ import { presenceSharingSchema, updateProfileInputSchema, type PresenceSharing, 
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
-import { Chip } from '@/components/chip';
 import { FormError } from '@/components/form-error';
+import { ChipRow, IconChip } from '@/components/icon-chip';
 import { Screen } from '@/components/screen';
 import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
+import { PRESENCE_ICON } from '@/constants/icons';
 import { apiGet, apiSend, errorMessage } from '@/lib/api';
 import { validateForm } from '@/lib/form';
 
@@ -66,23 +65,20 @@ export default function ProfileEditScreen() {
       />
 
       <ThemedText type="label">{t('profileEdit.presenceTitle')}</ThemedText>
-      <View style={styles.chips} accessibilityRole="radiogroup">
+      <ChipRow radiogroup>
         {presenceSharingSchema.options.map((option) => (
-          <Chip
+          <IconChip
             key={option}
             role="radio"
+            icon={PRESENCE_ICON[option]}
             label={t(`profileEdit.presence.${option}`)}
             selected={values.presenceSharing === option}
             onPress={() => setValues((v) => ({ ...v, presenceSharing: option }))}
           />
         ))}
-      </View>
+      </ChipRow>
 
       <Button label={t('profileEdit.save')} loading={saving} disabled={loading} onPress={save} />
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-});

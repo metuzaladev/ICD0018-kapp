@@ -6,7 +6,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { BookingCard } from '@/components/booking-card';
 import { Button } from '@/components/button';
-import { Chip } from '@/components/chip';
+import { ChipRow, IconChip } from '@/components/icon-chip';
 import { Entering } from '@/components/entering';
 import { FormError } from '@/components/form-error';
 import { Screen } from '@/components/screen';
@@ -147,13 +147,11 @@ export default function BookScreen() {
           <Button label={t('booking.addDog')} variant="secondary" onPress={() => router.push('/dogs/edit')} />
         </>
       ) : null}
-      <View style={styles.wrap}>
+      <ChipRow>
         {dogs?.map((dog) => (
-          <View key={dog.id} style={styles.dogChip}>
-            <Chip label={dog.name} selected={selectedDogs.includes(dog.id)} onPress={() => toggleDog(dog.id)} />
-          </View>
+          <IconChip key={dog.id} icon="paw-print" label={dog.name} selected={selectedDogs.includes(dog.id)} onPress={() => toggleDog(dog.id)} />
         ))}
-      </View>
+      </ChipRow>
 
       <TextField
         label={t('booking.note')}
@@ -179,7 +177,5 @@ export default function BookScreen() {
 }
 
 const styles = StyleSheet.create({
-  wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  dogChip: { minWidth: '30%', flexGrow: 1 },
   price: { gap: Spacing.one },
 });

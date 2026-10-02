@@ -11,9 +11,9 @@ import { Screen } from '@/components/screen';
 import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
-import { useStartConversation } from '@/hooks/use-messages';
+import { useSendInvitation } from '@/hooks/use-messages';
 import { usePlanVisit } from '@/hooks/use-visits';
-import { apiSend, errorMessage } from '@/lib/api';
+import { errorMessage } from '@/lib/api';
 import { formatDay, formatDurationShort, formatHour, formatTime } from '@/lib/format';
 import { validateForm } from '@/lib/form';
 
@@ -33,7 +33,7 @@ export default function PlanVisitScreen() {
   // inviteUserId: opened from "Kutsu parki" on a friend's profile (M5).
   const { parkId, parkName, inviteUserId } = useLocalSearchParams<{ parkId: string; parkName?: string; inviteUserId?: string }>();
   const plan = usePlanVisit();
-  const startConversation = useStartConversation();
+  const invite = useSendInvitation();
   const days = useMemo(() => upcomingDays(), []);
   const [day, setDay] = useState(0);
   const [hour, setHour] = useState<number | null>(null);
@@ -64,13 +64,9 @@ export default function PlanVisitScreen() {
       const saved = await plan.mutateAsync(data);
       if (inviteUserId) {
         // The invitation is an ordinary message in the sender's language, so the friend can reply.
-        const conversation = await startConversation.mutateAsync(inviteUserId);
-        await apiSend('POST', `/me/conversations/${conversation.id}/messages`, {
-          body: t('invite.message', {
-            park: saved.park.name,
-            day: formatDay(saved.startsAt),
-            from: formatTime(saved.startsAt),
-          }),
+        const { conversation } = await invite.mutateAsync({
+          userId: inviteUserId,
+          body: t('invite.message', { park: saved.park.name, day: formatDay(saved.startsAt), from: formatTime(saved.startsAt) }),
         });
         router.dismissAll();
         router.push({ pathname: '/messages/[conversationId]', params: { conversationId: conversation.id } });

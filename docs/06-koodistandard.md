@@ -15,6 +15,7 @@ apps/api/src
     auth.ts              requireUser() preHandler
   lib/                   Raamistikust sõltumatud abivahendid (withTimeout)
   storage/               Objektihoidla: ObjectStorage liides ja S3 teostus (MinIO / R2)
+  realtime/              Socket.IO värav (M5): ainult server → klient, autentimine sama sessiooniküpsisega
   modules/<valdkond>/    Üks kaust ärivaldkonna kohta
     <valdkond>.routes.ts       HTTP: valideeri → kutsu teenust → vali staatuskood
     <valdkond>.service.ts      Ärireeglid; ei tea HTTP-st ega SQL-ist
@@ -100,6 +101,8 @@ Kuidas lisada: lisa teate võti kolme faili `packages/shared/src/i18n/{et,en,ru}
 - **Idempotentsed muutused on `PUT`/`DELETE`** (nt lemmikud, `PUT …/reviews/mine`), et korduspäringud oleksid ohutud.
 - **Ärireeglid, mis peavad kehtima ka samaaegsete päringute korral, on andmebaasis** (unikaalsed/osalised indeksid, CHECK). Teenus kontrollib neid ka ise sõbraliku veateate jaoks ja tõlgib unikaalsusrikkumise (`isUniqueViolation`) koodiks 409.
 - **Võõra ressursi ID annab 404, mitte 403** (koerad, kohalolekud, plaanid, fotod, tervisekirjed), et ID-de olemasolu ei saaks kinnitada.
+- **Blokeering kehtib mõlemas suunas igas sotsiaalses päringus** (otsing, profiil, sõbrad, vestlused, teavitused, plaanid, külastajad). Kasuta `modules/safety/block-sql.ts` predikaate; blokeeritud kasutaja ressurss annab `404`.
+- **Kõrvalmõjud teistele kasutajatele (teavitus, push, reaalaja sündmus) käivad läbi `Notifier`-i**, mis ei viska viga: põhitegevus on juba salvestatud. Aeglane väline teenus (Expo push) on alati järjekorras (BullMQ), mitte päringu teel.
 - **Failid ei käi läbi API.** Klient saab allkirjastatud PUT-URL-i (tüüp ja suurus on allkirjas), server kontrollib hiljem, et võti on kasutaja oma (`uploads/<userId>/…`, muidu 404), ja usaldab ainult faili **sisu**, mitte `Content-Type`'i. Pildid kodeeritakse ümber, mis eemaldab EXIF-i (sh GPS). Bucket on privaatne, välja antakse ainult lühiajalised allkirjastatud URL-id.
 - **Andmebaas + hoidla:** objektid kirjutatakse enne rida ja ebaõnnestumisel kustutatakse (poolikut rida ei teki); kustutamisel rida enne, objektid pärast (parima tahte järgi — orvuks jäänud privaatne objekt maksab ainult ruumi, ülestõusnud rida oleks viga).
 

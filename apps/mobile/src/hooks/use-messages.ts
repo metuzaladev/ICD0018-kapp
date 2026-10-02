@@ -74,3 +74,19 @@ export function useMarkConversationRead(conversationId: string) {
 export function useStartConversation() {
   return useMutation({ mutationFn: (userId: string) => apiSend<Conversation>('POST', '/me/conversations', { userId }) });
 }
+
+/** "Kutsu parki": opens (or creates) the conversation with a friend and sends the invitation text. */
+export function useSendInvitation() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ userId, body }: { userId: string; body: string }) => {
+      const conversation = await apiSend<Conversation>('POST', '/me/conversations', { userId });
+      const message = await apiSend<Message>('POST', `/me/conversations/${conversation.id}/messages`, { body });
+      return { conversation, message };
+    },
+    onSuccess: ({ message }) => {
+      addMessageToCache(client, message);
+      client.invalidateQueries({ queryKey: conversationKeys.list });
+    },
+  });
+}

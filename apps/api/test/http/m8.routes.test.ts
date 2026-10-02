@@ -1,9 +1,12 @@
-import { createServer, type Server, type Socket } from 'node:net';
+import { createServer, type AddressInfo, type Server, type Socket } from 'node:net';
 
+import { REALTIME_PATH } from '@kapp/shared';
+import { io as connect } from 'socket.io-client';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { createRateLimitRedis } from '../../src/lib/redis-clients';
-import { buildTestApp } from '../helpers';
+import { createSocketGateway } from '../../src/realtime/socket-gateway';
+import { buildTestApp, fakeAuth } from '../helpers';
 import { expectApiError } from './expect-api-error';
 
 /**
@@ -54,6 +57,31 @@ describe('TRUST_PROXY and rate limits', () => {
     // Not from the load balancer: the header is ignored and the caller's own address counts.
     expect((await via('203.0.113.9', '198.51.100.3')).statusCode).toBe(200);
     expect((await via('203.0.113.9', '198.51.100.4')).statusCode).toBe(429);
+  });
+});
+
+describe('graceful close with connected sockets', () => {
+  it('app.close() finishes while a realtime client is still connected', async () => {
+    const realtime = createSocketGateway();
+    ctx = await buildTestApp({ realtime, resolveUserId: fakeAuth });
+    await ctx.app.listen({ host: '127.0.0.1', port: 0 });
+    const { port } = ctx.app.server.address() as AddressInfo;
+    const client = connect(`http://127.0.0.1:${port}`, { path: REALTIME_PATH, transports: ['websocket'], extraHeaders: { authorization: 'Bearer test' }, reconnection: false });
+    cleanups.push(async () => void client.close());
+    await new Promise<void>((resolve, reject) => {
+      client.once('connect', resolve);
+      client.once('connect_error', reject);
+    });
+    const disconnected = new Promise<string>((resolve) => client.once('disconnect', resolve));
+
+    // A WebSocket keeps the HTTP server open; before the fix close() hung until the deadline.
+    const app = ctx.app;
+    ctx = undefined;
+    const closed = app.close().then(() => 'closed');
+    const timeout = new Promise((resolve) => setTimeout(() => resolve('hung'), 3000));
+
+    await expect(Promise.race([closed, timeout])).resolves.toBe('closed');
+    await expect(disconnected).resolves.toBeTypeOf('string');
   });
 });
 

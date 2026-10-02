@@ -251,6 +251,7 @@ export async function buildTestApp(deps: Partial<AppDeps> = {}, config: Partial<
       checkDatabase: deps.checkDatabase ?? (async () => true),
       resolveUserId: deps.resolveUserId,
       authHandler: deps.authHandler,
+      realtime: deps.realtime,
     },
     { ...defaultAppConfig, ...config },
   );

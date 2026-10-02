@@ -156,7 +156,10 @@ export async function buildApp(deps: AppDeps, config: AppConfig = defaultAppConf
   if (deps.realtime) {
     const realtime = deps.realtime;
     realtime.attach(app.server, { resolveUserId, corsOrigins: config.corsOrigins, log: config.logger || undefined });
-    app.addHook('onClose', async () => realtime.close());
+    // preClose, not onClose: onClose runs only after the HTTP server has closed, and an open
+    // WebSocket keeps it open forever — shutdown hung until the deadline (found in M8 with
+    // `docker stop`). Disconnecting sockets first lets server.close() finish.
+    app.addHook('preClose', async () => realtime.close());
   }
 
   return app;

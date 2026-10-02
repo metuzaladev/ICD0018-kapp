@@ -1,6 +1,6 @@
 /**
  * App theme built from the shared Figma tokens (@kapp/shared). Change the accent here to try
- * another Figma "Accent" mode (terracotta | blue | green | violet).
+ * another Figma "Accent" mode (terracotta | blue | green | violet | lime).
  */
 
 import { radius, semanticColors, space, typography, type AccentName } from '@kapp/shared';
@@ -8,7 +8,8 @@ import { DMSans_400Regular, DMSans_500Medium, DMSans_700Bold } from '@expo-googl
 import { Manrope_700Bold, Manrope_800ExtraBold } from '@expo-google-fonts/manrope';
 import { Platform } from 'react-native';
 
-export const ACCENT: AccentName = 'terracotta';
+/** Figma "03 · Screens" is Light mode + Green accent since the M9 redesign (docs/05). */
+export const ACCENT: AccentName = 'green';
 
 function palette(scheme: 'light' | 'dark') {
   const c = semanticColors(scheme, ACCENT);

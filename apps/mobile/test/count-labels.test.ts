@@ -4,7 +4,7 @@ import { afterAll, describe, expect, it, vi } from 'vitest';
 vi.mock('expo-localization', () => ({ getLocales: () => [{ languageTag: 'et-EE', languageCode: 'et' }] }));
 
 import i18n from '@/i18n';
-import { dogsLabel, formatNumber, friendsInParkLabel } from '@/lib/format';
+import { dogsLabel, formatAgo, formatNumber, friendsInParkLabel, pawsLabel } from '@/lib/format';
 
 /**
  * Counted nouns on the M9 map pins ("6 koera"), park cards ("3 sõpra pargis") and the Käpad badge
@@ -69,5 +69,22 @@ describe('count labels', () => {
       expect(formatNumber(1200)).toBe('1200');
       expect(formatNumber(12000).replace(/\s/g, ' ')).toBe('12 000');
     });
+  });
+
+  it('paw amounts and "2 h tagasi" use plural keys (M9b)', async () => {
+    const now = new Date('2026-10-02T12:00:00Z');
+    await inLanguage('et', () => {
+      expect(pawsLabel(1)).toBe('1 käpp');
+      expect(pawsLabel(15)).toBe('15 käppa');
+      expect(formatAgo('2026-10-02T10:00:00Z', now)).toBe('2 h tagasi');
+      expect(formatAgo('2026-10-01T12:00:00Z', now)).toBe('1 päev tagasi');
+      expect(formatAgo('2026-10-02T11:59:40Z', now)).toBe('just praegu');
+    });
+    await inLanguage('ru', () => {
+      expect(pawsLabel(2)).toBe('2 лапки');
+      expect(pawsLabel(25)).toBe('25 лапок');
+      expect(formatAgo('2026-09-27T12:00:00Z', now)).toBe('5 дней назад');
+    });
+    await inLanguage('en', () => expect(formatAgo('2026-09-30T12:00:00Z', now)).toBe('2 days ago'));
   });
 });

@@ -15,7 +15,8 @@ export function useBlockedUsers() {
 function useInvalidateSocial() {
   const client = useQueryClient();
   return () => {
-    for (const key of [safetyKeys.blocks, ['friends'], ['users'], ['conversations'], ['notifications'], ['visits']]) {
+    // M9b: place posts and map pins of a blocked author disappear too (block-sql on the server).
+    for (const key of [safetyKeys.blocks, ['friends'], ['users'], ['conversations'], ['notifications'], ['visits'], ['place-posts'], ['map-places']]) {
       client.invalidateQueries({ queryKey: key });
     }
   };

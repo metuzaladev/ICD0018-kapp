@@ -1,4 +1,4 @@
-import type { Park, ProviderSummary } from '@kapp/shared';
+import type { MapPlace, Park } from '@kapp/shared';
 import {
   Camera,
   Map,
@@ -16,19 +16,30 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { useTheme } from '@/hooks/use-theme';
 import { dogsLabel } from '@/lib/format';
-import { parkPinModel, providerPlaceKind } from '@/lib/map-categories';
+import { placeKindOf, type LngLatBox } from '@/lib/explore';
+import { parkPinModel } from '@/lib/map-categories';
 import { MAP_STYLE } from '@/lib/map-style';
 
 type Point = { lat: number; lng: number };
 
 type ParkMapProps = {
   parks: Park[];
-  /** Service providers (M6) shown as Teenused / Kliinikud pins. */
-  providers?: ProviderSummary[];
+  /**
+   * Places from GET /map/places in the visible box (M9b): community posts (cafés, beaches, shops),
+   * service providers and parks that are not already drawn from `parks`.
+   */
+  places?: MapPlace[];
+  /** The selected place (provider sheet open): its pin gets the dark ring. */
+  selectedPlaceId?: string | null;
   center: Point;
   showUserLocation: boolean;
   onParkPress: (park: Park) => void;
-  onProviderPress?: (provider: ProviderSummary) => void;
+  onPlacePress?: (place: MapPlace) => void;
+  /** Visible box after the user (or the camera) moved the map: drives the places query. */
+  onRegionChange?: (bounds: LngLatBox) => void;
+  /** One-shot "centre here" (post "Kaardil"); replaces the initial fit when present. */
+  focus?: { lat: number; lng: number; nonce: number } | null;
+  onFocusApplied?: (nonce: number) => void;
   /** Space covered by floating UI (search + chips above, nearest-park card and tab bar below). */
   overlay: { top: number; bottom: number };
   /** Incremented by the locate button: the camera returns to `center`. */
@@ -54,7 +65,20 @@ function boundsOf(center: Point, places: Point[]): LngLatBounds {
  * map as native views, so VoiceOver reaches them, but the park list (Pargid sinu ümber) remains the
  * accessible way to browse all parks.
  */
-export function ParkMap({ parks, providers = [], center, showUserLocation, onParkPress, onProviderPress, overlay, locateSignal = 0 }: ParkMapProps) {
+export function ParkMap({
+  parks,
+  places = [],
+  selectedPlaceId = null,
+  center,
+  showUserLocation,
+  onParkPress,
+  onPlacePress,
+  onRegionChange,
+  focus = null,
+  onFocusApplied,
+  overlay,
+  locateSignal = 0,
+}: ParkMapProps) {
   const c = useTheme();
   const { t } = useTranslation();
   // Camera moves jump instead of gliding when Reduce Motion is on.
@@ -64,15 +88,26 @@ export function ParkMap({ parks, providers = [], center, showUserLocation, onPar
   // Camera commands sent before the style has loaded are dropped by the native map.
   const [loaded, setLoaded] = useState(false);
 
-  const places = useMemo<Point[]>(() => [...parks, ...providers], [parks, providers]);
-  const bounds = useMemo(() => boundsOf(center, places), [center, places]);
+  const bounds = useMemo(() => boundsOf(center, parks), [center, parks]);
   const padding = { top: overlay.top + EDGE, bottom: overlay.bottom + EDGE, left: EDGE, right: EDGE };
-  // Re-fit only when the visible set changes, not on every re-render or background refetch.
-  const fitKey = `${center.lat},${center.lng}|${parks.map((p) => p.id).join(',')}|${providers.map((p) => p.id).join(',')}`;
+  // Re-fit only when the nearby parks change (location, filters), never when the box-driven places
+  // load: those follow the camera, and fitting to them would move the camera → new box → loop.
+  const fitKey = `${center.lat},${center.lng}|${parks.map((p) => p.id).join(',')}`;
+  // After a "Kaardil" focus the user wants that place, not the automatic fit.
+  const focused = useRef(false);
 
   useEffect(() => {
-    if (!loaded) return;
-    if (places.length === 0) {
+    if (!loaded || !focus) return;
+    focused.current = true;
+    camera.current?.easeTo({ center: [focus.lng, focus.lat], zoom: 15, duration: cameraDuration });
+    onFocusApplied?.(focus.nonce);
+    // Only a new focus request (nonce) moves the camera.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded, focus?.nonce]);
+
+  useEffect(() => {
+    if (!loaded || focused.current || focus) return;
+    if (parks.length === 0) {
       camera.current?.easeTo({ center: [center.lng, center.lat], zoom: 13, duration: cameraDuration });
     } else {
       camera.current?.fitBounds(bounds, { padding, duration: cameraDuration, easing: 'ease' });
@@ -97,13 +132,19 @@ export function ParkMap({ parks, providers = [], center, showUserLocation, onPar
       tintColor={c.brand}
       // Keeps the © OpenStreetMap attribution visible above the nearest-park card.
       attributionPosition={{ bottom: overlay.bottom + 8, right: 8 }}
-      onDidFinishLoadingMap={() => setLoaded(true)}>
+      onDidFinishLoadingMap={() => setLoaded(true)}
+      // Fires once the camera settles (not while panning), so one request per gesture.
+      onRegionDidChange={(event) => onRegionChange?.(event.nativeEvent.bounds)}>
       <Camera ref={camera} initialViewState={{ center: [center.lng, center.lat], zoom: 12 }} />
       {showUserLocation ? <NativeUserLocation /> : null}
-      {providers.map((provider) => (
-        <Marker key={provider.id} id={`provider-${provider.id}`} lngLat={[provider.lng, provider.lat]} onPress={() => onProviderPress?.(provider)}>
-          <View accessible accessibilityRole="button" accessibilityLabel={t('map.providerMarker', { name: provider.name })}>
-            <PlacePin kind={providerPlaceKind(provider.category)} />
+      {places.map((place) => (
+        <Marker key={`${place.kind}-${place.id}`} id={`${place.kind}-${place.id}`} lngLat={[place.lng, place.lat]} onPress={() => onPlacePress?.(place)}>
+          <View
+            accessible
+            accessibilityRole="button"
+            accessibilityLabel={t('map.placeMarker', { name: place.name, kind: t(`map.placeKinds.${placeKindOf(place)}`) })}
+            accessibilityHint={place.kind === 'provider' ? t('map.providerHint') : undefined}>
+            <PlacePin kind={placeKindOf(place)} selected={place.id === selectedPlaceId} />
           </View>
         </Marker>
       ))}

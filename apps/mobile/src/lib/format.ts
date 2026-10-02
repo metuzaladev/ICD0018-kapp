@@ -224,6 +224,31 @@ export function formatFriendsSince(iso: string): string {
     : date.toLocaleDateString(currentLocaleTag(), { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
+/**
+ * Figma "soovitab · 2 h tagasi": how long ago, with plural keys ("1 h tagasi", "5 минут назад").
+ * After a week the numeric date ("02.10.2026"), never a month name after a preposition (docs/11).
+ */
+export function formatAgo(iso: string, now = new Date()): string {
+  const minutes = Math.floor((now.getTime() - new Date(iso).getTime()) / 60_000);
+  if (minutes < 1) return i18n.t('dates.justNow');
+  if (minutes < 60) return i18n.t('dates.minutesAgo', { count: minutes });
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return i18n.t('dates.hoursAgo', { count: hours });
+  const days = Math.floor(hours / 24);
+  if (days < 7) return i18n.t('dates.daysAgo', { count: days });
+  return formatNumericDate(iso);
+}
+
+/** "02.10.2026" / "02/10/2026" — a moment's date in the device zone, numeric (safe after any word). */
+export function formatNumericDate(iso: string): string {
+  return new Date(iso).toLocaleDateString(currentLocaleTag(), { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+/** "150 käppa" / "150 paws" / "150 лап" (plural key, grouped number). */
+export function pawsLabel(count: number): string {
+  return i18n.t('points.paws', { count, value: formatNumber(count) });
+}
+
 /** A chat timestamp: the time today, otherwise the day and the time. */
 export function formatMessageTime(iso: string, now = new Date()): string {
   const sameDay = startOfDay(new Date(iso)) === startOfDay(now);

@@ -30,13 +30,18 @@ export function useProviders(category: ServiceCategory | null, origin: { lat: nu
   });
 }
 
-export function useProvider(providerId: string) {
-  return useQuery({ queryKey: serviceKeys.provider(providerId), queryFn: () => apiGet<ProviderDetail>(`/service-providers/${providerId}`) });
+export function useProvider(providerId: string | undefined) {
+  return useQuery({
+    queryKey: serviceKeys.provider(providerId ?? ''),
+    queryFn: () => apiGet<ProviderDetail>(`/service-providers/${providerId}`),
+    enabled: Boolean(providerId),
+  });
 }
 
-export function useServiceSlots(serviceId: string) {
+export function useServiceSlots(serviceId: string | undefined) {
   return useQuery({
-    queryKey: serviceKeys.slots(serviceId),
+    enabled: Boolean(serviceId),
+    queryKey: serviceKeys.slots(serviceId ?? ''),
     queryFn: () => apiGet<ServiceSlots>(`/services/${serviceId}/slots`, { days: SLOT_DAYS }),
     // Someone else may book meanwhile; the server still has the final word (409 → refetch).
     staleTime: 30_000,

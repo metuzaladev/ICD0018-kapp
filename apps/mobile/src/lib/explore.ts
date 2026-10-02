@@ -112,6 +112,21 @@ export function placeRoute(place: Pick<MapPlace, 'id' | 'kind'>): PlaceRoute {
   }
 }
 
+/** The Kaart chip that shows a post's pin ("Kaardil"): shops and others only appear under "Kõik". */
+export function mapCategoryForPost(category: PlaceCategory): MapCategory {
+  switch (category) {
+    case 'cafe':
+      return 'cafes';
+    case 'park':
+      return 'parks';
+    case 'beach':
+      return 'beaches';
+    case 'shop':
+    case 'other':
+      return 'all';
+  }
+}
+
 /* ---------- Avasta: categories, amenities, feed filters ---------- */
 
 export const PLACE_CATEGORY_ICON: Record<PlaceCategory, IconName> = {
@@ -179,6 +194,14 @@ export function feedQueryParams(filters: FeedFilters, origin: { lat: number; lng
 /** Category chip toggle: exclusive, a second tap clears. */
 export function toggleCategory(filters: FeedFilters, category: PlaceCategory): FeedFilters {
   return { ...filters, category: filters.category === category ? null : category };
+}
+
+/** The provider sheet's "Vabad ajad": the earliest free starts across the week (M6 slots). */
+export function nextFreeSlots(days: readonly { slots: readonly { startsAt: string }[] }[], count = 3): string[] {
+  return days
+    .flatMap((d) => d.slots.map((s) => s.startsAt))
+    .sort()
+    .slice(0, count);
 }
 
 /* ---------- optimistic like / save ---------- */

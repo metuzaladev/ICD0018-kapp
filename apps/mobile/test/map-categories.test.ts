@@ -14,8 +14,8 @@ import {
 } from '@/lib/map-categories';
 
 describe('map categories', () => {
-  it('offers only categories backed by data (cafés and beaches wait for M9b)', () => {
-    expect(AVAILABLE_CATEGORIES).toEqual(['all', 'parks', 'services', 'vets']);
+  it('offers every Figma chip now that M9b places back cafés and beaches', () => {
+    expect(AVAILABLE_CATEGORIES).toEqual(['all', 'parks', 'cafes', 'services', 'beaches', 'vets']);
     expect(AVAILABLE_CATEGORIES.every((c) => MAP_CATEGORIES.includes(c))).toBe(true);
   });
 

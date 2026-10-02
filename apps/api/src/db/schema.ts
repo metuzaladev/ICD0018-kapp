@@ -4,6 +4,7 @@ import {
   boolean,
   check,
   date,
+  foreignKey,
   geometry,
   index,
   integer,
@@ -13,6 +14,7 @@ import {
   pgTable,
   primaryKey,
   text,
+  time,
   timestamp,
   uniqueIndex,
   uuid,
@@ -441,7 +443,7 @@ export const notifications = pgTable(
   },
   (t) => [
     index('notifications_user_time_idx').on(t.userId, t.createdAt),
-    check('notifications_type', sql`${t.type} in ('friend_request', 'friend_accepted', 'message', 'friend_plan')`),
+    check('notifications_type', sql`${t.type} in ('friend_request', 'friend_accepted', 'message', 'friend_plan', 'booking_confirmed', 'booking_cancelled', 'booking_reminder')`),
   ],
 );
 
@@ -453,6 +455,8 @@ export const notificationPreferences = pgTable('notification_preferences', {
   messages: boolean('messages').notNull().default(true),
   friendRequests: boolean('friend_requests').notNull().default(true),
   friendPlans: boolean('friend_plans').notNull().default(true),
+  /** Figma "Broneeringute uuendused" (M6): booking reminders. */
+  bookings: boolean('bookings').notNull().default(true),
   updatedAt: timestamps.updatedAt,
 });
 
@@ -477,32 +481,102 @@ export const pushTokens = pgTable(
 
 export const serviceCategory = pgEnum('service_category', ['grooming', 'training', 'vet', 'other']);
 
+/**
+ * A business that offers dog services (M6, docs/13-teenused.md). Managed by the Käpp team (seed /
+ * admin), not by provider accounts: there is no provider sign-up in the app.
+ */
 export const serviceProviders = pgTable(
   'service_providers',
   {
     id: uuid('id').primaryKey().defaultRandom(),
     name: text('name').notNull(),
     category: serviceCategory('category').notNull(),
+    /** Figma "Rahulik hoolitsus" — a short headline above the description. */
+    tagline: text('tagline'),
     description: text('description'),
+    /** City district shown in lists ("Kadriorg"); the full address is on the detail screen. */
+    area: text('area').notNull(),
     address: text('address'),
-    location: geometry('location', { type: 'point', mode: 'xy', srid: 4326 }),
+    location: geometry('location', { type: 'point', mode: 'xy', srid: 4326 }).notNull(),
+    /** Opening hours are wall-clock times in this zone; slots are computed in it (DST-safe). */
+    timeZone: text('time_zone').notNull().default('Europe/Tallinn'),
+    /** Optional picture in the private photo bucket (signed URL on read), like dog photos. */
+    photoKey: text('photo_key'),
+    /**
+     * Curated rating from the provider's public reviews. Käpp has no provider reviews (yet), so this
+     * is informational data kept with the provider record, not computed from our tables.
+     */
+    ratingAverage: numeric('rating_average', { precision: 2, scale: 1, mode: 'number' }),
+    ratingCount: integer('rating_count').notNull().default(0),
     ...timestamps,
   },
-  (t) => [index('service_providers_location_gist').using('gist', t.location)],
+  (t) => [
+    index('service_providers_location_gist').using('gist', t.location),
+    index('service_providers_category_idx').on(t.category),
+    check('service_providers_rating_range', sql`${t.ratingAverage} is null or ${t.ratingAverage} between 1 and 5`),
+    check('service_providers_rating_count', sql`${t.ratingCount} >= 0`),
+  ],
 );
 
-export const services = pgTable('services', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  providerId: uuid('provider_id')
-    .notNull()
-    .references(() => serviceProviders.id, { onDelete: 'cascade' }),
-  name: text('name').notNull(),
-  durationMinutes: integer('duration_minutes').notNull(),
-  priceFromCents: integer('price_from_cents'),
-});
+/**
+ * Weekly opening hours (wall-clock time in the provider's zone). Several rows per weekday allow a
+ * lunch break. Bookable slots are generated from these on read, so no slot table must be kept filled.
+ */
+export const providerHours = pgTable(
+  'provider_hours',
+  {
+    providerId: uuid('provider_id')
+      .notNull()
+      .references(() => serviceProviders.id, { onDelete: 'cascade' }),
+    /** ISO weekday: 1 = Monday … 7 = Sunday (Postgres `extract(isodow …)`). */
+    weekday: integer('weekday').notNull(),
+    opensAt: time('opens_at').notNull(),
+    closesAt: time('closes_at').notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.providerId, t.weekday, t.opensAt] }),
+    check('provider_hours_weekday', sql`${t.weekday} between 1 and 7`),
+    check('provider_hours_order', sql`${t.closesAt} > ${t.opensAt}`),
+  ],
+);
 
-export const bookingStatus = pgEnum('booking_status', ['requested', 'confirmed', 'cancelled', 'completed']);
+export const services = pgTable(
+  'services',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    providerId: uuid('provider_id')
+      .notNull()
+      .references(() => serviceProviders.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    description: text('description'),
+    durationMinutes: integer('duration_minutes').notNull(),
+    /** Euro cents (integer: no floating-point money). Informational only — payment is out of scope. */
+    priceCents: integer('price_cents').notNull(),
+    /** "alates 35 €": the final price depends on the dog and is agreed with the provider. */
+    priceIsFrom: boolean('price_is_from').notNull().default(false),
+    ...timestamps,
+  },
+  (t) => [
+    index('services_provider_idx').on(t.providerId),
+    // Target of the composite foreign key from bookings: a booking's service belongs to its provider.
+    uniqueIndex('services_id_provider_uq').on(t.id, t.providerId),
+    check('services_duration_range', sql`${t.durationMinutes} between 5 and 480`),
+    check('services_price_nonnegative', sql`${t.priceCents} >= 0`),
+  ],
+);
 
+/**
+ * Stored states. "completed" is derived on read (confirmed + ended), like check-in expiry, so no job
+ * has to flip rows; the stored value is reserved for a future provider-side "done / no-show" flow.
+ */
+export const bookingStatus = pgEnum('booking_status', ['confirmed', 'cancelled', 'completed']);
+
+/**
+ * A booked time with a provider. Bookings are confirmed immediately (there is no provider-side
+ * approval). `provider_id` is denormalised from the service so the database itself can forbid
+ * overlapping bookings per provider — the `bookings_no_overlap` exclusion constraint, added in SQL in
+ * migration 0006_m6_services because drizzle cannot express EXCLUDE.
+ */
 export const bookings = pgTable(
   'bookings',
   {
@@ -510,24 +584,45 @@ export const bookings = pgTable(
     userId: text('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
-    dogId: uuid('dog_id')
-      .notNull()
-      .references(() => dogs.id, { onDelete: 'cascade' }),
-    serviceId: uuid('service_id')
-      .notNull()
-      .references(() => services.id, { onDelete: 'restrict' }),
+    providerId: uuid('provider_id').notNull(),
+    serviceId: uuid('service_id').notNull(),
     startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
+    endsAt: timestamp('ends_at', { withTimezone: true }).notNull(),
     note: text('note'),
-    status: bookingStatus('status').notNull().default('requested'),
+    /** Price at booking time, so a later price change does not rewrite history. */
+    priceCents: integer('price_cents').notNull(),
+    priceIsFrom: boolean('price_is_from').notNull(),
+    status: bookingStatus('status').notNull().default('confirmed'),
+    cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
     ...timestamps,
   },
   (t) => [
-    index('bookings_user_idx').on(t.userId),
-    // One active booking per service slot; cancelled bookings free the slot again.
-    uniqueIndex('bookings_service_slot_uq')
-      .on(t.serviceId, t.startsAt)
-      .where(sql`${t.status} <> 'cancelled'`),
+    index('bookings_user_time_idx').on(t.userId, t.startsAt),
+    // restrict: a service with bookings cannot vanish from someone's history. The composite key also
+    // guarantees provider_id matches the service, which the overlap constraint relies on.
+    foreignKey({
+      columns: [t.serviceId, t.providerId],
+      foreignColumns: [services.id, services.providerId],
+      name: 'bookings_service_provider_fk',
+    }).onDelete('restrict'),
+    check('bookings_time_order', sql`${t.endsAt} > ${t.startsAt}`),
+    check('bookings_note_length', sql`${t.note} is null or char_length(${t.note}) <= 300`),
+    check('bookings_cancelled_at', sql`(${t.status} = 'cancelled') = (${t.cancelledAt} is not null)`),
   ],
+);
+
+/** Which of the user's dogs come along (like check_in_dogs). */
+export const bookingDogs = pgTable(
+  'booking_dogs',
+  {
+    bookingId: uuid('booking_id')
+      .notNull()
+      .references(() => bookings.id, { onDelete: 'cascade' }),
+    dogId: uuid('dog_id')
+      .notNull()
+      .references(() => dogs.id, { onDelete: 'cascade' }),
+  },
+  (t) => [primaryKey({ columns: [t.bookingId, t.dogId] }), index('booking_dogs_dog_idx').on(t.dogId)],
 );
 
 /* ------------------------------------------------------------------ */

@@ -43,6 +43,13 @@
       "when": 1790899414473,
       "tag": "0005_m5_community",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790914377265,
+      "tag": "0006_m6_services",
+      "breakpoints": true
     }
   ]
 }

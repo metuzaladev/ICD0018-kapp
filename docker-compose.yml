@@ -17,6 +17,7 @@ services:
       timeout: 3s
       retries: 10
 
+  # BullMQ queue for push notifications (M5, docs/12-kogukond.md).
   redis:
     image: redis:7-alpine
     ports:

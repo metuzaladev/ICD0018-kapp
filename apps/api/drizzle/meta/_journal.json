@@ -50,6 +50,13 @@
       "when": 1790914377265,
       "tag": "0006_m6_services",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790948839122,
+      "tag": "0007_m9b_explore_rewards",
+      "breakpoints": true
     }
   ]
 }

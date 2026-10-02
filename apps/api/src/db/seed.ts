@@ -4,6 +4,9 @@
  * Park names are real areas with approximate coordinates — sample data, not a verified registry.
  * Providers are invented (the app says so on the Services screen); any likeness to a real business
  * name is unintended.
+ * M9b adds paw discounts and invented products for those providers and a few approved demo place
+ * posts (invented café/shop names, approximate coordinates) by a system author that cannot sign in.
+ * Insert-only and idempotent: re-running never deletes or overwrites anything.
  */
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 

@@ -42,10 +42,9 @@ export default function RootLayout() {
     Promise.all([loadLanguagePreference(), onboarding.load()]).finally(() => setPreferencesLoaded(true));
   }, []);
 
-  // Someone who has an account does not need the intro after signing out.
-  useEffect(() => {
-    if (signedIn) void onboarding.markSeen();
-  }, [signedIn]);
+  // "Has an account → skip the intro after signing out" is handled in lib/auth-client.ts on a
+  // server-confirmed session, not here: `session` can briefly be a stale copy restored from the
+  // Keychain (which survives a reinstall), and that wrongly hid the intro on fresh installs.
 
   // Keep the splash until fonts, the stored session, the chosen language and the onboarding flag are
   // known, to avoid a flash of the welcome screen (or of the wrong language). A font error must not block the app.

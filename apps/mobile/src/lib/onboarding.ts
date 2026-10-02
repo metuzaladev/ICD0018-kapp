@@ -68,6 +68,17 @@ export function createOnboardingStore(storage: FlagStorage): OnboardingStore {
 
 export const onboarding = createOnboardingStore(AsyncStorage);
 
+/**
+ * Whether an auth API response body proves this device has a signed-in account: sign-in/sign-up
+ * return `{ user, token }`, get-session `{ user, session }` or `null`. Used instead of the client's
+ * session state, which may be a stale Keychain copy that the server is about to reject.
+ */
+export function confirmsAccount(body: unknown): boolean {
+  if (typeof body !== 'object' || body === null || !('user' in body)) return false;
+  const { user } = body as { user: unknown };
+  return typeof user === 'object' && user !== null && typeof (user as { id?: unknown }).id === 'string';
+}
+
 /** `null` while loading, then whether the intro was seen; re-renders when it is marked seen. */
 export function useOnboardingSeen(): boolean | null {
   return useSyncExternalStore(onboarding.subscribe, onboarding.isSeen);

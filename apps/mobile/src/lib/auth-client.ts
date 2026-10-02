@@ -5,6 +5,7 @@ import * as SecureStore from 'expo-secure-store';
 import i18n, { currentLanguage } from '@/i18n';
 
 import { API_ORIGIN, APP_SCHEME } from './config';
+import { confirmsAccount, onboarding } from './onboarding';
 
 /**
  * Better Auth client. The session cookie lives in the iOS Keychain / Android Keystore via
@@ -19,6 +20,10 @@ export const authClient = createAuthClient({
     onRequest: (context) => {
       context.headers.set('accept-language', currentLanguage());
       return context;
+    },
+    // A server-confirmed account on this device: it no longer needs the intro after signing out.
+    onSuccess: (context) => {
+      if (confirmsAccount(context.data)) void onboarding.markSeen();
     },
   },
   plugins: [

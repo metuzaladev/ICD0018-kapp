@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 // The default store is created with AsyncStorage at import time; the tests use their own storage.
 vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: vi.fn(), setItem: vi.fn() } }));
 
-import { createOnboardingStore, ONBOARDING_STORAGE_KEY, type FlagStorage } from '@/lib/onboarding';
+import { confirmsAccount, createOnboardingStore, ONBOARDING_STORAGE_KEY, type FlagStorage } from '@/lib/onboarding';
 
 function memoryStorage(initial: string | null = null) {
   const state: { value: string | null } = { value: initial };
@@ -76,4 +76,25 @@ describe('onboarding store', () => {
     await store.markSeen();
     expect(listener).not.toHaveBeenCalled();
   });
+});
+
+describe('confirmsAccount', () => {
+  it('accepts a sign-in response ({ user, token })', () => {
+    expect(confirmsAccount({ token: 't', user: { id: 'u1', name: 'Mari' } })).toBe(true);
+  });
+
+  it('accepts a get-session response ({ user, session })', () => {
+    expect(confirmsAccount({ user: { id: 'u1' }, session: { id: 's1' } })).toBe(true);
+  });
+
+  it('rejects a signed-out get-session response (null)', () => {
+    expect(confirmsAccount(null)).toBe(false);
+  });
+
+  it.each([undefined, 'user', 42, {}, { user: null }, { user: {} }, { user: { id: 7 } }, { session: { id: 's1' } }])(
+    'rejects bodies without a user id: %j',
+    (body) => {
+      expect(confirmsAccount(body)).toBe(false);
+    },
+  );
 });

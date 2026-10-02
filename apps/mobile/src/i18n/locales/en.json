@@ -688,7 +688,7 @@
     "when": "{{date}}, {{from}}–{{to}}",
     "note": "Note: {{note}}",
     "cancel": "Cancel booking",
-    "cancelUntil": "You can cancel until {{date}} {{time}}.",
+    "cancelUntil": "Cancel by {{date}}, {{time}}.",
     "cancelClosed": "It’s too late to cancel here. If you can’t make it, please let the provider know.",
     "cancelTitle": "Cancel this booking?",
     "cancelBody": "{{service}}, {{provider}} · {{when}}. The time will be freed for others.",

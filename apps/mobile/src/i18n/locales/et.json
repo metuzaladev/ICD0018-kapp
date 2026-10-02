@@ -688,7 +688,7 @@
     "when": "{{date}}, {{from}}–{{to}}",
     "note": "Märkus: {{note}}",
     "cancel": "Tühista broneering",
-    "cancelUntil": "Tühistada saab kuni {{date}} {{time}}.",
+    "cancelUntil": "Tühistamise tähtaeg: {{date}}, {{time}}.",
     "cancelClosed": "Tühistamise aeg on möödas. Kui sa ei saa tulla, anna teenusepakkujale teada.",
     "cancelTitle": "Tühistada broneering?",
     "cancelBody": "{{service}}, {{provider}} · {{when}}. Aeg vabaneb teistele.",

@@ -17,6 +17,7 @@ Rules that are easy to miss:
 - All UI text goes through i18n (`t('…')`, keys in `apps/mobile/src/i18n/locales/{et,en,ru}.json`); Estonian is the source and fallback, Figma copy in `docs/figma/copy-et.json`. Never hard-code visible text in `apps/mobile/src` (`npm run i18n:check` fails). Numbers/dates via `lib/format.ts`, counted nouns via plural keys. See docs/11-tolked-ja-figma.md.
 - API/validation messages are keys in `packages/shared/src/i18n/{et,en,ru}.ts`: `throw new NotFoundError('errors.x')`, schemas use `issueMessage('validation.x')`; the error handler translates per `Accept-Language`, logs stay English.
 - Blocks hide users in both directions everywhere: every social query uses `modules/safety/block-sql.ts`. Side effects for other users (feed row, socket event, push) go through `Notifier`, never directly; pushes are queued (BullMQ), texts in the recipient's `user.language`. See docs/12-kogukond.md.
+- Rules that must hold under concurrency live in the database (unique/partial indexes, CHECK, the `bookings_no_overlap` EXCLUDE constraint); the service checks them too for a friendly message and maps `isUniqueViolation` / `isExclusionViolation` to 409. Booking time rules are pure functions in `modules/bookings/booking-rules.ts`. No payments anywhere. See docs/13-teenused.md.
 - Code, identifiers and comments are English.
 
 Before finishing: `npm run typecheck && npm test`, `npm run lint -w mobile` and `npm run i18n:check`.

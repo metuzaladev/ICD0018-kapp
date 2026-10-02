@@ -15,14 +15,14 @@ Tabelid on tuletatud Figma vaadetest (leht *03 · Screens*, sektsioonid 01–08)
 | Kogukond | `friendships`, `conversations`, `conversation_members`, `messages` | 05 Friends, Friend Profile, Inbox, Conversation |
 | Turvalisus | `user_blocks`, `user_reports` | 08 Report or Block, Settings / Privacy |
 | Teavitused | `notifications`, `push_tokens` | 05 Notifications / Activity, Settings / Notifications |
-| Teenused | `service_providers`, `services`, `bookings` | 06 Services, Groomer, Select Time, Confirmed, My Bookings |
+| Teenused (M6) | `service_providers`, `provider_hours`, `services`, `bookings`, `booking_dogs` | 06 Services, Groomer, Select Time, Confirmed, My Bookings |
 
 ## Olulised reeglid
 
 - **Kohalolek aegub:** `check_ins.expires_at` on kohustuslik (vaikimisi 60 min). Aktiivne = `ended_at is null and expires_at > now()`.
 - **Üks avatud kohalolek kasutaja kohta:** osaline unikaalne indeks `check_ins_one_open_per_user_uq` (`user_id` where `ended_at is null`); uus check-in sulgeb eelmise samas transaktsioonis.
 - **Pargi lisamine:** uued pargid on `status = 'pending'` kuni modereerimiseni; `/parks/nearby` tagastab ainult `approved`.
-- **Broneeringud:** ühele teenusele ühele ajale saab olla üks aktiivne broneering (osaline unikaalne indeks, tühistatud vabastavad aja).
+- **Broneeringud (M6):** ühel teenusepakkujal ei saa olla kahte ajaliselt kattuvat aktiivset broneeringut, ka eri teenustele (välistuspiirang `bookings_no_overlap`, `btree_gist`; tühistatud vabastavad aja); teenus peab kuuluma broneeritud pakkujale (liitvõti); hind sentides, broneeringusse kopeeritud; vabad ajad arvutatakse lahtiolekuaegadest pakkuja ajavööndis. Vt [13-teenused.md](13-teenused.md).
 - **Hinnang:** `reviews.rating` vahemikus 1–5 (CHECK-piirang); üks hinnang kasutaja ja pargi kohta (`reviews_user_park_uq`); hinnata saab ainult külastatud parki; pargi lehel keskmine ühe komakohaga.
 - **Lemmikud:** `favorite_parks` (user_id + park_id liitvõti); nimekirjas ainult `approved` pargid, tagasi lükatud park kaob nimekirjast, aga rida jääb alles.
 - **Sõprus (M5):** vastastikune, kinnitatav; üks rida paari kohta mõlemas suunas (`friendships_pair_uq` avaldistel `least/greatest`), iseendaga mitte (`CHECK`). Vt [12-kogukond.md](12-kogukond.md).
@@ -34,5 +34,5 @@ Tabelid on tuletatud Figma vaadetest (leht *03 · Screens*, sektsioonid 01–08)
 ## Avatud küsimused
 
 - ~~Kas sõbrad on ühesuunalised või kahesuunalised?~~ Otsustatud M5-s: kahesuunalised, kinnitatava kutsega.
-- Kas teenusepakkujad on äpi kasutajad (oma vaade) või haldab neid admin?
+- ~~Kas teenusepakkujad on äpi kasutajad (oma vaade) või haldab neid admin?~~ Otsustatud M6-s: haldab Käpi meeskond (seeme / admin), pakkujakontosid pole; broneering kinnitub kohe.
 - Kui kaua hoitakse lõpetatud kohalolekut ajaloo jaoks (GDPR: säilitusaeg)?

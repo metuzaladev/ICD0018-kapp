@@ -23,6 +23,7 @@ TalTechi kursuse **ICD0018 Hübriidmobiilirakendused** projekt · autor Kristofe
 | [10 Koerad ja tervis](docs/10-koerad-ja-tervis.md) | Fotod (privaatne hoidla, EXIF/GPS eemaldamine), profiilipilt, tervisekirjed, meeldetuletused |
 | [11 Tõlked ja Figma tekstid](docs/11-tolked-ja-figma.md) | Eesti, inglise ja vene keel, keelevalik, API veateadete tõlkimine, CI kontrollid, erinevused Figmast |
 | [12 Kogukond](docs/12-kogukond.md) | Sõbrad, sõnumid (Socket.IO), teavitused ja push (BullMQ + Expo), blokeerimine ja teavitamine |
+| [13 Teenused](docs/13-teenused.md) | Teenusepakkujad, vabad ajad (lahtiolekuajad Tallinna ajas), broneerimine ja tühistamine, meeldetuletused |
 
 ## Käivitamine
 
@@ -33,7 +34,7 @@ npm install                 # kõik workspace'id
 cp apps/api/.env.example apps/api/.env
 npm run db:up               # Postgres + PostGIS, Redis (push'i järjekord) ja MinIO (fotod, loob bucket'i) Dockeris
 npm run db:migrate          # tabelid
-npm run db:seed             # näidispargid Tallinnas
+npm run db:seed             # näidispargid ja väljamõeldud teenusepakkujad Tallinnas
 npm run dev:api             # API → http://localhost:3000
 (cd apps/mobile && npx expo run:ios)   # development build (MapLibre, pildivalija); uuesti pärast natiivsete pakettide lisamist
 npm run dev:mobile          # Metro development build'i jaoks

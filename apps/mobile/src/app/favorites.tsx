@@ -6,7 +6,7 @@ import { EmptyState } from '@/components/empty-state';
 import { Entering } from '@/components/entering';
 import { ErrorState } from '@/components/error-state';
 import { OfflineBanner } from '@/components/offline-banner';
-import { ParkRow } from '@/components/park-row';
+import { ParkCard } from '@/components/park-card';
 import { Screen } from '@/components/screen';
 import { SkeletonList } from '@/components/skeleton';
 import { useFavoriteParks } from '@/hooks/use-parks';
@@ -28,7 +28,7 @@ export default function FavoritesScreen() {
       {parks?.length === 0 ? <EmptyState title={t('favorites.empty')} /> : null}
       {parks?.map((park, i) => (
         <Entering key={park.id} index={i}>
-          <ParkRow park={park} />
+          <ParkCard park={park} />
         </Entering>
       ))}
       {parks ? <Button label={t('favorites.explore')} variant="secondary" onPress={() => router.navigate('/map')} /> : null}

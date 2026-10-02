@@ -82,7 +82,9 @@ export function ParkCard({ park, rating }: ParkCardProps) {
           {tag ? (
             <View style={[styles.tag, { backgroundColor: c.mapPark }]}>
               <Icon name="trees" size={14} color={c.mapPinInk} />
-              <ThemedText type="caption" style={{ color: c.mapPinInk }} numberOfLines={1}>
+              {/* Figma: 13 pt medium. White on map.park is 4.1 : 1 — below 4.5 for small text — so the
+                  tag uses Label (15 pt bold), which counts as large text (≥ 14 pt bold, needs 3 : 1). */}
+              <ThemedText type="label" style={{ color: c.mapPinInk }} numberOfLines={1}>
                 {tag}
               </ThemedText>
             </View>

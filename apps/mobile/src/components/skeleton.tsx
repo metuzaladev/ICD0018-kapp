@@ -11,7 +11,7 @@ import { SKELETON_OPACITY } from '@/lib/motion';
 type SkeletonListProps = {
   /** How many placeholder rows; roughly what fits above the fold. */
   rows?: number;
-  /** Height of one row, matching the real row it stands in for (ListRow/ParkRow are 64 pt). */
+  /** Height of one row, matching the real row it stands in for (ListRow is 64 pt). */
   rowHeight?: number;
 };
 

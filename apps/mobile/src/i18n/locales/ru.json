@@ -15,7 +15,8 @@
     "kg": "{{value}} кг",
     "minutes": "{{value}} мин",
     "hours": "{{value}} ч",
-    "hoursMinutes": "{{hours}} ч {{minutes}} мин"
+    "hoursMinutes": "{{hours}} ч {{minutes}} мин",
+    "priceFrom": "от {{price}}"
   },
   "counts": {
     "dogs_one": "{{count}} собака",
@@ -85,7 +86,8 @@
     "vaccinationAdd": "Добавить прививку",
     "vetVisitAdd": "Визит к ветеринару",
     "healthRecordEdit": "Изменить запись",
-    "reportUser": "Пожаловаться или заблокировать"
+    "reportUser": "Пожаловаться или заблокировать",
+    "book": "Выбор времени"
   },
   "auth": {
     "email": "Эл. почта",
@@ -174,7 +176,9 @@
     "friendsPlansTitle": "Друзья идут в парк",
     "friendsPlansEmpty": "В ближайшие два дня у друзей нет планов.",
     "friendPlan": "{{name}} · {{day}} {{from}}–{{to}}",
-    "findFriends": "Найти друзей для игр"
+    "findFriends": "Найти друзей для игр",
+    "servicesTitle": "Услуги",
+    "servicesSub": "Груминг, дрессировка и ветклиники"
   },
   "map": {
     "title": "Откроем Таллинн.",
@@ -454,7 +458,13 @@
     "unreadMessages_one": "{{count}} непрочитанное сообщение",
     "unreadMessages_few": "{{count}} непрочитанных сообщения",
     "unreadMessages_many": "{{count}} непрочитанных сообщений",
-    "unreadMessages_other": "{{count}} непрочитанного сообщения"
+    "unreadMessages_other": "{{count}} непрочитанного сообщения",
+    "bookings": "Мои записи",
+    "bookingsSub": "Груминг и визиты",
+    "upcomingBookings_one": "{{count}} предстоящий визит",
+    "upcomingBookings_few": "{{count}} предстоящих визита",
+    "upcomingBookings_many": "{{count}} предстоящих визитов",
+    "upcomingBookings_other": "{{count}} предстоящего визита"
   },
   "settings": {
     "title": "Ваш Käpp.",
@@ -494,7 +504,7 @@
   "notifications": {
     "title": "Что нового?",
     "subtitle": "Хорошие новости для вашей маленькой стаи.",
-    "body": "Здесь появятся планы друзей, запросы в друзья и сообщения.",
+    "body": "Здесь появятся планы друзей, запросы в друзья, сообщения и записи.",
     "someone": "Кто-то",
     "friendRequest": "Новый запрос в друзья",
     "friendRequestBody": "{{name}} хочет добавить вас в друзья",
@@ -508,7 +518,11 @@
     },
     "markAll": "Отметить всё прочитанным",
     "unreadHint": "Не прочитано",
-    "more": "Показать более ранние"
+    "more": "Показать более ранние",
+    "bookingConfirmed": "Запись подтверждена",
+    "bookingCancelled": "Запись отменена",
+    "bookingReminder": "Скоро увидимся!",
+    "bookingBody": "{{service}} · {{provider}} · {{when}}"
   },
   "community": {
     "nameWithDogs": "{{name}} и {{dogs}}"
@@ -607,7 +621,8 @@
     "friendPlans": "Друзья идут в парк",
     "friendRequests": "Запросы в друзья",
     "feedNote": "Во вкладке уведомлений всегда видно всё; эти переключатели касаются только push-уведомлений.",
-    "save": "Сохранить настройки"
+    "save": "Сохранить настройки",
+    "bookings": "Обновления записей"
   },
   "invite": {
     "title": "Позвать в парк: {{name}}",
@@ -624,5 +639,102 @@
   },
   "push": {
     "channelName": "Друзья и сообщения"
+  },
+  "services": {
+    "title": "Немного заботы. Много радости.",
+    "subtitle": "Услуги для вашего хвостатого",
+    "categories": {
+      "all": "Все",
+      "grooming": "Груминг",
+      "training": "Дрессировка",
+      "vet": "Клиника",
+      "other": "Другое"
+    },
+    "kind": {
+      "grooming": "груминг",
+      "training": "дрессировка",
+      "vet": "ветклиника",
+      "other": "услуга для собак"
+    },
+    "kindTitle": {
+      "grooming": "Груминг",
+      "training": "Дрессировка",
+      "vet": "Ветклиника",
+      "other": "Услуга для собак"
+    },
+    "rowTitle": "{{name}} · {{kind}}",
+    "rating": "★ {{rating}}",
+    "ratingA11y": "оценка {{rating}} из 5, {{reviews}}",
+    "demoNote": "Специалисты, цены и время — демонстрационные данные.",
+    "empty": "В этой категории пока никого нет.",
+    "distanceNote": "Расстояния считаются от центра Таллина."
+  },
+  "provider": {
+    "serviceMeta": "{{duration}} · {{price}}",
+    "serviceHint": "Выбирает эту услугу",
+    "chooseTime": "Выбрать время",
+    "noServices": "Сейчас у этого специалиста нет услуг для записи."
+  },
+  "booking": {
+    "title": {
+      "grooming": "Время для себя. И для чистой шерсти.",
+      "training": "Время учиться вместе.",
+      "vet": "Время для здоровья.",
+      "other": "Время для вашего хвостатого."
+    },
+    "serviceLine": "{{service}} · {{duration}}",
+    "date": "Дата",
+    "time": "Время",
+    "dayFull": "В этот день свободного времени нет.",
+    "noSlots": "На ближайшую неделю свободного времени нет.",
+    "timeZoneNote": "Время указано по часовому поясу специалиста ({{zone}}).",
+    "who": "Кто придёт?",
+    "noDogs": "Чтобы записаться, сначала добавьте собаку.",
+    "addDog": "Добавить собаку",
+    "note": "Комментарий для специалиста",
+    "notePlaceholder": "Первый визит, сначала немного стесняется.",
+    "price": "Цена {{price}}",
+    "priceNote": "Точная цена согласуется со специалистом.",
+    "cancelRule_one": "Отменить можно не позднее чем за {{count}} час до начала.",
+    "cancelRule_few": "Отменить можно не позднее чем за {{count}} часа до начала.",
+    "cancelRule_many": "Отменить можно не позднее чем за {{count}} часов до начала.",
+    "cancelRule_other": "Отменить можно не позднее чем за {{count}} часа до начала.",
+    "submit": "Подтвердить запись",
+    "chooseTime": "Выберите время",
+    "confirmed": {
+      "title": "До встречи!",
+      "subtitle": "Вы записаны.",
+      "card": "{{dogs}} · {{service}}",
+      "info": "Подробности записи — в вашем профиле.",
+      "viewBookings": "Мои записи",
+      "home": "На главную"
+    }
+  },
+  "bookings": {
+    "title": "Забота запланирована.",
+    "subtitle_zero": "Ваши ближайшие визиты.",
+    "subtitle_one": "Ближайшие визиты вашей собаки.",
+    "subtitle_few": "Ближайшие визиты ваших собак.",
+    "subtitle_many": "Ближайшие визиты ваших собак.",
+    "subtitle_other": "Ближайшие визиты ваших собак.",
+    "upcoming": "Предстоящие",
+    "past": "Прошедшие",
+    "emptyUpcoming": "Пока ничего не запланировано.",
+    "emptyPast": "Прошедших записей нет.",
+    "findService": "Найти услугу",
+    "status": {
+      "confirmed": "Подтверждена",
+      "cancelled": "Отменена",
+      "completed": "Состоялась"
+    },
+    "when": "{{date}}, {{from}}–{{to}}",
+    "note": "Комментарий: {{note}}",
+    "cancel": "Отменить запись",
+    "cancelUntil": "Отменить можно до {{date}} {{time}}.",
+    "cancelClosed": "Отменить в приложении уже нельзя. Если не получается прийти, сообщите специалисту.",
+    "cancelTitle": "Отменить запись?",
+    "cancelBody": "{{service}}, {{provider}} · {{when}}. Время освободится для других.",
+    "cancelConfirm": "Отменить",
+    "keep": "Оставить"
   }
 }

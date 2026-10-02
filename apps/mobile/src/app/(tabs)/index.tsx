@@ -103,6 +103,9 @@ export default function HomeScreen() {
 
       <Button label={t('home.findPark')} onPress={() => router.navigate('/map')} />
 
+      {/* Not on the Figma Home: without it the services were reachable only via Profile → bookings (docs/11). */}
+      <ListRow title={t('home.servicesTitle')} subtitle={t('home.servicesSub')} onPress={() => router.push('/services')} />
+
       {parks.length > 0 ? (
         <>
           <ThemedText type="heading">{t('home.nearby')}</ThemedText>

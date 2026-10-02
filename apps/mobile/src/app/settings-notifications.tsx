@@ -12,7 +12,7 @@ import { ThemedText } from '@/components/themed-text';
 import { useNotificationPreferences, useSaveNotificationPreferences } from '@/hooks/use-notifications';
 import { errorMessage } from '@/lib/api';
 
-const KEYS: (keyof NotificationPreferences)[] = ['messages', 'friendPlans', 'friendRequests'];
+const KEYS: (keyof NotificationPreferences)[] = ['messages', 'friendPlans', 'friendRequests', 'bookings'];
 
 /** Figma 07 / Settings / Notifications: which pushes to receive. The in-app feed always shows everything. */
 export default function NotificationSettingsScreen() {

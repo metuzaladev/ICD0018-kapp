@@ -15,7 +15,8 @@
     "kg": "{{value}} kg",
     "minutes": "{{value}} min",
     "hours": "{{value}} h",
-    "hoursMinutes": "{{hours}} h {{minutes}} min"
+    "hoursMinutes": "{{hours}} h {{minutes}} min",
+    "priceFrom": "from {{price}}"
   },
   "counts": {
     "dogs_one": "{{count}} dog",
@@ -69,7 +70,8 @@
     "vaccinationAdd": "Add vaccination",
     "vetVisitAdd": "Vet visit",
     "healthRecordEdit": "Edit record",
-    "reportUser": "Report or block"
+    "reportUser": "Report or block",
+    "book": "Choose a time"
   },
   "auth": {
     "email": "Email",
@@ -158,7 +160,9 @@
     "friendsPlansTitle": "Friends heading to the park",
     "friendsPlansEmpty": "No plans from friends in the next two days.",
     "friendPlan": "{{name}} · {{day}} {{from}}–{{to}}",
-    "findFriends": "Find playmates"
+    "findFriends": "Find playmates",
+    "servicesTitle": "Services",
+    "servicesSub": "Grooming, training and vets"
   },
   "map": {
     "title": "Let’s explore Tallinn.",
@@ -420,7 +424,11 @@
     "messages": "Messages",
     "messagesSub": "Little hellos",
     "unreadMessages_one": "{{count}} unread message",
-    "unreadMessages_other": "{{count}} unread messages"
+    "unreadMessages_other": "{{count}} unread messages",
+    "bookings": "My bookings",
+    "bookingsSub": "Grooming and appointments",
+    "upcomingBookings_one": "{{count}} upcoming appointment",
+    "upcomingBookings_other": "{{count}} upcoming appointments"
   },
   "settings": {
     "title": "Your Käpp.",
@@ -460,7 +468,7 @@
   "notifications": {
     "title": "What’s new?",
     "subtitle": "Good news for your little pack.",
-    "body": "Friends’ plans, friend requests and messages will show up here.",
+    "body": "Friends’ plans, friend requests, messages and bookings will show up here.",
     "someone": "Someone",
     "friendRequest": "New friend request",
     "friendRequestBody": "{{name}} would like to be friends",
@@ -474,7 +482,11 @@
     },
     "markAll": "Mark all as read",
     "unreadHint": "Unread",
-    "more": "Show older"
+    "more": "Show older",
+    "bookingConfirmed": "Booking confirmed",
+    "bookingCancelled": "Booking cancelled",
+    "bookingReminder": "See you soon!",
+    "bookingBody": "{{service}} · {{provider}} · {{when}}"
   },
   "community": {
     "nameWithDogs": "{{name}} and {{dogs}}"
@@ -571,7 +583,8 @@
     "friendPlans": "Friends heading to the park",
     "friendRequests": "Friend requests",
     "feedNote": "The Activity tab always shows everything; these switches only affect push notifications.",
-    "save": "Save preferences"
+    "save": "Save preferences",
+    "bookings": "Booking updates"
   },
   "invite": {
     "title": "Invite {{name}} to the park",
@@ -588,5 +601,98 @@
   },
   "push": {
     "channelName": "Friends and messages"
+  },
+  "services": {
+    "title": "A little care. A lot of joy.",
+    "subtitle": "Services for your furry friend",
+    "categories": {
+      "all": "All",
+      "grooming": "Grooming",
+      "training": "Training",
+      "vet": "Vet",
+      "other": "Other"
+    },
+    "kind": {
+      "grooming": "dog grooming",
+      "training": "dog training",
+      "vet": "vet clinic",
+      "other": "dog service"
+    },
+    "kindTitle": {
+      "grooming": "Dog grooming",
+      "training": "Dog training",
+      "vet": "Vet clinic",
+      "other": "Dog service"
+    },
+    "rowTitle": "{{name}} · {{kind}}",
+    "rating": "★ {{rating}}",
+    "ratingA11y": "rated {{rating}} out of 5, {{reviews}}",
+    "demoNote": "Providers, prices and times are sample data.",
+    "empty": "No providers in this category yet.",
+    "distanceNote": "Distances are measured from Tallinn city centre."
+  },
+  "provider": {
+    "serviceMeta": "{{duration}} · {{price}}",
+    "serviceHint": "Selects this service",
+    "chooseTime": "Choose a time",
+    "noServices": "This provider has no bookable services right now."
+  },
+  "booking": {
+    "title": {
+      "grooming": "Time for yourself. And a clean coat.",
+      "training": "Time to learn together.",
+      "vet": "Time for good health.",
+      "other": "Time for your furry friend."
+    },
+    "serviceLine": "{{service}} · {{duration}}",
+    "date": "Date",
+    "time": "Time",
+    "dayFull": "No free times on this day.",
+    "noSlots": "No free times in the coming week.",
+    "timeZoneNote": "Times are in the provider’s time zone ({{zone}}).",
+    "who": "Who’s coming?",
+    "noDogs": "Add your dog first to book.",
+    "addDog": "Add a dog",
+    "note": "Note for the provider",
+    "notePlaceholder": "First visit, a little shy at first.",
+    "price": "Price {{price}}",
+    "priceNote": "The exact price is confirmed with the provider.",
+    "cancelRule_one": "You can cancel up to {{count}} hour before the start.",
+    "cancelRule_other": "You can cancel up to {{count}} hours before the start.",
+    "submit": "Confirm booking",
+    "chooseTime": "Choose a time",
+    "confirmed": {
+      "title": "See you soon!",
+      "subtitle": "Your booking is in.",
+      "card": "{{dogs}} · {{service}}",
+      "info": "You’ll find the booking details in your profile.",
+      "viewBookings": "View bookings",
+      "home": "Back to home"
+    }
+  },
+  "bookings": {
+    "title": "Care is planned.",
+    "subtitle_zero": "Your upcoming appointments.",
+    "subtitle_one": "Your dog’s upcoming appointments.",
+    "subtitle_other": "Your dogs’ upcoming appointments.",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "emptyUpcoming": "Nothing planned yet.",
+    "emptyPast": "No past bookings.",
+    "findService": "Find a new service",
+    "status": {
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "completed": "Completed"
+    },
+    "when": "{{date}}, {{from}}–{{to}}",
+    "note": "Note: {{note}}",
+    "cancel": "Cancel booking",
+    "cancelUntil": "You can cancel until {{date}} {{time}}.",
+    "cancelClosed": "It’s too late to cancel here. If you can’t make it, please let the provider know.",
+    "cancelTitle": "Cancel this booking?",
+    "cancelBody": "{{service}}, {{provider}} · {{when}}. The time will be freed for others.",
+    "cancelConfirm": "Cancel booking",
+    "keep": "Keep it"
   }
 }

@@ -1,4 +1,5 @@
-import type { ServiceCategory } from '@kapp/shared';
+import { SERVICE_CATEGORIES, type ServiceCategory } from '@kapp/shared';
+import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -34,7 +35,11 @@ const CATEGORY_ICON: Record<ServiceCategory | 'all', IconName> = {
 export default function ServicesScreen() {
   const { t } = useTranslation();
   const location = useDeviceLocation();
-  const [category, setCategory] = useState<ServiceCategory | null>(null);
+  // Pood's category tiles open the list on a category (`?category=grooming`).
+  const { category: initial } = useLocalSearchParams<{ category?: string }>();
+  const [category, setCategory] = useState<ServiceCategory | null>(
+    (SERVICE_CATEGORIES as readonly string[]).includes(initial ?? '') ? (initial as ServiceCategory) : null,
+  );
   const providers = useProviders(category, location.origin);
   const refresh = usePullToRefresh(providers.refetch);
 

@@ -76,12 +76,16 @@ function MapScreen() {
   const [promptRequested, setPromptRequested] = useState(false);
   const featureCount = activeFilterCount(filters);
 
-  // A focus that only selects a chip (Pood → "Lähedal kaardil") is applied here; one with a point
-  // is applied by the map once its style has loaded (onFocusApplied).
-  useEffect(() => {
-    if (!focus) return;
+  // A focus request selects its chip once (adjusting state while rendering, React's pattern for
+  // "state follows a prop"); its point is applied by the map once the style has loaded.
+  const [handledFocus, setHandledFocus] = useState<number | null>(focus?.nonce ?? null);
+  if (focus && focus.nonce !== handledFocus) {
+    setHandledFocus(focus.nonce);
     if (focus.category) setCategory(focus.category);
-    if (focus.lat === undefined) clearMapFocus(focus.nonce);
+  }
+  // A chip-only focus (Pood → "Lähedal kaardil") has nothing left for the map: clear it.
+  useEffect(() => {
+    if (focus && focus.lat === undefined) clearMapFocus(focus.nonce);
   }, [focus]);
 
   const matches = useMemo(() => {

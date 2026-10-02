@@ -1,4 +1,4 @@
-import type { NotificationPreferences } from '@kapp/shared';
+import type { NotificationPreferencesWithRewards } from '@kapp/shared';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +12,8 @@ import { ThemedText } from '@/components/themed-text';
 import { useNotificationPreferences, useSaveNotificationPreferences } from '@/hooks/use-notifications';
 import { errorMessage } from '@/lib/api';
 
-const KEYS: (keyof NotificationPreferences)[] = ['messages', 'friendPlans', 'friendRequests', 'bookings'];
+/** `rewards` (M9b): level-ups, badges and "Sinu soovitus on avaldatud". */
+const KEYS: (keyof NotificationPreferencesWithRewards)[] = ['messages', 'friendPlans', 'friendRequests', 'bookings', 'rewards'];
 
 /** Figma 07 / Settings / Notifications: which pushes to receive. The in-app feed always shows everything. */
 export default function NotificationSettingsScreen() {
@@ -20,7 +21,7 @@ export default function NotificationSettingsScreen() {
   const saved = useNotificationPreferences();
   const save = useSaveNotificationPreferences();
   // Local edits on top of the saved values; nothing is sent until "Salvesta eelistused".
-  const [draft, setDraft] = useState<NotificationPreferences | null>(null);
+  const [draft, setDraft] = useState<NotificationPreferencesWithRewards | null>(null);
   const values = draft ?? saved.data ?? null;
 
   async function submit() {

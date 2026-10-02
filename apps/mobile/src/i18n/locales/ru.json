@@ -61,7 +61,20 @@
     "ageYears_one": "{{count}} год",
     "ageYears_few": "{{count}} года",
     "ageYears_many": "{{count}} лет",
-    "ageYears_other": "{{count}} года"
+    "ageYears_other": "{{count}} года",
+    "justNow": "только что",
+    "minutesAgo_one": "{{count}} мин назад",
+    "minutesAgo_few": "{{count}} мин назад",
+    "minutesAgo_many": "{{count}} мин назад",
+    "minutesAgo_other": "{{count}} мин назад",
+    "hoursAgo_one": "{{count}} ч назад",
+    "hoursAgo_few": "{{count}} ч назад",
+    "hoursAgo_many": "{{count}} ч назад",
+    "hoursAgo_other": "{{count}} ч назад",
+    "daysAgo_one": "{{count}} день назад",
+    "daysAgo_few": "{{count}} дня назад",
+    "daysAgo_many": "{{count}} дней назад",
+    "daysAgo_other": "{{count}} дня назад"
   },
   "errors": {
     "network": "Нет подключения к интернету, или сервер не отвечает",
@@ -92,7 +105,9 @@
     "vetVisitAdd": "Визит к ветеринару",
     "healthRecordEdit": "Изменить запись",
     "reportUser": "Пожаловаться или заблокировать",
-    "book": "Выбор времени"
+    "book": "Выбор времени",
+    "suggestPlace": "Посоветовать место",
+    "reportPost": "Пожаловаться"
   },
   "auth": {
     "email": "Эл. почта",
@@ -259,7 +274,18 @@
     "noMatches": "Места с таким названием не найдено.",
     "providerMarker": "{{name}}, услуги для собак",
     "active": "Активные",
-    "favorites": "Избранные"
+    "favorites": "Избранные",
+    "placeMarker": "{{name}}, {{kind}}",
+    "placeKinds": {
+      "park": "парк",
+      "cafe": "кафе",
+      "beach": "пляж",
+      "service": "услуги",
+      "vet": "ветклиника",
+      "shop": "магазин или другое место"
+    },
+    "providerHint": "Показывает свободное время и запись",
+    "emptyPlaces": "На этом участке карты пока ничего нет. Сдвиньте карту или посмотрите советы сообщества."
   },
   "parkRow": {
     "dogsNow": "сейчас {{dogs}}",
@@ -538,7 +564,14 @@
     "upcomingBookings_one": "{{count}} предстоящий визит",
     "upcomingBookings_few": "{{count}} предстоящих визита",
     "upcomingBookings_many": "{{count}} предстоящих визитов",
-    "upcomingBookings_other": "{{count}} предстоящего визита"
+    "upcomingBookings_other": "{{count}} предстоящего визита",
+    "rewards": "Лапки",
+    "rewardsSub": "{{paws}} · {{level}}",
+    "rewardsSubEmpty": "Зарабатывайте в парке",
+    "shop": "Магазин",
+    "shopSub": "Скидки партнёров за лапки",
+    "myPosts": "Мои советы",
+    "myPostsSub": "Посоветованные и сохранённые места"
   },
   "settings": {
     "title": "Ваш Käpp.",
@@ -602,7 +635,11 @@
     "bookingConfirmed": "Запись подтверждена",
     "bookingCancelled": "Запись отменена",
     "bookingReminder": "Скоро увидимся!",
-    "bookingBody": "{{service}} · {{provider}} · {{when}}"
+    "bookingBody": "{{service}} · {{provider}} · {{when}}",
+    "levelUp": "Новый уровень!",
+    "badge": "Новый значок!",
+    "postApproved": "Ваш совет опубликован",
+    "postApprovedPoints": "+{{paws}}"
   },
   "community": {
     "nameWithDogs": "{{name}} и {{dogs}}"
@@ -703,7 +740,8 @@
     "friendRequests": "Запросы в друзья",
     "feedNote": "Во вкладке уведомлений всегда видно всё; эти переключатели касаются только push-уведомлений.",
     "save": "Сохранить настройки",
-    "bookings": "Обновления записей"
+    "bookings": "Обновления записей",
+    "rewards": "Лапки и значки"
   },
   "invite": {
     "title": "Позвать в парк: {{name}}",
@@ -789,7 +827,13 @@
       "info": "Подробности записи — в вашем профиле.",
       "viewBookings": "Мои записи",
       "home": "На главную"
-    }
+    },
+    "usePaws": "Использовать лапки: −{{percent}}%",
+    "usePawsCost": "Будет списано: {{cost}}",
+    "usePawsShort": "Нужно: {{cost}}, у вас: {{balance}}",
+    "usePawsCode": "Используем ваш код {{code}}",
+    "usePawsNote": "Цена со скидкой (−{{percent}}%) подтверждается при записи. Оплата по-прежнему у исполнителя.",
+    "discounted": "Цена за лапки: {{price}} (−{{percent}}%)"
   },
   "bookings": {
     "title": "Забота запланирована.",
@@ -822,7 +866,12 @@
     "balance_one": "{{count}} лапка",
     "balance_few": "{{count}} лапки",
     "balance_many": "{{count}} лапок",
-    "balance_other": "{{count}} лапки"
+    "balance_other": "{{count}} лапки",
+    "paws_one": "{{value}} лапка",
+    "paws_few": "{{value}} лапки",
+    "paws_many": "{{value}} лапок",
+    "paws_other": "{{value}} лапки",
+    "openHint": "Открывает лапки"
   },
   "parkCard": {
     "tag": {
@@ -837,5 +886,345 @@
     "label": "Ближайший парк",
     "hereNow": "Вы здесь",
     "checkInHint": "Отмечает ваше присутствие: {{name}}"
+  },
+  "mapSheet": {
+    "freeTimes": "Свободное время",
+    "discountTitle": "−{{percent}}% за лапки",
+    "discountBody": "При записи можно использовать {{cost}}.",
+    "discountBodyBalance": "При записи можно использовать {{cost}}. У вас {{balance}}.",
+    "services": "Услуги",
+    "book": "Записаться",
+    "bookAt": "Записаться: {{time}}"
+  },
+  "explore": {
+    "title": "Места, где рады собакам.",
+    "subtitle": "Советы сообщества рядом с вами.",
+    "switchLabel": "Карта или Обзор",
+    "switchMap": "Карта",
+    "switchFeed": "Обзор",
+    "communityEntry": "Советы сообщества",
+    "communityEntryHint": "Открывает ленту советов",
+    "filters": {
+      "near": "Рядом",
+      "nearFallbackHint": "Без вашего местоположения считаем от центра Таллинна",
+      "cafe": "Кафе",
+      "park": "Парки",
+      "beach": "Пляжи",
+      "shop": "Магазины",
+      "friends": "Друзья"
+    },
+    "categories": {
+      "cafe": "Кафе",
+      "park": "Парк",
+      "beach": "Пляж",
+      "shop": "Магазин",
+      "other": "Другое"
+    },
+    "amenities": {
+      "dogs_inside": "Собакам можно внутрь",
+      "water_bowl": "Миска с водой",
+      "terrace": "Терраса",
+      "dog_treats": "Лакомства",
+      "fenced_area": "Огороженная зона",
+      "off_leash": "Без поводка",
+      "shade": "Тень",
+      "stream": "Ручей или вода"
+    },
+    "emptyTitle": "Здесь пока нет советов.",
+    "emptyFriendsTitle": "Друзья пока ничего не посоветовали.",
+    "emptyBody": "Знаете место, где рады собакам? Поделитесь им.",
+    "suggest": "Посоветовать место",
+    "suggestHint": "Открывает форму нового места",
+    "pendingInfoTitle": "Ожидает проверки",
+    "pendingInfoBody_one": "Мы проверяем ваш совет. После публикации вы получите {{count}} лапку.",
+    "pendingInfoBody_few": "Мы проверяем ваш совет. После публикации вы получите {{count}} лапки.",
+    "pendingInfoBody_many": "Мы проверяем ваш совет. После публикации вы получите {{count}} лапок.",
+    "pendingInfoBody_other": "Мы проверяем ваш совет. После публикации вы получите {{count}} лапки.",
+    "pendingInfoBodyNoPoints": "Мы проверяем ваш совет. Другие увидят его после одобрения.",
+    "post": {
+      "you": "Вы",
+      "meta": "советует · {{when}}",
+      "byline": "{{name}} советует, {{when}}",
+      "pending": "Ожидает проверки",
+      "rejected": "Отклонено",
+      "earnedShort": "+{{points}}",
+      "earned_one": "Вы заработали {{count}} лапку",
+      "earned_few": "Вы заработали {{count}} лапки",
+      "earned_many": "Вы заработали {{count}} лапок",
+      "earned_other": "Вы заработали {{count}} лапки",
+      "more": "Другие действия",
+      "openHint": "Открывает совет",
+      "like": "Нравится",
+      "unlike": "Убрать отметку «нравится»",
+      "likes_one": "{{count}} отметка «нравится»",
+      "likes_few": "{{count}} отметки «нравится»",
+      "likes_many": "{{count}} отметок «нравится»",
+      "likes_other": "{{count}} отметки «нравится»",
+      "save": "Сохранить",
+      "unsave": "Убрать из сохранённых",
+      "onMap": "На карте",
+      "onMapHint": "Показывает место на карте"
+    },
+    "delete": {
+      "action": "Удалить совет",
+      "title": "Удалить совет?",
+      "body": "Совет «{{name}}» нельзя будет восстановить.",
+      "failed": "Не удалось удалить"
+    },
+    "report": {
+      "action": "Пожаловаться на публикацию",
+      "author": "Пожаловаться или заблокировать: {{name}}",
+      "title": "Что не так с этой публикацией?",
+      "why": "Причина",
+      "reasons": {
+        "spam": "Спам",
+        "inappropriate": "Неуместное содержание",
+        "wrong_info": "Неверная информация",
+        "other": "Другое"
+      },
+      "placeholder": "Например: место закрыто или с собаками нельзя",
+      "thanksTitle": "Жалоба отправлена",
+      "thanksBody": "Мы проверим публикацию. Автор не узнает, кто пожаловался."
+    },
+    "mine": {
+      "title": "Мои советы",
+      "subtitle": "Места, которые вы посоветовали и сохранили.",
+      "tabMine": "Посоветованные",
+      "tabSaved": "Сохранённые",
+      "emptyMine": "Вы пока не посоветовали ни одного места.",
+      "emptySaved": "Сохранённых мест пока нет. Нажмите на закладку у совета, чтобы сохранить его здесь."
+    }
+  },
+  "suggest": {
+    "title": "Посоветуйте место.",
+    "subtitle": "Помогите другим найти места, где рады собакам.",
+    "addPhoto": "Добавить фото",
+    "addPhotoHint": "До {{max}} фото",
+    "photoNote": "До {{max}} фото, первое — обложка. Данные о местоположении удаляются из фото автоматически.",
+    "photoTitle": "Фото {{position}}/{{total}}",
+    "photoA11y": "Фото {{position}}/{{total}}",
+    "photoCoverA11y": "Фото {{position}}/{{total}}, обложка",
+    "photoHint": "Открывает действия: обложка или удаление",
+    "makeCover": "Сделать обложкой",
+    "removePhoto": "Удалить фото",
+    "cameraDenied": "Разрешите доступ к камере в настройках, чтобы сфотографировать место.",
+    "name": "Название места",
+    "namePlaceholder": "Например, кафе Kalamaja Kiri",
+    "address": "Адрес",
+    "addressPlaceholder": "Например, Kotzebue 9, Каламая",
+    "where": "Место на карте",
+    "whereHint": "Сдвигайте карту, пока булавка не окажется на месте.",
+    "useMyLocation": "Моё местоположение",
+    "locationDenied": "Разрешите доступ к местоположению в настройках или сдвиньте карту вручную.",
+    "locationFailed": "Не удалось определить местоположение. Сдвиньте карту вручную.",
+    "choosePoint": "Сдвиньте карту, чтобы булавка оказалась на месте.",
+    "category": "Категория",
+    "chooseCategory": "Выберите категорию",
+    "amenities": "Чем это место хорошо для собак?",
+    "body": "Ваш опыт",
+    "bodyPlaceholder": "Фредди сразу дали миску воды и печенье.",
+    "earnTitle_one": "Вы получите {{count}} лапку",
+    "earnTitle_few": "Вы получите {{count}} лапки",
+    "earnTitle_many": "Вы получите {{count}} лапок",
+    "earnTitle_other": "Вы получите {{count}} лапки",
+    "earnTitleNoPoints": "Места проверяет сообщество",
+    "earnBody": "Когда место подтвердят. Данные о местоположении удаляются из фото автоматически.",
+    "uploading": "Загружаем фото {{done}}/{{total}}…",
+    "submit": "Опубликовать",
+    "sent": "Совет отправлен и ожидает проверки."
+  },
+  "rewards": {
+    "title": "Ваши лапки.",
+    "subtitle": "Зарабатывайте в парке, тратьте у партнёров.",
+    "balance": "Баланс",
+    "levelPill": "{{level}} · уровень {{number}}",
+    "pawsWord_one": "лапка",
+    "pawsWord_few": "лапки",
+    "pawsWord_many": "лапок",
+    "pawsWord_other": "лапки",
+    "toNext": "Ещё {{paws}} до уровня «{{level}}»",
+    "topLevel": "Высший уровень достигнут!",
+    "balanceA11y": "Баланс: {{paws}}. {{level}}, уровень {{number}}. {{next}}",
+    "useInShop": "Потратить в магазине",
+    "streak_one": "{{count}} день подряд на улице",
+    "streak_few": "{{count}} дня подряд на улице",
+    "streak_many": "{{count}} дней подряд на улице",
+    "streak_other": "{{count}} дня подряд на улице",
+    "streakNone": "Начните серию в парке",
+    "perDay": "+{{points}} в день",
+    "weekA11y_one": "За последние 7 дней: {{count}} день в парке",
+    "weekA11y_few": "За последние 7 дней: {{count}} дня в парке",
+    "weekA11y_many": "За последние 7 дней: {{count}} дней в парке",
+    "weekA11y_other": "За последние 7 дней: {{count}} дня в парке",
+    "howToEarn": "Как заработать",
+    "plus": "+{{points}}",
+    "plusA11y": "плюс {{paws}}",
+    "withLimit_one": "{{body}} · до {{count}} раза в день",
+    "withLimit_few": "{{body}} · до {{count}} раз в день",
+    "withLimit_many": "{{body}} · до {{count}} раз в день",
+    "withLimit_other": "{{body}} · до {{count}} раза в день",
+    "badgesTitle": "Значки",
+    "badgeUnlocked": "Получен!",
+    "badgeProgress": "{{progress}} из {{target}}",
+    "badgeProgressShort": "{{progress}}/{{target}}",
+    "historyTitle": "История",
+    "historySubtitle": "Все заработанные и потраченные лапки.",
+    "historyEmpty": "История пока пуста. Первые лапки — за посещение парка.",
+    "historyAll": "Вся история",
+    "historyDelta": "{{delta}} лап.",
+    "honestyTitle": "Честность прежде всего",
+    "honestyBody": "Лапки начисляются только за подтверждённые действия. Двойные отметки и слишком короткие визиты не считаются.",
+    "levels": {
+      "puppy": "Щенок",
+      "park_friend": "Друг парка",
+      "park_legend": "Легенда парка",
+      "pack_leader": "Вожак стаи"
+    },
+    "badges": {
+      "early_bird": {
+        "name": "Ранняя пташка",
+        "body": "В парке до 8 утра"
+      },
+      "ten_parks": {
+        "name": "Десять парков",
+        "body": "Побывали в 10 разных парках"
+      },
+      "explorer": {
+        "name": "Исследователь",
+        "body": "3 одобренных совета"
+      },
+      "kadriorg_legend": {
+        "name": "Легенда парка",
+        "body": "20 визитов в один и тот же парк"
+      }
+    },
+    "reasons": {
+      "check_in": {
+        "title": "В парке",
+        "body": "Не меньше 20 минут в парке"
+      },
+      "streak": {
+        "title": "Серия",
+        "body": "В парке сегодня и вчера"
+      },
+      "plan_honoured": {
+        "title": "План выполнен",
+        "body": "Пришли в запланированное время"
+      },
+      "review": {
+        "title": "Отзыв",
+        "body": "Первая оценка парка"
+      },
+      "place_post": {
+        "title": "Новое место",
+        "body": "Когда сообщество его подтвердит"
+      },
+      "invite": {
+        "title": "Друг присоединился",
+        "body": "По вашему коду, после его первого визита в парк"
+      },
+      "redemption": {
+        "title": "Скидка получена",
+        "body": "Потрачено в магазине"
+      },
+      "redemption_refund": {
+        "title": "Возврат",
+        "body": "Код отменён"
+      }
+    },
+    "invite": {
+      "title": "Пригласите друга",
+      "body": "Когда друг присоединится по вашему коду и впервые придёт в парк, вы получите {{paws}}.",
+      "codeA11y": "Ваш код приглашения: {{code}}",
+      "share": "Поделиться кодом",
+      "shareMessage": "Присоединяйтесь к Käpp! Мой код приглашения: {{code}}",
+      "claimLabel": "Получили код от друга?",
+      "claimPlaceholder": "Например, ABCD2345",
+      "claim": "Применить код",
+      "claimed": "Код сохранён. Друг получит лапки после вашего первого визита в парк."
+    }
+  },
+  "shop": {
+    "title": "Магазин.",
+    "subtitle": "Местные партнёры, дешевле за лапки.",
+    "tabServices": "Услуги",
+    "tabProducts": "Товары",
+    "balance": "У вас {{paws}}",
+    "balanceSub": "До −{{percent}}% у партнёров.",
+    "myCodes": "Мои коды",
+    "myCodesSub": "Полученные коды скидок",
+    "tiles": {
+      "grooming": "Груминг",
+      "training": "Дрессировка",
+      "vet": "Здоровье"
+    },
+    "tileHint": "Открывает исполнителей услуг",
+    "nearbyMap": "Рядом на карте",
+    "openMap": "Открыть карту",
+    "openMapHint": "Открывает карту с услугами",
+    "popularServices": "Популярные услуги",
+    "partnerHint": "Открывает исполнителя",
+    "noPartners": "Партнёров пока нет.",
+    "partnerProducts": "Товары партнёров",
+    "allProducts": "Все товары",
+    "noProducts": "В этой категории товаров нет.",
+    "discount": "−{{percent}}%",
+    "discountA11y": "−{{percent}}% за лапки, {{paws}}",
+    "productA11y": "{{name}}, {{price}}, −{{percent}}% за лапки, {{partner}}",
+    "productCategories": {
+      "all": "Все",
+      "food": "Корм",
+      "treats": "Лакомства",
+      "toys": "Игрушки",
+      "accessories": "Аксессуары",
+      "care": "Уход"
+    },
+    "priceAtPartner": "Цена у партнёра",
+    "priceWithPaws": "За лапки",
+    "cost": "Стоимость",
+    "youHave": "У вас {{paws}}",
+    "short": "Не хватает: {{paws}}",
+    "redeem_one": "Обменять на {{value}} лапку",
+    "redeem_few": "Обменять на {{value}} лапки",
+    "redeem_many": "Обменять на {{value}} лапок",
+    "redeem_other": "Обменять на {{value}} лапки",
+    "confirmTitle": "Получить скидку?",
+    "confirmBody_one": "Будет списано: {{paws}}. Вы получите код на скидку −{{percent}}% у партнёра {{partner}}. Код действует {{count}} день.",
+    "confirmBody_few": "Будет списано: {{paws}}. Вы получите код на скидку −{{percent}}% у партнёра {{partner}}. Код действует {{count}} дня.",
+    "confirmBody_many": "Будет списано: {{paws}}. Вы получите код на скидку −{{percent}}% у партнёра {{partner}}. Код действует {{count}} дней.",
+    "confirmBody_other": "Будет списано: {{paws}}. Вы получите код на скидку −{{percent}}% у партнёра {{partner}}. Код действует {{count}} дня.",
+    "confirmAction": "Обменять",
+    "howTitle": "Как это работает?",
+    "howBody_one": "Покажите код у партнёра. Оплаты в приложении нет. Неиспользованный код можно отменить в течение {{count}} дня и вернуть лапки.",
+    "howBody_few": "Покажите код у партнёра. Оплаты в приложении нет. Неиспользованный код можно отменить в течение {{count}} дней и вернуть лапки.",
+    "howBody_many": "Покажите код у партнёра. Оплаты в приложении нет. Неиспользованный код можно отменить в течение {{count}} дней и вернуть лапки.",
+    "howBody_other": "Покажите код у партнёра. Оплаты в приложении нет. Неиспользованный код можно отменить в течение {{count}} дня и вернуть лапки.",
+    "noPayments": "Цены указаны для информации, оплата у партнёра. Партнёры и товары — демонстрационные данные."
+  },
+  "redemptions": {
+    "title": "Мои коды",
+    "subtitle": "Покажите код у партнёра.",
+    "empty": "У вас пока нет кодов скидок.",
+    "toShop": "Открыть магазин",
+    "productTitle": "{{name}} · −{{percent}}%",
+    "bookingTitle": "Скидка на запись · −{{percent}}%",
+    "codeLabel": "Код скидки",
+    "codeA11y": "Код скидки {{code}}, {{status}}",
+    "status": {
+      "active": "Активен",
+      "used": "Использован",
+      "cancelled": "Отменён",
+      "expired": "Истёк"
+    },
+    "validUntil": "Действует до: {{date}}",
+    "howTitle": "Как использовать",
+    "howProduct": "Покажите код при оплате у партнёра {{partner}}. Код одноразовый.",
+    "howBooking": "Запишитесь на услугу к партнёру {{partner}} и включите «Использовать лапки». Код одноразовый.",
+    "bookNow": "Записаться",
+    "cancelAction": "Отменить и вернуть лапки",
+    "cancelTitle": "Отменить код?",
+    "cancelBody": "Код исчезнет, и вам вернётся: {{paws}}.",
+    "cancelled": "Код отменён, возвращено: {{paws}}.",
+    "allCodes": "Все мои коды"
   }
 }

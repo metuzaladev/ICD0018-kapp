@@ -12,7 +12,7 @@ import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AccessibilityInfo, Alert, Linking, ScrollView, StyleSheet, View } from 'react-native';
 
@@ -69,7 +69,7 @@ export default function SuggestPlaceScreen() {
   const [category, setCategory] = useState<PlaceCategory | null>(null);
   const [amenities, setAmenities] = useState<PlaceAmenity[]>([]);
   const [body, setBody] = useState('');
-  const [point, setPoint] = useState(location.origin);
+  const [point, setPoint] = useState<{ lat: number; lng: number }>(location.origin);
   const [pointChosen, setPointChosen] = useState(false);
   const [recenter, setRecenter] = useState(0);
   const [locating, setLocating] = useState(false);
@@ -77,12 +77,10 @@ export default function SuggestPlaceScreen() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
 
-  // The device position may arrive after the screen opened; follow it until the user moves the pin.
-  useEffect(() => {
-    if (pointChosen) return;
-    setPoint(location.origin);
-    setRecenter((n) => n + 1);
-  }, [location.origin, pointChosen]);
+  // Until the user moves the pin (or taps "Kasuta minu asukohta") the point follows the device
+  // position, which may arrive after the screen opened.
+  const chosenPoint = pointChosen ? point : location.origin;
+  const recenterKey = pointChosen ? `chosen-${recenter}` : `device-${location.origin.lat},${location.origin.lng}`;
 
   async function useMyLocation() {
     setFormError(null);
@@ -162,8 +160,8 @@ export default function SuggestPlaceScreen() {
     const { data, errors: invalid } = validateForm(createPlacePostInputSchema, {
       name,
       category,
-      lat: point.lat,
-      lng: point.lng,
+      lat: chosenPoint.lat,
+      lng: chosenPoint.lng,
       address,
       amenities,
       body,
@@ -239,12 +237,14 @@ export default function SuggestPlaceScreen() {
         {t('suggest.where')}
       </ThemedText>
       <LocationPicker
-        value={point}
-        recenter={recenter}
+        value={chosenPoint}
+        recenter={recenterKey}
         category={category}
         onChange={(next, byUser) => {
+          // Camera moves made by the app (load, recenter) are not a choice.
+          if (!byUser) return;
           setPoint({ lat: precise(next.lat), lng: precise(next.lng) });
-          if (byUser) setPointChosen(true);
+          setPointChosen(true);
         }}
       />
       <ThemedText type="caption" themeColor={errors.lat ? 'danger' : 'muted'} accessibilityLiveRegion="polite">

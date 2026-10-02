@@ -43,7 +43,14 @@
     "ageMonths_one": "{{count}} month",
     "ageMonths_other": "{{count}} months",
     "ageYears_one": "{{count}} year",
-    "ageYears_other": "{{count}} years"
+    "ageYears_other": "{{count}} years",
+    "justNow": "just now",
+    "minutesAgo_one": "{{count}} min ago",
+    "minutesAgo_other": "{{count}} min ago",
+    "hoursAgo_one": "{{count}} h ago",
+    "hoursAgo_other": "{{count}} h ago",
+    "daysAgo_one": "{{count}} day ago",
+    "daysAgo_other": "{{count}} days ago"
   },
   "errors": {
     "network": "No internet connection, or the server is not responding",
@@ -74,7 +81,9 @@
     "vetVisitAdd": "Vet visit",
     "healthRecordEdit": "Edit record",
     "reportUser": "Report or block",
-    "book": "Choose a time"
+    "book": "Choose a time",
+    "suggestPlace": "Suggest a place",
+    "reportPost": "Report post"
   },
   "auth": {
     "email": "Email",
@@ -239,7 +248,18 @@
     "noMatches": "No place with that name.",
     "providerMarker": "{{name}}, service provider",
     "active": "Active",
-    "favorites": "Favourites"
+    "favorites": "Favourites",
+    "placeMarker": "{{name}}, {{kind}}",
+    "placeKinds": {
+      "park": "park",
+      "cafe": "café",
+      "beach": "beach",
+      "service": "service provider",
+      "vet": "vet clinic",
+      "shop": "shop or other place"
+    },
+    "providerHint": "Shows free times and booking",
+    "emptyPlaces": "Nothing here on this part of the map yet. Move the map or see community tips."
   },
   "parkRow": {
     "dogsNow": "{{dogs}} now",
@@ -500,7 +520,14 @@
     "bookings": "My bookings",
     "bookingsSub": "Grooming and appointments",
     "upcomingBookings_one": "{{count}} upcoming appointment",
-    "upcomingBookings_other": "{{count}} upcoming appointments"
+    "upcomingBookings_other": "{{count}} upcoming appointments",
+    "rewards": "Paws",
+    "rewardsSub": "{{paws}} · {{level}}",
+    "rewardsSubEmpty": "Earn them at the park",
+    "shop": "Shop",
+    "shopSub": "Partner discounts with paws",
+    "myPosts": "My tips",
+    "myPostsSub": "Suggested and saved places"
   },
   "settings": {
     "title": "Your Käpp.",
@@ -564,7 +591,11 @@
     "bookingConfirmed": "Booking confirmed",
     "bookingCancelled": "Booking cancelled",
     "bookingReminder": "See you soon!",
-    "bookingBody": "{{service}} · {{provider}} · {{when}}"
+    "bookingBody": "{{service}} · {{provider}} · {{when}}",
+    "levelUp": "New level!",
+    "badge": "New badge!",
+    "postApproved": "Your tip is published",
+    "postApprovedPoints": "+{{paws}}"
   },
   "community": {
     "nameWithDogs": "{{name}} and {{dogs}}"
@@ -663,7 +694,8 @@
     "friendRequests": "Friend requests",
     "feedNote": "The Activity tab always shows everything; these switches only affect push notifications.",
     "save": "Save preferences",
-    "bookings": "Booking updates"
+    "bookings": "Booking updates",
+    "rewards": "Paws and badges"
   },
   "invite": {
     "title": "Invite {{name}} to the park",
@@ -747,7 +779,13 @@
       "info": "You’ll find the booking details in your profile.",
       "viewBookings": "View bookings",
       "home": "Back to home"
-    }
+    },
+    "usePaws": "Use paws: −{{percent}}%",
+    "usePawsCost": "Uses {{cost}}",
+    "usePawsShort": "Needs {{cost}}, you have {{balance}}",
+    "usePawsCode": "We’ll use your code {{code}}",
+    "usePawsNote": "The discounted price (−{{percent}}%) is confirmed with the booking. You still pay at the provider.",
+    "discounted": "Price with paws: {{price}} (−{{percent}}%)"
   },
   "bookings": {
     "title": "Care is planned.",
@@ -776,7 +814,10 @@
   },
   "points": {
     "balance_one": "{{count}} paw",
-    "balance_other": "{{count}} paws"
+    "balance_other": "{{count}} paws",
+    "paws_one": "{{value}} paw",
+    "paws_other": "{{value}} paws",
+    "openHint": "Opens Paws"
   },
   "parkCard": {
     "tag": {
@@ -791,5 +832,323 @@
     "label": "Nearest park",
     "hereNow": "You're here",
     "checkInHint": "Checks you in: {{name}}"
+  },
+  "mapSheet": {
+    "freeTimes": "Free times",
+    "discountTitle": "−{{percent}}% with paws",
+    "discountBody": "Use {{cost}} when booking.",
+    "discountBodyBalance": "Use {{cost}} when booking. You have {{balance}}.",
+    "services": "Services",
+    "book": "Book",
+    "bookAt": "Book {{time}}"
+  },
+  "explore": {
+    "title": "Dog-friendly places.",
+    "subtitle": "Community tips near you.",
+    "switchLabel": "Map or Discover",
+    "switchMap": "Map",
+    "switchFeed": "Discover",
+    "communityEntry": "Community tips",
+    "communityEntryHint": "Opens the Discover feed",
+    "filters": {
+      "near": "Nearby",
+      "nearFallbackHint": "Without your location we measure from Tallinn centre",
+      "cafe": "Cafés",
+      "park": "Parks",
+      "beach": "Beaches",
+      "shop": "Shops",
+      "friends": "Friends"
+    },
+    "categories": {
+      "cafe": "Café",
+      "park": "Park",
+      "beach": "Beach",
+      "shop": "Shop",
+      "other": "Other"
+    },
+    "amenities": {
+      "dogs_inside": "Dogs inside",
+      "water_bowl": "Water bowl",
+      "terrace": "Terrace",
+      "dog_treats": "Dog treats",
+      "fenced_area": "Fenced area",
+      "off_leash": "Off leash",
+      "shade": "Shade",
+      "stream": "Stream or water"
+    },
+    "emptyTitle": "No tips here yet.",
+    "emptyFriendsTitle": "Your friends haven’t suggested anything yet.",
+    "emptyBody": "Know a place where dogs are welcome? Share it.",
+    "suggest": "Suggest a place",
+    "suggestHint": "Opens the form for a new place",
+    "pendingInfoTitle": "Waiting for approval",
+    "pendingInfoBody_one": "We’re reviewing your tip. Once it’s published you get {{count}} paw.",
+    "pendingInfoBody_other": "We’re reviewing your tip. Once it’s published you get {{count}} paws.",
+    "pendingInfoBodyNoPoints": "We’re reviewing your tip. Others will see it once it’s approved.",
+    "post": {
+      "you": "You",
+      "meta": "suggests · {{when}}",
+      "byline": "{{name}} suggests, {{when}}",
+      "pending": "Waiting for approval",
+      "rejected": "Rejected",
+      "earnedShort": "+{{points}}",
+      "earned_one": "You earned {{count}} paw",
+      "earned_other": "You earned {{count}} paws",
+      "more": "More options",
+      "openHint": "Opens the tip",
+      "like": "Like",
+      "unlike": "Unlike",
+      "likes_one": "{{count}} like",
+      "likes_other": "{{count}} likes",
+      "save": "Save",
+      "unsave": "Remove from saved",
+      "onMap": "On map",
+      "onMapHint": "Shows the place on the map"
+    },
+    "delete": {
+      "action": "Delete tip",
+      "title": "Delete this tip?",
+      "body": "The tip “{{name}}” can’t be restored.",
+      "failed": "Couldn’t delete"
+    },
+    "report": {
+      "action": "Report post",
+      "author": "Report or block: {{name}}",
+      "title": "What’s wrong with this post?",
+      "why": "Reason",
+      "reasons": {
+        "spam": "Spam",
+        "inappropriate": "Inappropriate",
+        "wrong_info": "Wrong information",
+        "other": "Other"
+      },
+      "placeholder": "For example: the place has closed or dogs aren’t allowed",
+      "thanksTitle": "Report received",
+      "thanksBody": "We’ll review the post. The author won’t know who reported it."
+    },
+    "mine": {
+      "title": "My tips",
+      "subtitle": "Places you suggested and saved.",
+      "tabMine": "Suggested",
+      "tabSaved": "Saved",
+      "emptyMine": "You haven’t suggested any places yet.",
+      "emptySaved": "No saved places yet. Tap the bookmark on a tip to keep it here."
+    }
+  },
+  "suggest": {
+    "title": "Suggest a place.",
+    "subtitle": "Help others find dog-friendly places.",
+    "addPhoto": "Add photo",
+    "addPhotoHint": "Up to {{max}} photos",
+    "photoNote": "Up to {{max}} photos, the first is the cover. Location data is removed from photos automatically.",
+    "photoTitle": "Photo {{position}}/{{total}}",
+    "photoA11y": "Photo {{position}}/{{total}}",
+    "photoCoverA11y": "Photo {{position}}/{{total}}, cover",
+    "photoHint": "Opens options: cover or remove",
+    "makeCover": "Make cover",
+    "removePhoto": "Remove photo",
+    "cameraDenied": "Allow camera access in Settings to take a photo of the place.",
+    "name": "Place name",
+    "namePlaceholder": "For example Kalamaja Kiri café",
+    "address": "Address",
+    "addressPlaceholder": "For example Kotzebue 9, Kalamaja",
+    "where": "Location on the map",
+    "whereHint": "Move the map until the pin is on the place.",
+    "useMyLocation": "Use my location",
+    "locationDenied": "Allow location in Settings or move the map by hand.",
+    "locationFailed": "Couldn’t find your location. Move the map by hand.",
+    "choosePoint": "Move the map so the pin is on the place.",
+    "category": "Category",
+    "chooseCategory": "Choose a category",
+    "amenities": "What makes it dog-friendly?",
+    "body": "Your experience",
+    "bodyPlaceholder": "Freddy got a bowl of water and a biscuit straight away.",
+    "earnTitle_one": "You’ll earn {{count}} paw",
+    "earnTitle_other": "You’ll earn {{count}} paws",
+    "earnTitleNoPoints": "The community approves places",
+    "earnBody": "Once the place is approved. Location data is removed from photos automatically.",
+    "uploading": "Uploading photo {{done}}/{{total}}…",
+    "submit": "Post",
+    "sent": "Tip sent. It is waiting for approval."
+  },
+  "rewards": {
+    "title": "Your paws.",
+    "subtitle": "Earn them in the park, spend them with partners.",
+    "balance": "Balance",
+    "levelPill": "{{level}} · level {{number}}",
+    "pawsWord_one": "paw",
+    "pawsWord_other": "paws",
+    "toNext": "{{paws}} to go to {{level}}",
+    "topLevel": "You’ve reached the top level!",
+    "balanceA11y": "Balance {{paws}}. {{level}}, level {{number}}. {{next}}",
+    "useInShop": "Spend in the shop",
+    "streak_one": "{{count}} day outdoors in a row",
+    "streak_other": "{{count}} days outdoors in a row",
+    "streakNone": "Start a streak at the park",
+    "perDay": "+{{points}} a day",
+    "weekA11y_one": "{{count}} park day in the last 7 days",
+    "weekA11y_other": "{{count}} park days in the last 7 days",
+    "howToEarn": "How to earn",
+    "plus": "+{{points}}",
+    "plusA11y": "plus {{paws}}",
+    "withLimit_one": "{{body}} · up to {{count}} time a day",
+    "withLimit_other": "{{body}} · up to {{count}} times a day",
+    "badgesTitle": "Badges",
+    "badgeUnlocked": "Unlocked!",
+    "badgeProgress": "{{progress}} of {{target}}",
+    "badgeProgressShort": "{{progress}}/{{target}}",
+    "historyTitle": "History",
+    "historySubtitle": "Every paw earned and spent.",
+    "historyEmpty": "No history yet. Your first paws come with a park visit.",
+    "historyAll": "See full history",
+    "historyDelta": "{{delta}} paws",
+    "honestyTitle": "Fair play first",
+    "honestyBody": "Paws come from confirmed activity. Double check-ins and very short visits don’t count.",
+    "levels": {
+      "puppy": "Puppy",
+      "park_friend": "Park friend",
+      "park_legend": "Park legend",
+      "pack_leader": "Pack leader"
+    },
+    "badges": {
+      "early_bird": {
+        "name": "Early bird",
+        "body": "At the park before 8 am"
+      },
+      "ten_parks": {
+        "name": "Ten parks",
+        "body": "Visited 10 different parks"
+      },
+      "explorer": {
+        "name": "Explorer",
+        "body": "3 approved tips"
+      },
+      "kadriorg_legend": {
+        "name": "Park legend",
+        "body": "20 visits to the same park"
+      }
+    },
+    "reasons": {
+      "check_in": {
+        "title": "At the park",
+        "body": "At least 20 minutes at a park"
+      },
+      "streak": {
+        "title": "Streak",
+        "body": "At the park today and yesterday"
+      },
+      "plan_honoured": {
+        "title": "Plan kept",
+        "body": "You came at the planned time"
+      },
+      "review": {
+        "title": "Review",
+        "body": "First rating for a park"
+      },
+      "place_post": {
+        "title": "New place",
+        "body": "When the community approves it"
+      },
+      "invite": {
+        "title": "A friend joins",
+        "body": "With your code, after their first park visit"
+      },
+      "redemption": {
+        "title": "Discount redeemed",
+        "body": "Spent in the shop"
+      },
+      "redemption_refund": {
+        "title": "Refunded",
+        "body": "A code was cancelled"
+      }
+    },
+    "invite": {
+      "title": "Invite a friend",
+      "body": "When a friend joins with your code and visits a park for the first time, you get {{paws}}.",
+      "codeA11y": "Your invite code: {{code}}",
+      "share": "Share code",
+      "shareMessage": "Join me on Käpp! My invite code: {{code}}",
+      "claimLabel": "Got a code from a friend?",
+      "claimPlaceholder": "For example ABCD2345",
+      "claim": "Use code",
+      "claimed": "Code saved. Your friend gets their paws after your first park visit."
+    }
+  },
+  "shop": {
+    "title": "Shop.",
+    "subtitle": "Local partners, cheaper with paws.",
+    "tabServices": "Services",
+    "tabProducts": "Products",
+    "balance": "You have {{paws}}",
+    "balanceSub": "Up to −{{percent}}% at partners.",
+    "myCodes": "My codes",
+    "myCodesSub": "Redeemed discount codes",
+    "tiles": {
+      "grooming": "Grooming",
+      "training": "Training",
+      "vet": "Health"
+    },
+    "tileHint": "Opens the service providers",
+    "nearbyMap": "Nearby on the map",
+    "openMap": "Open map",
+    "openMapHint": "Opens the map with services",
+    "popularServices": "Popular services",
+    "partnerHint": "Opens the service provider",
+    "noPartners": "No partners yet.",
+    "partnerProducts": "Partner products",
+    "allProducts": "See all products",
+    "noProducts": "No products in this category.",
+    "discount": "−{{percent}}%",
+    "discountA11y": "−{{percent}}% with paws, {{paws}}",
+    "productA11y": "{{name}}, {{price}}, −{{percent}}% with paws, {{partner}}",
+    "productCategories": {
+      "all": "All",
+      "food": "Food",
+      "treats": "Treats",
+      "toys": "Toys",
+      "accessories": "Accessories",
+      "care": "Care"
+    },
+    "priceAtPartner": "Price at the partner",
+    "priceWithPaws": "With paws",
+    "cost": "Costs",
+    "youHave": "You have {{paws}}",
+    "short": "{{paws}} short",
+    "redeem_one": "Redeem for {{value}} paw",
+    "redeem_other": "Redeem for {{value}} paws",
+    "confirmTitle": "Redeem the discount?",
+    "confirmBody_one": "This uses {{paws}}. You get a −{{percent}}% code for {{partner}}. The code is valid for {{count}} day.",
+    "confirmBody_other": "This uses {{paws}}. You get a −{{percent}}% code for {{partner}}. The code is valid for {{count}} days.",
+    "confirmAction": "Redeem",
+    "howTitle": "How does it work?",
+    "howBody_one": "Show the code at the partner. There are no payments in the app. You can cancel an unused code within {{count}} day and get your paws back.",
+    "howBody_other": "Show the code at the partner. There are no payments in the app. You can cancel an unused code within {{count}} days and get your paws back.",
+    "noPayments": "Prices are for information; you pay at the partner. Partners and products are sample data."
+  },
+  "redemptions": {
+    "title": "My codes",
+    "subtitle": "Show the code at the partner.",
+    "empty": "You don’t have any discount codes yet.",
+    "toShop": "Open the shop",
+    "productTitle": "{{name}} · −{{percent}}%",
+    "bookingTitle": "Booking discount · −{{percent}}%",
+    "codeLabel": "Discount code",
+    "codeA11y": "Discount code {{code}}, {{status}}",
+    "status": {
+      "active": "Active",
+      "used": "Used",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "validUntil": "Valid until: {{date}}",
+    "howTitle": "How to use it",
+    "howProduct": "Show the code when paying at {{partner}}. It works once.",
+    "howBooking": "Book a service at {{partner}} and switch on “Use paws”. The code works once.",
+    "bookNow": "Book a time",
+    "cancelAction": "Cancel and refund paws",
+    "cancelTitle": "Cancel the code?",
+    "cancelBody": "The code disappears and you get back {{paws}}.",
+    "cancelled": "Code cancelled, {{paws}} refunded.",
+    "allCodes": "All my codes"
   }
 }

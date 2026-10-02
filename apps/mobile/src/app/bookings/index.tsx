@@ -36,7 +36,7 @@ export default function BookingsScreen() {
     haptic('warning');
     Alert.alert(
       t('bookings.cancelTitle'),
-      t('bookings.cancelBody', { service: booking.service.name, provider: booking.provider.name, when: bookingWhen(t, booking) }),
+      t('bookings.cancelBody', { service: booking.service.name, provider: booking.provider.name, when: bookingWhen(booking) }),
       [
         { text: t('bookings.keep'), style: 'cancel' },
         { text: t('bookings.cancelConfirm'), style: 'destructive', onPress: () => cancel.mutate(booking.id) },

@@ -162,7 +162,7 @@ export const AMENITY_ICON: Record<PlaceAmenity, IconName> = {
 export const SUGGEST_CATEGORIES: readonly PlaceCategory[] = ['cafe', 'park', 'beach', 'shop', 'other'];
 
 /** Avasta filter chips (Figma 84:7825): Lähedal, Kohvikud, Pargid, Rannad, Poed; Sõbrad. */
-export const FEED_CATEGORY_CHIPS: readonly PlaceCategory[] = ['cafe', 'park', 'beach', 'shop'];
+export const FEED_CATEGORY_CHIPS: readonly Exclude<PlaceCategory, 'other'>[] = ['cafe', 'park', 'beach', 'shop'];
 
 export type FeedFilters = {
   /** "Lähedal": only posts within the radius of the user (or Tallinn's centre). */

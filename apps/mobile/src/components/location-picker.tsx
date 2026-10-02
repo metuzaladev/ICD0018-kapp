@@ -31,8 +31,8 @@ export function LocationPicker({
   onChange,
 }: {
   value: Point;
-  /** Changed by "Kasuta minu asukohta": the camera jumps to `value`. */
-  recenter: number;
+  /** A new key moves the camera to `value` ("Kasuta minu asukohta", the device position arriving). */
+  recenter: string;
   category: PlaceCategory | null;
   /** `byUser` is false for camera moves the app made (load, recenter). */
   onChange: (point: Point, byUser: boolean) => void;
@@ -43,10 +43,11 @@ export function LocationPicker({
   const camera = useRef<CameraRef>(null);
   const [initial] = useState(value);
 
+  const firstKey = useRef(recenter);
   useEffect(() => {
-    if (recenter === 0) return;
+    if (recenter === firstKey.current) return;
     camera.current?.easeTo({ center: [value.lng, value.lat], zoom: 16, duration: reduceMotion ? 0 : 400 });
-    // Only the button (recenter counter) moves the camera; drags report through onChange.
+    // Only a new key moves the camera; drags report through onChange.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recenter]);
 

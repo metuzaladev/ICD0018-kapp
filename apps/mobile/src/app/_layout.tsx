@@ -100,6 +100,15 @@ export default function RootLayout() {
             <Stack.Screen name="services/index" options={{ ...pushed, headerTitle: '' }} />
             <Stack.Screen name="services/[providerId]" options={{ ...pushed, headerTitle: '' }} />
             <Stack.Screen name="bookings/index" options={{ ...pushed, headerTitle: '' }} />
+            {/* M9b Avasta, Käpad and Pood (docs/16-avasta-ja-kapad.md). */}
+            <Stack.Screen name="place-posts/[postId]" options={{ ...pushed, headerTitle: '' }} />
+            <Stack.Screen name="place-posts/mine" options={{ ...pushed, headerTitle: '' }} />
+            <Stack.Screen name="rewards/index" options={{ ...pushed, headerTitle: '' }} />
+            <Stack.Screen name="rewards/history" options={{ ...pushed, headerTitle: '' }} />
+            <Stack.Screen name="shop/index" options={{ ...pushed, headerTitle: '' }} />
+            <Stack.Screen name="shop/[productId]" options={{ ...pushed, headerTitle: '' }} />
+            <Stack.Screen name="redemptions/index" options={{ ...pushed, headerTitle: '' }} />
+            <Stack.Screen name="redemptions/[redemptionId]" options={{ ...pushed, headerTitle: '' }} />
             {/* Modals: focused edit tasks with an explicit "done" action (HIG). */}
             <Stack.Screen name="profile-edit" options={{ presentation: 'modal', headerShown: true, title: t('nav.profileEdit') }} />
             <Stack.Screen name="park-filters" options={{ presentation: 'modal', headerShown: true, title: t('nav.filters') }} />
@@ -111,6 +120,8 @@ export default function RootLayout() {
             <Stack.Screen name="report" options={{ presentation: 'modal', headerShown: true, title: t('nav.report') }} />
             <Stack.Screen name="report-user" options={{ presentation: 'modal', headerShown: true, title: t('nav.reportUser') }} />
             <Stack.Screen name="book" options={{ presentation: 'modal', headerShown: true, title: t('nav.book') }} />
+            <Stack.Screen name="suggest-place" options={{ presentation: 'modal', headerShown: true, title: t('nav.suggestPlace') }} />
+            <Stack.Screen name="report-post" options={{ presentation: 'modal', headerShown: true, title: t('nav.reportPost') }} />
           </Stack.Protected>
         </Stack>
       </ThemeProvider>

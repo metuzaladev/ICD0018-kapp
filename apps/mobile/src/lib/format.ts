@@ -1,4 +1,4 @@
-import type { DogSex } from '@kapp/shared';
+import type { DogSex, Redemption } from '@kapp/shared';
 
 import i18n, { currentLanguage, currentLocaleTag } from '@/i18n';
 
@@ -253,4 +253,11 @@ export function pawsLabel(count: number): string {
 export function formatMessageTime(iso: string, now = new Date()): string {
   const sameDay = startOfDay(new Date(iso)) === startOfDay(now);
   return sameDay ? formatTime(iso) : `${formatDay(iso, now)} ${formatTime(iso)}`;
+}
+
+/** "Kaerahelbe maiused · −15%" or "Broneeringu soodustus · −15%" (booking codes have no product). */
+export function redemptionTitle(r: Pick<Redemption, 'product' | 'discountPercent'>): string {
+  return r.product
+    ? i18n.t('redemptions.productTitle', { name: r.product.name, percent: r.discountPercent })
+    : i18n.t('redemptions.bookingTitle', { percent: r.discountPercent });
 }

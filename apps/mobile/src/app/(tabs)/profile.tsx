@@ -13,9 +13,11 @@ import { useMyDogs } from '@/hooks/use-dogs';
 import { useFriendRequests } from '@/hooks/use-friends';
 import { useConversations } from '@/hooks/use-messages';
 import { useProfile } from '@/hooks/use-profile';
+import { useRewards } from '@/hooks/use-rewards';
 import { useTheme } from '@/hooks/use-theme';
 import { useVisitHistory } from '@/hooks/use-visits';
-import { dogsLabel, visitsLabel } from '@/lib/format';
+import { dogsLabel, pawsLabel, visitsLabel } from '@/lib/format';
+import { levelNameKey } from '@/lib/rewards';
 
 /**
  * Figma 07 / Profile / Overview: greeting, counts and the user's areas. Account settings
@@ -30,6 +32,7 @@ export default function ProfileScreen() {
   const incoming = useFriendRequests().data?.incoming.length ?? 0;
   const upcomingBookings = useBookings('upcoming').data?.length ?? 0;
   const unreadMessages = (useConversations().data ?? []).reduce((sum, conv) => sum + conv.unreadCount, 0);
+  const rewards = useRewards().data;
   const firstName = profile?.name.split(' ')[0];
   const stats =
     dogs && visits ? t('profile.stats', { dogs: dogsLabel(dogs.length), visits: visitsLabel(visits.length) }) : null;
@@ -81,6 +84,15 @@ export default function ProfileScreen() {
         subtitle={upcomingBookings > 0 ? t('profile.upcomingBookings', { count: upcomingBookings }) : t('profile.bookingsSub')}
         onPress={() => router.push('/bookings')}
       />
+      {/* M9b: Käpad (balance + level from the server), Pood and the user's recommendations. */}
+      <ListRow
+        icon="paw-print"
+        title={t('profile.rewards')}
+        subtitle={rewards ? t('profile.rewardsSub', { paws: pawsLabel(rewards.balance), level: t(levelNameKey(rewards.level.id)) }) : t('profile.rewardsSubEmpty')}
+        onPress={() => router.push('/rewards')}
+      />
+      <ListRow icon="store" title={t('profile.shop')} subtitle={t('profile.shopSub')} onPress={() => router.push('/shop')} />
+      <ListRow icon="sparkles" title={t('profile.myPosts')} subtitle={t('profile.myPostsSub')} onPress={() => router.push('/place-posts/mine')} />
       <ListRow icon="heart" title={t('profile.favorites')} subtitle={t('profile.favoritesSub')} onPress={() => router.push('/favorites')} />
       <ListRow icon="sliders-horizontal" title={t('profile.settings')} subtitle={t('profile.settingsSub')} onPress={() => router.push('/settings')} />
     </Screen>

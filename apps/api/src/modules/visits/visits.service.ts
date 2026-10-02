@@ -13,6 +13,7 @@ import { withTimeout } from '../../lib/timeout';
 import type { DogsRepository } from '../dogs/dogs.repository';
 import type { ParksRepository } from '../parks/parks.repository';
 import { isPublic } from '../parks/parks.service';
+import type { RewardsService } from '../rewards/rewards.service';
 import type { VisitsRepository } from './visits.repository';
 
 /** Rules for being in a park now (check-in), who else is there, and planning a visit. */
@@ -35,6 +36,7 @@ export function createVisitsService({
   dogs,
   timeoutMs,
   onPlanCreated,
+  rewards,
 }: {
   visits: VisitsRepository;
   parks: Pick<ParksRepository, 'findById'>;
@@ -42,6 +44,12 @@ export function createVisitsService({
   timeoutMs: number;
   /** M5: tells friends about the plan. Best effort — must not throw (FriendsService.announcePlan). */
   onPlanCreated?: (userId: string, plan: PlannedVisit) => Promise<void>;
+  /**
+   * M9b Käpad: settled after a check-in starts (it may have closed the previous one) and after one
+   * ends. Never throws; a check-in that simply runs out is settled on the next of these or when the
+   * rewards screen opens (docs/16).
+   */
+  rewards?: Pick<RewardsService, 'settle'>;
 }): VisitsService {
   const t = <T>(p: Promise<T>, label: string) => withTimeout(p, timeoutMs, label);
 
@@ -56,7 +64,9 @@ export function createVisitsService({
       const owned = await t(dogs.ownedIds(userId, input.dogIds), 'dogs.ownedIds');
       if (owned.length !== input.dogIds.length) throw new NotFoundError('errors.dogNotFound');
       try {
-        return await t(visits.createCheckIn({ userId, ...input }), 'visits.createCheckIn');
+        const created = await t(visits.createCheckIn({ userId, ...input }), 'visits.createCheckIn');
+        await rewards?.settle(userId);
+        return created;
       } catch (error) {
         // Two check-ins at the same moment: the unique index lets exactly one through.
         if (isUniqueViolation(error, 'check_ins_one_open_per_user_uq')) {
@@ -72,6 +82,7 @@ export function createVisitsService({
       const result = await t(visits.endCheckIn(userId, checkInId), 'visits.endCheckIn');
       // Ending an already finished visit is fine (idempotent); someone else's is "not found".
       if (result === 'not-found') throw new NotFoundError('errors.visitNotFound');
+      if (result === 'ended') await rewards?.settle(userId);
     },
 
     async listVisitors(parkId, viewerId) {

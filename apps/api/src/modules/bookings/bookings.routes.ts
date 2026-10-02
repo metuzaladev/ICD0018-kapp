@@ -1,4 +1,4 @@
-import { bookingIdParamsSchema, bookingInputSchema, bookingsQuerySchema } from '@kapp/shared';
+import { bookingIdParamsSchema, bookingsQuerySchema, bookingWithRedemptionInputSchema } from '@kapp/shared';
 import type { FastifyPluginAsync } from 'fastify';
 
 import { requireUser, type ResolveUserId } from '../../http/auth';
@@ -17,7 +17,7 @@ export const bookingsRoutes: FastifyPluginAsync<BookingsRoutesOptions> = async (
   // Stricter than the global limit: each booking blocks a provider's time, so a script must not be
   // able to fill a calendar. 20 per hour is far above what a person books.
   app.post('/me/bookings', { config: { rateLimit: { max: 20, timeWindow: '1 hour' } } }, async (request, reply) => {
-    const input = parseRequest(bookingInputSchema, request.body, 'body');
+    const input = parseRequest(bookingWithRedemptionInputSchema, request.body, 'body');
     return reply.code(201).send(await service.create(request.userId!, input));
   });
 

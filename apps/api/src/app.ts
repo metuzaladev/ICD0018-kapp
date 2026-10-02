@@ -38,6 +38,12 @@ import type { NotificationsService } from './modules/notifications/notifications
 import { safetyRoutes } from './modules/safety/safety.routes';
 import type { SafetyService } from './modules/safety/safety.service';
 import type { SocketGateway } from './realtime/socket-gateway';
+import { placePostsRoutes } from './modules/place-posts/place-posts.routes';
+import type { PlacePostsService } from './modules/place-posts/place-posts.service';
+import { rewardsRoutes } from './modules/rewards/rewards.routes';
+import type { RewardsService } from './modules/rewards/rewards.service';
+import { shopRoutes } from './modules/shop/shop.routes';
+import type { ShopService } from './modules/shop/shop.service';
 import { visitsRoutes } from './modules/visits/visits.routes';
 import type { VisitsService } from './modules/visits/visits.service';
 
@@ -61,6 +67,10 @@ export interface AppDeps {
   safetyService: SafetyService;
   providersService: ProvidersService;
   bookingsService: BookingsService;
+  /** M9b (docs/16-avasta-ja-kapad.md). */
+  placePostsService: PlacePostsService;
+  rewardsService: RewardsService;
+  shopService: ShopService;
   /** Socket.IO gateway attached to this app's HTTP server (M5); absent in HTTP tests. */
   realtime?: SocketGateway;
   checkDatabase: () => Promise<boolean>;
@@ -152,6 +162,9 @@ export async function buildApp(deps: AppDeps, config: AppConfig = defaultAppConf
   await app.register(safetyRoutes, { prefix: API_PREFIX, service: deps.safetyService, resolveUserId });
   await app.register(providersRoutes, { prefix: API_PREFIX, service: deps.providersService });
   await app.register(bookingsRoutes, { prefix: API_PREFIX, service: deps.bookingsService, resolveUserId });
+  await app.register(placePostsRoutes, { prefix: API_PREFIX, service: deps.placePostsService, resolveUserId });
+  await app.register(rewardsRoutes, { prefix: API_PREFIX, service: deps.rewardsService, resolveUserId });
+  await app.register(shopRoutes, { prefix: API_PREFIX, service: deps.shopService, resolveUserId });
 
   if (deps.realtime) {
     const realtime = deps.realtime;

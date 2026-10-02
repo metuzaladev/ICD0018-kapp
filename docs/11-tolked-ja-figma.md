@@ -84,6 +84,8 @@ Vastuse kuju jääb **täpselt** `{ error: true, message }` ([06-koodistandard.m
    - tähti sisaldav literaal kasutajale nähtavas propis või valikus (`title`, `label`, `placeholder`, `accessibilityLabel`, `accessibilityHint`, Alerti nupu `text` jne). Tõlkevõti (`'health.vaccinations'`) on lubatud.
    - Lubatud erandid (`ALLOWED`): brändinimi `käpp`, `© OpenStreetMap`.
 
+`npm run a11y:check` (M7) kontrollib, et nupud, lülitid, väljad ja pildid on VoiceOverile sildistatud; sildid ise käivad läbi `t()` ja on seega kolmes keeles. Vt [14-animatsioonid-ja-ligipaasetavus.md](14-animatsioonid-ja-ligipaasetavus.md).
+
 ## Vene keele pöördumine
 
 **„Вы" (viisakas, väikese tähega).** Põhjus: Tallinna venekeelsed kasutajad on igas vanuses ja tundmatult teenuselt mõjub „ты" vene keeles liiga familiaarselt; „вы" on avalike teenuste ja enamiku Eesti äppide vene keeles tavaline. Soojus tuleb sõnavalikust („хвостатые", „стая", „Гулять, Freddy?"), mitte pöördumisest. Eesti keeles jääb Figma „sina".
@@ -111,6 +113,10 @@ Figma tekstid on kasutusel kõigil olemasolevatel ekraanidel. Näidisandmed (nim
 
 | Ekraan (Figma) | Figma | Äpp | Põhjus |
 |---|---|---|---|
+| Onboarding / Discover | kaardipilt „© OpenStreetMap" | pargi foto (sama, mis pargi lehel) | Staatilist kaardipilti pole; päris kaart vajaks asukohta enne kontot. |
+| Onboarding / Connect | ainult „Loo konto" | „Loo konto" + „Mul on juba konto" (Welcome'i tekst); „Jäta vahele" ainult esimesel lehel | Intro on enne Welcome'i, seega olemasolev kasutaja vajab teed sisselogimisse; viimasel lehel pole midagi vahele jätta. |
+| Onboarding / Connect | kaart „Freddy ootab sõpru / Kadrioru koerapark · täna 17.00–18.00" | sama näidiskaart koera foto peal, VoiceOveri eest peidetud | Näidisandmed segaksid VoiceOveri kasutajat. |
+| Onboarding | — | samm „Samm 1, kokku 2" VoiceOverile („01 / 02" ekraanil) | Numbrid kaldkriipsuga loetakse halvasti ette. |
 | Account / Sign Up | „Jätka Apple’iga" | Apple'i natiivne nupp (tekst süsteemi keeles); lisaks „Jätka Google’iga" | App Store'i juhis 4.8 nõuab Apple'i nuppu; Google on lisavõimalus. |
 | Account / Reset Password | info „Vaata oma postkasti … Link kehtib piiratud aja." | sama vormil; pärast saatmist eraldi ekraan „Vaata oma postkasti" + „Kui selle aadressiga konto on olemas, saatsime sinna lingi. Link kehtib üks tund." | Ei paljasta, kas konto on olemas; täpne kehtivusaeg on teada. |
 | — (pole Figmas) | — | „Uus parool" ekraan | Taastamislingi sihtkoht. |
@@ -130,6 +136,9 @@ Figma tekstid on kasutusel kõigil olemasolevatel ekraanidel. Näidisandmed (nim
 | Visit / Check In | „Mängime / Rahulikult / Tutvume", „Näita meid pargi külastajatele" | puuduvad; lisatud „Kui kauaks?" (30 min – 2 h); „Kohalolek aegub {N} minuti pärast." valitud kestusega | Nähtavus on profiili privaatsusseades; kestus on valitav. |
 | Visit / Plan | „Vali või muuda parki", „Freddy / Tuleb mängima", „Teavita minu sõpru" | pargi nimi sildina; koera ja sõprade valikut pole; lisatud „Kestus"; kuupäev kiipidena | Plaan tehakse pargi lehelt; sõbrad M5. |
 | Visit / Planned | kinnitusekraan | modaal sulgub, plaan on avalehel ja „Meie jalajäljed" all | Eraldi ekraani pole. |
+| Visit / Active | eraldi ekraan „Freddy on Kadrioru koerapargis.", „Lõpeta külastus" | check-in modaal lõpeb vaatega: linnuke, „Head mängimist!", pargi nimi, „Freddy · kuni 18.00", „Vaata mängusõpru" (tagasi pargi lehele, kus on külastajad ja „Lõpeta külastus") | Pargi nime ei käänata; lõpetamine on pargi lehel ja avalehel. |
+| Empty State / Meetups | „Veel üks tühi kalender.", „Teeme siia mõne toreda plaani.", tekst, „Loo esimene mänguplaan", „Vaata lähedal olevaid parke" | „Meie jalajäljed" → Planeeritud: pealkiri, tekst ja üks nupp „Vaata lähedal olevaid parke" | Plaan algab pargi lehelt, seega „Loo esimene mänguplaan" viiks samasse kohta; alapealkiri jäi kaardilt välja. |
+| Offline State | „Proovi uuesti" | sama nupp igal vea olekul (`ErrorState`), kui puhvris andmeid pole | Üks järjepidev vea olek. |
 | Visits / History | kiibid Kõik / Planeeritud / Käidud, „Planeeri uus külastus" | jaotised „Planeeritud" ja „Käidud"; nupp puudub | Plaan vajab parki. |
 | Visit / Add Review | „Väga hea / Hea / Kehv", „Lisa foto", „Jaga kogemust teistega", „Salvesta külastus" | 5 tärni, fotot ja jagamise lülitit pole, „Salvesta hinnang"; lisatud „Sinu hinnang aitab teistel õige pargi valida." | API hinne on 1–5; nupp salvestab hinnangu, mitte külastuse. |
 | Park / Report Issue | kiibid Klaas / Varustus / Muu, foto, „Näita teadet pargi lehel" | puuduvad; lisatud „Näiteks katkine värav, klaasikillud või mürgikahtlus. Ohu korral helista 112." ja tänu-ekraan „Aitäh!" | Kategooriaid ja fotosid andmemudelis pole. |
@@ -143,10 +152,11 @@ Figma tekstid on kasutusel kõigil olemasolevatel ekraanidel. Näidisandmed (nim
 | Offline State | täisekraan „Võtame korraks hoo maha.", „Proovi uuesti", „Minu lemmikpargid" | bänner „Internetiühendus puudub." + „Näitame viimati laaditud andmeid ja uuendame, kui ühendus taastub." | Bänner on igal ekraanil, puhverdatud andmed jäävad näha. |
 | Profile / Overview | „1 koer · 18 külastust · 5 sõpra", „Sõbrad ja sõnumid", „Minu broneeringud" | „1 koer · 18 külastust"; read „Oma kamp" ja „Sõnumid" (uute kutsete / lugemata arvuga); „Minu broneeringud" alapealkirjaga „Hooldus ja kohtumised" või „N tulevat kohtumist" | Sõprade arv ja sõnumid on eraldi ridadel. |
 | Settings / Overview | „Asukoht", „Abi ja tugi", „Lisa koerapark" | „Muuda profiili", „Teavitused", „Privaatsus", „Keel", „Logi välja" | Ülejäänud tulevad koos funktsioonidega. |
+| Settings / Overview | „Teavitused / Sõbrad, pargid ja meeldetuletused" | „Teavitused / Sõbrad, sõnumid ja plaanid" | Pargi- ja meeldetuletuse push'e pole; alapealkiri kirjeldab olemasolevaid. |
 | Profile / Edit | „E-post", „Huvid", vihje „Freddy inimene. Alati valmis jalutama." | puuduvad; vihje „Paar sõna sinust ja su koerast"; lisatud „Kes näeb, kui oled pargis?" | E-post muutub Better Authi vooga; Figma vihje on näidisandmed. |
 | Notifications / Activity | kiibid Kõik / Sõbrad / Pargid, „Sinu lemmikpargis on teade" | kiibid Kõik / Sõbrad / Sõnumid; pargiteateid pole; enne süsteemi dialoogi selgitus „Kas anname märku?" | Pargiteadete teavitusi pole veel; push vajab selgitust enne iOS-i ühekordset küsimust. |
 | Community / Friends | „Mari ja Luna / Täna Kadriorus kell 17.00", „Planeeri ühine külastus" | sõbra rida „{nimi} ja {koerad}" + piirkond; plaanid avalehel; ühine külastus profiilil „Kutsu parki" | Plaan on avalehe kaardil; kutse vajab sõpra. |
-| Community / Friend Profile | iseloomu kiibid „Sõbralik / Rahulik", „Luna profiil", „sõbrad alates septembrist" | koera kaart „Koer {nimi}" (tõug · vanus · iseloom), „sõbrad alates september 2026" | Nimesid ei käänata; iseloom on vabatekst; kuu ja aasta Intl-ist. |
+| Community / Friend Profile | iseloomu kiibid „Sõbralik / Rahulik", „Luna profiil", „sõbrad alates septembrist" | koera kaart „Koer {nimi}" (tõug · vanus · iseloom), „Sõbrad alates 02.10.2026" (vene ja inglise keeles pikk kuupäev, kus Intl käänab kuu) | Nimesid ei käänata; iseloom on vabatekst; Intl ei oska „septembrist". |
 | Messages / Conversation | „Tavaliselt vastab päeva jooksul.", „Ühine mänguplaan" kaart | puuduvad; pargikutse on tavaline sõnum | Vastamisaja andmeid pole; plaan + sõnum katab sama vajaduse. |
 | Settings / Notifications | „Lemmikpargi ohuteated", „Külastuse meeldetuletused", „Broneeringute uuendused", „Tervise meeldetuletused" | „Sõnumid sõpradelt", „Sõbrad lähevad parki", lisatud „Sõbrakutsed", „Broneeringute uuendused" (M6, broneeringu meeldetuletus) | Ülejäänud push-tüüpe veel pole. |
 | Settings / Privacy | „Profiil nähtav pargisõpradele" lüliti, „Kogukonna turvalisus / Abi ja teavitamine" | puuduvad; tutvustus ja koerte detailid on alati ainult sõpradele | Reegel on fikseeritud; abi-vaade hiljem. |
@@ -170,6 +180,11 @@ Figma tekstid on kasutusel kõigil olemasolevatel ekraanidel. Näidisandmed (nim
 | „Luba Käpp-il kaamerat kasutada…" | „Luba seadetes kaamera kasutamine, et koerast pilti teha." |
 | „Näitan…/Uuendan…" (mina-vorm) | „Näitame…/uuendame…" (Figma meie-hääl) |
 | „Kohalolek aegub" (kestus puudus) | „Kohalolek aegub 60 minuti pärast." (omastav, sobib iga arvuga) |
+| „Sündinud 1. märts 2026" (vajaks „märtsil") | „Sünnikuupäev: 1. märts 2026" (sildivorm) |
+| „Foto, lisatud 1. märts 2026" | „Foto, lisamise kuupäev 1. märts 2026" |
+| „Иду в парк X пятница, 2 окт. в 17:00" (nimetav pärast eessõnata tegusõna) | „Иду в парк X: пятница, 2 окт., 17:00"; eesti „Lähen parki X: reede, 2. okt kell 17.00" |
+
+**Reegel:** kuu- või nädalapäeva nime (Intl annab nimetava) ei panda eesti ega vene keeles eessõna või käänet nõudva sõna järele („kuni laupäev", „до суббота", „с октябрь"). Kasuta sildivormi („Tühistamise tähtaeg: …", „Sünnikuupäev: …") või numbrilist kuupäeva.
 
 ## Mida pole kontrollitud
 

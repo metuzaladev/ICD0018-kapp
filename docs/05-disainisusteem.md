@@ -31,6 +31,20 @@ Figma muutujad on peegeldatud failis [`packages/shared/src/tokens.ts`](../packag
 - Tab bar: viis tab'i, ikoon + silt; põhivaadetel tagasi-nuppu pole.
 - „Sign in with Apple" kasutab Apple'i ametlikku nupustiili.
 - Tume režiim on põhidisain; hele režiim peab samuti töötama (`userInterfaceStyle: automatic`).
+- Tekstiga elementidel pole fikseeritud kõrgust ega laiust: nupp `minHeight` 52, kiip `minHeight` 44 ja laius sildist, kiipide read murduvad (Dynamic Type kuni 160 %, pikad vene sildid).
+- Liikumine (M7): kestused ja vedrud failis `apps/mobile/src/lib/motion.ts` (150 / 250 / 350 ms), kõik animatsioonid järgivad „Vähenda liikumist"; haptika ainult `lib/haptics.ts` kaudu. Vt [14-animatsioonid-ja-ligipaasetavus.md](14-animatsioonid-ja-ligipaasetavus.md).
+
+## Komponendid koodis (M7)
+
+| Figma / muster | Kood |
+|---|---|
+| Button | `components/button.tsx` (vajutusel kahaneb, kasvab suure tekstiga) |
+| Chip | `components/chip.tsx` (värvi üleminek, valiku-haptika, `role="radio"` ainuvalikus) |
+| List Row | `components/list-row.tsx`, `park-row.tsx`, `provider-row.tsx` (üks VoiceOveri element) |
+| Empty State / Meetups | `components/empty-state.tsx` |
+| Offline State („Proovi uuesti") | `components/error-state.tsx`, `offline-banner.tsx` |
+| — (laadimine) | `components/skeleton.tsx` |
+| — (õnnestumine) | `components/success-mark.tsx` |
 
 ## Pildid ja litsentsid (kohatäited)
 

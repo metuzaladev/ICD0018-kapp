@@ -114,4 +114,6 @@ Kuidas lisada: lisa teate võti kolme faili `packages/shared/src/i18n/{et,en,ru}
 | HTTP | `test/http` | Staatuskoodid, veaformaat, puuduv/vigane/`null` sisu, vigased ID-d, 401/404/413/415/429/503/500 | Teenus mock'itud, andmebaasi pole |
 | Integratsioon | `test/integration` | Päris SQL ja PostGIS (kaugus, staatusefilter, `null` tulemus) | Docker Postgres (`npm run test:integration`) |
 
+Äpis (`apps/mobile/test`) testitakse Vitestiga puhast loogikat (`lib/haptics.ts`, `lib/motion.ts`, `lib/onboarding.ts`; natiivsed moodulid `vi.mock`-itud), `scripts/*.test.ts` testib CI skriptide reegleid (`npm run test:scripts`); mõlemad käivituvad `npm test`-iga. Vaateid kontrollitakse simulaatoris (docs/14).
+
 Raamistik on **Vitest** (Jestiga sama API: `describe`, `it`, `expect`, `vi.fn`). See töötab ESM-i ja TypeScriptiga ilma lisaseadistuseta. Igal uuel marsruudil peab olema vähemalt: edukas juhtum, puuduv sisu, vigane tüüp, `null` kohustuslikus väljas, vigane ID, autentimata päring (kui kaitstud) ja teenuse timeout → 503.

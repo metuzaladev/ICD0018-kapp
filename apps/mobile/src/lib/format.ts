@@ -52,13 +52,21 @@ export function formatDateIn(iso: string, timeZone: string): string {
   return new Date(iso).toLocaleDateString(currentLocaleTag(), { weekday: 'long', day: 'numeric', month: 'long', timeZone });
 }
 
-/** A slot day chip from a calendar date ("2026-10-06"): "täna", "homme" or "R 9. okt". */
+/**
+ * A slot day chip from a calendar date ("2026-10-06"): "Täna", "Homme" or "R 9. okt". A chip is a
+ * standalone label, so it starts with a capital ("täna" stays lowercase mid-sentence elsewhere,
+ * and Russian weekday abbreviations are lowercase by default: "пт" → "Пт").
+ */
 export function formatDayChip(isoDate: string, now = new Date()): string {
   const day = localDate(isoDate);
   const diff = Math.round((day.getTime() - startOfDay(now)) / 86_400_000);
-  if (diff === 0) return i18n.t('dates.today');
-  if (diff === 1) return i18n.t('dates.tomorrow');
-  return day.toLocaleDateString(currentLocaleTag(), { weekday: 'short', day: 'numeric', month: 'short' });
+  const label =
+    diff === 0
+      ? i18n.t('dates.today')
+      : diff === 1
+        ? i18n.t('dates.tomorrow')
+        : day.toLocaleDateString(currentLocaleTag(), { weekday: 'short', day: 'numeric', month: 'short' });
+  return label.charAt(0).toLocaleUpperCase(currentLocaleTag()) + label.slice(1);
 }
 
 /** "35 €" / "€35" / "12,50 €": whole euros without decimals as in Figma, cents only when present. */

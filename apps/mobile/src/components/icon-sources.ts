@@ -1,0 +1,53 @@
+/**
+ * Lucide icons (ISC licence, lucide-static 1.49) bundled as SVG assets — generated list, one file
+ * per icon in assets/icons. Rendered by components/icon.tsx through expo-image (already a dependency),
+ * so no new native module (react-native-svg) is needed. Add an icon: copy its SVG from lucide-static
+ * with stroke="#FFFFFF" and add a line here.
+ */
+export const ICON_SOURCES = {
+  'arrow-left': require('@/assets/icons/arrow-left.svg'),
+  'arrow-right': require('@/assets/icons/arrow-right.svg'),
+  bell: require('@/assets/icons/bell.svg'),
+  bookmark: require('@/assets/icons/bookmark.svg'),
+  calendar: require('@/assets/icons/calendar.svg'),
+  camera: require('@/assets/icons/camera.svg'),
+  check: require('@/assets/icons/check.svg'),
+  'chevron-right': require('@/assets/icons/chevron-right.svg'),
+  clock: require('@/assets/icons/clock.svg'),
+  coffee: require('@/assets/icons/coffee.svg'),
+  compass: require('@/assets/icons/compass.svg'),
+  dog: require('@/assets/icons/dog.svg'),
+  dumbbell: require('@/assets/icons/dumbbell.svg'),
+  flame: require('@/assets/icons/flame.svg'),
+  footprints: require('@/assets/icons/footprints.svg'),
+  'heart-filled': require('@/assets/icons/heart-filled.svg'),
+  heart: require('@/assets/icons/heart.svg'),
+  house: require('@/assets/icons/house.svg'),
+  layers: require('@/assets/icons/layers.svg'),
+  lock: require('@/assets/icons/lock.svg'),
+  mail: require('@/assets/icons/mail.svg'),
+  'map-pin': require('@/assets/icons/map-pin.svg'),
+  map: require('@/assets/icons/map.svg'),
+  'message-circle': require('@/assets/icons/message-circle.svg'),
+  navigation: require('@/assets/icons/navigation.svg'),
+  'paw-print': require('@/assets/icons/paw-print.svg'),
+  plus: require('@/assets/icons/plus.svg'),
+  scissors: require('@/assets/icons/scissors.svg'),
+  search: require('@/assets/icons/search.svg'),
+  shield: require('@/assets/icons/shield.svg'),
+  'shopping-bag': require('@/assets/icons/shopping-bag.svg'),
+  'sliders-horizontal': require('@/assets/icons/sliders-horizontal.svg'),
+  sparkles: require('@/assets/icons/sparkles.svg'),
+  'star-filled': require('@/assets/icons/star-filled.svg'),
+  star: require('@/assets/icons/star.svg'),
+  stethoscope: require('@/assets/icons/stethoscope.svg'),
+  store: require('@/assets/icons/store.svg'),
+  trees: require('@/assets/icons/trees.svg'),
+  trophy: require('@/assets/icons/trophy.svg'),
+  user: require('@/assets/icons/user.svg'),
+  users: require('@/assets/icons/users.svg'),
+  waves: require('@/assets/icons/waves.svg'),
+  x: require('@/assets/icons/x.svg'),
+} as const;
+
+export type IconName = keyof typeof ICON_SOURCES;

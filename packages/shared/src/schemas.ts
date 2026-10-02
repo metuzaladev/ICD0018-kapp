@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { LANGUAGES } from './i18n';
 import { issueMessage } from './validation';
 
 /**
@@ -155,6 +156,10 @@ export const profileSchema = z.object({
   area: z.string().nullable(),
   bio: z.string().nullable(),
   presenceSharing: presenceSharingSchema,
+  /** Settings / Privacy "Luba sõbrakutseid". (M5) */
+  allowFriendRequests: z.boolean(),
+  /** The app's language; push notifications are written in it. (M5) */
+  language: z.enum(LANGUAGES),
 });
 export type Profile = z.infer<typeof profileSchema>;
 
@@ -169,6 +174,8 @@ export const updateProfileInputSchema = z
     area: patchText(60),
     bio: patchText(300),
     presenceSharing: presenceSharingSchema.optional(),
+    allowFriendRequests: z.boolean().optional(),
+    language: z.enum(LANGUAGES).optional(),
   })
   .strict()
   .refine((v) => Object.values(v).some((x) => x !== undefined), { message: issueMessage('validation.changeAtLeastOne') });
@@ -384,6 +391,8 @@ export type ActiveCheckIn = z.infer<typeof activeCheckInSchema>;
 /** Someone currently in a park, as the viewer is allowed to see them. */
 export const parkVisitorSchema = z.object({
   checkInId: z.uuid(),
+  /** Opens the owner's profile ("Ava koera profiil ja saada omanikule sõbrakutse"). Only visible people are listed. (M5) */
+  userId: z.string(),
   isMe: z.boolean(),
   /** First name only — enough to recognise a park friend, less personal data shown to strangers. */
   ownerFirstName: z.string(),

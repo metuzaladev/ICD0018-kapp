@@ -54,6 +54,10 @@ export const et = {
   'validation.planMaxHours': 'kuni {{max}} tundi',
   'validation.rating': 'vali 1–5',
   'validation.describeMin': 'kirjelda vähemalt {{min}} märgiga',
+  'validation.userId': 'vigane kasutaja ID',
+  'validation.searchMin': 'sisesta vähemalt {{min}} tähte',
+  'validation.messageEmpty': 'kirjuta sõnum',
+  'validation.pushToken': 'ei ole Expo push-märk',
 
   /* ---------- API errors ---------- */
   'errors.badRequest': 'Vigane päring',
@@ -86,6 +90,23 @@ export const et = {
   'errors.notAnImage': 'Faili ei saanud pildina lugeda, proovi JPEG- või PNG-pildiga',
   'errors.photoLimit': 'Kuni {{max}} fotot koera kohta',
   'errors.storageUnavailable': 'Pildihoidla ei vasta, proovi hetke pärast uuesti',
+  'errors.cannotFriendSelf': 'Iseendale ei saa sõbrakutset saata',
+  'errors.friendRequestsDisabled': 'See kasutaja ei võta praegu sõbrakutseid vastu',
+  'errors.friendRequestNotFound': 'Sõbrakutset ei leitud',
+  'errors.messagesFriendsOnly': 'Sõnumeid saab saata ainult sõpradele',
+  'errors.conversationNotFound': 'Vestlust ei leitud',
+  'errors.notificationNotFound': 'Teadet ei leitud',
+  'errors.cannotBlockSelf': 'Iseennast ei saa blokeerida',
+  'errors.cannotReportSelf': 'Iseendast ei saa teavitada',
+
+  /* ---------- push notifications (written in the recipient's language, docs/12-kogukond.md) ---------- */
+  'push.friendRequest.title': 'Uus sõbrakutse',
+  'push.friendRequest.body': '{{name}} tahab sinuga sõbraks saada',
+  'push.friendAccepted.title': 'Uus sõber',
+  'push.friendAccepted.body': '{{name}} võttis sinu sõbrakutse vastu',
+  'push.message.title': '{{name}} saatis sõnumi',
+  'push.friendPlan.title': '{{name}} läheb parki',
+  'push.friendPlan.body': '{{park}} · {{when}}',
 
   /* ---------- Better Auth errors ---------- */
   'auth.userExists': 'Selle e-postiga konto on juba olemas',

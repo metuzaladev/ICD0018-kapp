@@ -1,4 +1,12 @@
-import { translate, type Language, type NotificationData, type NotificationPreferences, type NotificationType } from '@kapp/shared';
+import {
+  translate,
+  type AnyNotificationType,
+  type Language,
+  type NotificationPreferencesWithRewards,
+  type RewardBadgeId,
+  type RewardLevelId,
+  type RewardNotificationData,
+} from '@kapp/shared';
 
 /**
  * Push texts in the RECIPIENT's language (stored on the user), built from the shared message
@@ -7,7 +15,7 @@ import { translate, type Language, type NotificationData, type NotificationPrefe
  */
 
 /** Which Settings / Notifications switch controls a type. */
-export const PREFERENCE_FOR: Record<NotificationType, keyof NotificationPreferences> = {
+export const PREFERENCE_FOR: Record<AnyNotificationType, keyof NotificationPreferencesWithRewards> = {
   friend_request: 'friendRequests',
   friend_accepted: 'friendRequests',
   message: 'messages',
@@ -15,6 +23,10 @@ export const PREFERENCE_FOR: Record<NotificationType, keyof NotificationPreferen
   booking_confirmed: 'bookings',
   booking_cancelled: 'bookings',
   booking_reminder: 'bookings',
+  // M9b: one switch for everything Käpad (docs/16-avasta-ja-kapad.md).
+  reward_level_up: 'rewards',
+  reward_badge: 'rewards',
+  place_post_approved: 'rewards',
 };
 
 /** The app and the parks are in Tallinn; plan times are shown in Estonian time for everyone. */
@@ -53,9 +65,9 @@ const BOOKING_TITLE = {
 
 export function composePush(
   language: Language,
-  type: NotificationType,
+  type: AnyNotificationType,
   actorName: string,
-  data: NotificationData,
+  data: RewardNotificationData,
 ): { title: string; body: string } {
   const name = actorName;
   switch (type) {
@@ -84,5 +96,34 @@ export function composePush(
           when: data.startsAt ? formatBookingStart(language, data.startsAt) : '',
         }),
       };
+    case 'reward_level_up':
+      return {
+        title: translate(language, 'push.rewardLevelUp.title'),
+        body: translate(language, 'push.rewardLevelUp.body', { level: data.levelId ? translate(language, LEVEL_NAME[data.levelId]) : '' }),
+      };
+    case 'reward_badge':
+      return {
+        title: translate(language, 'push.rewardBadge.title'),
+        body: translate(language, 'push.rewardBadge.body', { badge: data.badgeId ? translate(language, BADGE_NAME[data.badgeId]) : '' }),
+      };
+    case 'place_post_approved':
+      return {
+        title: translate(language, 'push.placePostApproved.title'),
+        body: translate(language, 'push.placePostApproved.body', { place: data.placeName ?? '', points: data.points ?? '' }),
+      };
   }
 }
+
+const LEVEL_NAME = {
+  puppy: 'rewards.level.puppy',
+  park_friend: 'rewards.level.park_friend',
+  park_legend: 'rewards.level.park_legend',
+  pack_leader: 'rewards.level.pack_leader',
+} as const satisfies Record<RewardLevelId, string>;
+
+const BADGE_NAME = {
+  early_bird: 'rewards.badge.early_bird',
+  ten_parks: 'rewards.badge.ten_parks',
+  explorer: 'rewards.badge.explorer',
+  kadriorg_legend: 'rewards.badge.kadriorg_legend',
+} as const satisfies Record<RewardBadgeId, string>;

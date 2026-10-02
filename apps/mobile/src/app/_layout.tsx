@@ -80,6 +80,7 @@ export default function RootLayout() {
           <Stack.Protected guard={signedIn}>
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="parks/[parkId]" options={pushed} />
+            <Stack.Screen name="parks/index" options={{ ...pushed, headerTitle: '' }} />
             <Stack.Screen name="favorites" options={{ ...pushed, headerTitle: '' }} />
             <Stack.Screen name="visits" options={{ ...pushed, headerTitle: '' }} />
             <Stack.Screen name="dogs/index" options={{ ...pushed, headerTitle: '' }} />

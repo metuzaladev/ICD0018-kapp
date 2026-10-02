@@ -37,6 +37,8 @@ export function useDeviceLocation() {
     origin: coords ?? TALLINN_CENTER,
     usingFallback: coords === null,
     status: permission?.status ?? Location.PermissionStatus.UNDETERMINED,
+    /** false until the permission has been read — avoids flashing the permission screen at launch. */
+    statusKnown: permission != null,
     canAskAgain: permission?.canAskAgain ?? true,
     requestPermission,
   };

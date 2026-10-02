@@ -96,6 +96,9 @@ export default function HomeScreen() {
         </ThemedView>
       )}
 
+      {/* Figma Home: the nearest park with "Oleme siin" right under today's card — the main action of the app. */}
+      {parks[0] ? <NearestParkCard park={parks[0]} /> : <Button label={t('home.findPark')} onPress={() => router.navigate('/map')} />}
+
       {plans.slice(0, 2).map((p, i) => (
         <Entering key={p.id} index={i}>
           {/* One VoiceOver element: park and time belong together. */}
@@ -141,8 +144,6 @@ export default function HomeScreen() {
           ))}
         </>
       ) : null}
-
-      {parks[0] ? <NearestParkCard park={parks[0]} /> : <Button label={t('home.findPark')} onPress={() => router.navigate('/map')} />}
 
       {/* Not on the Figma Home: without it the services were reachable only via Profile → bookings (docs/11). */}
       <ListRow icon="scissors" title={t('home.servicesTitle')} subtitle={t('home.servicesSub')} onPress={() => router.push('/services')} />

@@ -24,6 +24,15 @@ import { reportsRoutes } from './modules/reports/reports.routes';
 import type { ReportsService } from './modules/reports/reports.service';
 import { reviewsRoutes } from './modules/reviews/reviews.routes';
 import type { ReviewsService } from './modules/reviews/reviews.service';
+import { friendsRoutes } from './modules/friends/friends.routes';
+import type { FriendsService } from './modules/friends/friends.service';
+import { messagesRoutes } from './modules/messages/messages.routes';
+import type { MessagesService } from './modules/messages/messages.service';
+import { notificationsRoutes } from './modules/notifications/notifications.routes';
+import type { NotificationsService } from './modules/notifications/notifications.service';
+import { safetyRoutes } from './modules/safety/safety.routes';
+import type { SafetyService } from './modules/safety/safety.service';
+import type { SocketGateway } from './realtime/socket-gateway';
 import { visitsRoutes } from './modules/visits/visits.routes';
 import type { VisitsService } from './modules/visits/visits.service';
 
@@ -41,6 +50,12 @@ export interface AppDeps {
   reportsService: ReportsService;
   photosService: PhotosService;
   healthRecordsService: HealthRecordsService;
+  friendsService: FriendsService;
+  messagesService: MessagesService;
+  notificationsService: NotificationsService;
+  safetyService: SafetyService;
+  /** Socket.IO gateway attached to this app's HTTP server (M5); absent in HTTP tests. */
+  realtime?: SocketGateway;
   checkDatabase: () => Promise<boolean>;
   /** Reads the user id from the session; defaults to "nobody is signed in". */
   resolveUserId?: ResolveUserId;
@@ -106,6 +121,16 @@ export async function buildApp(deps: AppDeps, config: AppConfig = defaultAppConf
   await app.register(reviewsRoutes, { prefix: API_PREFIX, service: deps.reviewsService, resolveUserId });
   await app.register(reportsRoutes, { prefix: API_PREFIX, service: deps.reportsService, resolveUserId });
   await app.register(parksRoutes, { prefix: API_PREFIX, service: deps.parksService, resolveUserId });
+  await app.register(friendsRoutes, { prefix: API_PREFIX, service: deps.friendsService, resolveUserId });
+  await app.register(messagesRoutes, { prefix: API_PREFIX, service: deps.messagesService, resolveUserId });
+  await app.register(notificationsRoutes, { prefix: API_PREFIX, service: deps.notificationsService, resolveUserId });
+  await app.register(safetyRoutes, { prefix: API_PREFIX, service: deps.safetyService, resolveUserId });
+
+  if (deps.realtime) {
+    const realtime = deps.realtime;
+    realtime.attach(app.server, { resolveUserId, corsOrigins: config.corsOrigins, log: config.logger || undefined });
+    app.addHook('onClose', async () => realtime.close());
+  }
 
   return app;
 }

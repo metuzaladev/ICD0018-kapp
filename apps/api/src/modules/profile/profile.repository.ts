@@ -20,6 +20,8 @@ const columns = {
   area: user.area,
   bio: user.bio,
   presenceSharing: user.presenceSharing,
+  allowFriendRequests: user.allowFriendRequests,
+  language: user.language,
 };
 
 export function createProfileRepository(db: Db): ProfileRepository {

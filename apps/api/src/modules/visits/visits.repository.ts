@@ -167,6 +167,7 @@ export function createVisitsRepository(db: Db): VisitsRepository {
       return {
         visitors: shown.map((r) => ({
           checkInId: r.id,
+          userId: r.userId,
           isMe: r.userId === viewerId,
           ownerFirstName: firstName(r.ownerName),
           dogs: dogMap.get(r.id) ?? [],

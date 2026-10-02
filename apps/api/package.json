@@ -23,11 +23,15 @@
     "@fastify/rate-limit": "^11.2.0",
     "@kapp/shared": "*",
     "better-auth": "^1.7.7",
+    "bullmq": "^6.3.11",
     "drizzle-orm": "^0.45.3",
+    "expo-server-sdk": "^7.2.0",
     "fastify": "^5.12.5",
+    "ioredis": "^6.0.0",
     "pg": "^8.23.1",
     "pino": "^10.3.1",
     "sharp": "^0.35.5",
+    "socket.io": "^4.8.4",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -35,8 +39,10 @@
     "@types/pg": "^8.15.0",
     "drizzle-kit": "^0.31.11",
     "exif-reader": "^2.0.3",
+    "socket.io-client": "^4.8.4",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",
+    "undici": "^7.30.0",
     "vitest": "^5.0.3"
   }
 }

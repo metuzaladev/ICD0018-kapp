@@ -79,6 +79,8 @@ export function makeProfile(overrides: Partial<Profile> = {}): Profile {
     area: 'Tallinn',
     bio: null,
     presenceSharing: 'friends',
+    allowFriendRequests: true,
+    language: 'et',
     ...overrides,
   };
 }

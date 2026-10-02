@@ -9,3 +9,6 @@ dist/
 
 # Claude Code agent worktrees (local working copies of background sessions)
 .claude/worktrees/
+
+# Production env file for docker-compose.prod.yml (docs/15) — never commit
+api.env

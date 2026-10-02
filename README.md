@@ -24,6 +24,8 @@ TalTechi kursuse **ICD0018 Hübriidmobiilirakendused** projekt · autor Kristofe
 | [11 Tõlked ja Figma tekstid](docs/11-tolked-ja-figma.md) | Eesti, inglise ja vene keel, keelevalik, API veateadete tõlkimine, CI kontrollid, erinevused Figmast |
 | [12 Kogukond](docs/12-kogukond.md) | Sõbrad, sõnumid (Socket.IO), teavitused ja push (BullMQ + Expo), blokeerimine ja teavitamine |
 | [13 Teenused](docs/13-teenused.md) | Teenusepakkujad, vabad ajad (lahtiolekuajad Tallinna ajas), broneerimine ja tühistamine, meeldetuletused |
+| [14 Animatsioonid ja ligipääsetavus](docs/14-animatsioonid-ja-ligipaasetavus.md) | Liikumise tokenid, haptika, VoiceOver, Dynamic Type, Reduce Motion |
+| [15 Pakendamine ja levitamine](docs/15-pakendamine-ja-levitamine.md) | EAS Build, TestFlight, Play internal testing, API Docker image, hostimine EL-is, GDPR, keskkonnamuutujad, varukoopiad |
 
 ## Käivitamine
 
@@ -46,6 +48,19 @@ Push-teavitused vajavad füüsilist seadet ja EAS projekti ID-d (`npx eas-cli@la
 
 Arenduses saadetud parooli taastamise lingid ilmuvad API logisse (e-posti teenust veel pole).
 
+## Toodang
+
+API on Docker image; andmebaas, Redis ja fotod on EL-is. Täielik juhend (kontod, `eas init`, TestFlight, Play, varukoopiad, kontrollnimekiri): [docs/15](docs/15-pakendamine-ja-levitamine.md).
+
+```bash
+docker build -f apps/api/Dockerfile -t kapp-api .                    # repo juurest
+docker run --rm --env-file api.env kapp-api node dist/migrate.js     # migratsioonid, kord väljalaske kohta
+docker run -d -p 3000:3000 --env-file api.env kapp-api               # API, healthcheck GET /health
+# või ühel VM-il koos Redise ja TLS-iga: docker-compose.prod.yml
+```
+
+`api.env` mall on `apps/api/.env.production.example`; toodangus keeldub API käivitumast, kui mõni kohustuslik väärtus puudub või on arenduse vaikeväärtus. Äpi buildid: `cd apps/mobile && npx eas-cli@latest build --profile preview|production` (profiilid `eas.json`-is, `EXPO_PUBLIC_API_URL` EAS-i keskkonnamuutujana).
+
 ## Kontrollid
 
 ```bash
@@ -54,6 +69,8 @@ npm test                                   # API unit- ja HTTP-testid (ilma andm
 npm run test:integration -w @kapp/api      # PostGIS, MinIO, Redis ja Socket.IO (vajab db:up)
 npm run lint -w mobile
 npm run i18n:check                         # tõlgete võtmed/parameetrid/mitmused, kõvakodeeritud UI-tekst
+npm run a11y:check                         # nuppude rollid ja sildid
+docker build -f apps/api/Dockerfile .      # toodangu image (CI teeb ka suitsutesti)
 ```
 
 Äpp on eesti, inglise ja vene keeles (seadme keel või Seaded → Keel); eestikeelsed tekstid tulevad Figmast. Uus tekst lisatakse kõigisse kolme faili `apps/mobile/src/i18n/locales/` — vt [docs/11](docs/11-tolked-ja-figma.md).

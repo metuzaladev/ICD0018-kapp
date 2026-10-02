@@ -55,5 +55,7 @@ API sisemine ülesehitus (kihid, nimed, vigade leping, turvalisus) on kirjas dok
 | Keskkond | API | Andmebaas | Äpp |
 |---|---|---|---|
 | Arendus | `npm run dev:api` (localhost:3000) | Docker Compose | Expo Go / development build |
-| Test (M8) | Railway / Render või Hetzner + Coolify (EL) | Hallatud Postgres + PostGIS | EAS Build → TestFlight, Play internal testing |
-| Toodang | sama, eraldi projekt | eraldi andmebaas, igapäevased varukoopiad | App Store, Google Play, EAS Update |
+| Staging (M8) | Docker image (`apps/api/Dockerfile`) EL-i VM-il (Hetzner) või platvormil (Scaleway/Render Frankfurt), Redis samas | Hallatud Postgres + PostGIS EL-is | EAS Build `preview` → sisemine levitamine |
+| Toodang | sama image, eraldi keskkond; migratsioon eraldi sammuna (`node dist/migrate.js`) | eraldi andmebaas, PITR + öised koopiad | EAS Build `production` → TestFlight, Play internal testing → poed; EAS Update |
+
+Pakendamine, hostimine, keskkonnamuutujad, varukoopiad ja väljalaske sammud: [15-pakendamine-ja-levitamine.md](15-pakendamine-ja-levitamine.md). API on mitme instantsi jaoks valmis: limiidiloendurid ja Socket.IO emitid käivad soovi korral läbi Redise (`RATE_LIMIT_STORE`, `REALTIME_ADAPTER`).

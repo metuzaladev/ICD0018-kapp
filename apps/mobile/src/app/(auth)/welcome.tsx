@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,10 +9,13 @@ import { PawBackground } from '@/components/paw-background';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
+import { useOnboardingSeen } from '@/lib/onboarding';
 
-/** Figma 01 / Welcome. */
+/** Figma 01 / Welcome. On a device that has never seen the intro, Onboarding comes first. */
 export default function WelcomeScreen() {
   const { t } = useTranslation();
+  // Loaded before the splash hides (root layout), so this never flashes Welcome first.
+  if (useOnboardingSeen() === false) return <Redirect href="/onboarding" />;
   return (
     <ThemedView style={styles.root}>
       <PawBackground />

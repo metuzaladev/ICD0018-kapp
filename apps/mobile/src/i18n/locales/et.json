@@ -8,7 +8,8 @@
     "openSettings": "Ava seaded",
     "you": "Sina",
     "dog": "koer",
-    "until": "kuni {{time}}"
+    "until": "kuni {{time}}",
+    "retry": "Proovi uuesti"
   },
   "units": {
     "km": "{{value}} km",
@@ -130,6 +131,23 @@
       "appleFailed": "Apple’iga sisselogimine ebaõnnestus"
     }
   },
+  "onboarding": {
+    "discover": {
+      "title": "Hea park on lähemal, kui arvad.",
+      "body": "Vaata, kes on pargis praegu, ja leia just teie tempoga sobiv seltskond.",
+      "photoLabel": "Koerapark sügisel"
+    },
+    "connect": {
+      "title": "Vähem ootamist. Rohkem mängu.",
+      "body": "Planeeri jalutuskäik, kutsu sõber kaasa ja leia oma väike kogukond.",
+      "sampleTitle": "Freddy ootab sõpru",
+      "sampleSubtitle": "Kadrioru koerapark · täna 17.00–18.00"
+    },
+    "step": "Samm {{current}}, kokku {{total}}",
+    "next": "Edasi",
+    "skip": "Jäta vahele",
+    "createAccount": "Loo konto"
+  },
   "location": {
     "title": "Mis on teie lähedal?",
     "body": "Asukoht aitab leida lähedal olevaid parke.",
@@ -176,11 +194,14 @@
     "count_other": "{{count}} paika väikesteks seiklusteks.",
     "fallbackNote": "Kaugused on arvutatud Tallinna kesklinnast.",
     "empty": "Selles raadiuses parke ei leitud. Proovi suuremat kaugust või vähem filtreid.",
-    "marker": "{{name}}, {{dogs}} praegu"
+    "marker": "{{name}}, {{dogs}} praegu",
+    "filtersHint": "Avab filtrid",
+    "emptyAction": "Tühjenda filtrid"
   },
   "parkRow": {
     "dogsNow": "{{dogs}} praegu",
-    "quiet": "hetkel vaikne"
+    "quiet": "hetkel vaikne",
+    "hint": "Avab pargi lehe"
   },
   "filters": {
     "title": "Just teile sobiv.",
@@ -237,7 +258,8 @@
     "privacy": "Teised näevad sind vastavalt sinu privaatsusseadele.",
     "submit": "Märgi kohalolek",
     "noDogs": "Lisa enne oma koer.",
-    "addDog": "Lisa koer"
+    "addDog": "Lisa koer",
+    "done": "Kohalolek märgitud. Head mängimist!"
   },
   "plan": {
     "title": "Teeme mänguplaani.",
@@ -258,7 +280,11 @@
     "cancelPlan": "Tühista plaan",
     "done": "Käidud",
     "empty": "Külastusi veel pole. Märgi pargis kohalolek, siis jääb käik siia meelde.",
-    "addReview": "Lisa hinnang"
+    "addReview": "Lisa hinnang",
+    "plannedEmptyTitle": "Veel üks tühi kalender.",
+    "plannedEmptyBody": "Sul pole veel planeeritud kohtumisi. Vali park, aeg ja kutsu sõbrad kaasa.",
+    "plannedEmptyAction": "Vaata lähedal olevaid parke",
+    "emptyAction": "Leia lähim park"
   },
   "review": {
     "title": "Kuidas teil läks?",
@@ -269,7 +295,8 @@
     "experience": "Sinu kogemus",
     "experiencePlaceholder": "Sõbralikud koerad ja mõnus jalutuskäik.",
     "submit": "Salvesta hinnang",
-    "chooseRating": "Vali hinne 1–5"
+    "chooseRating": "Vali hinne 1–5",
+    "saved": "Hinnang salvestatud. Aitäh!"
   },
   "report": {
     "title": "Hoiame pargid mõnusad.",
@@ -305,7 +332,7 @@
     "profile": {
       "notFound": "Koera ei leitud",
       "photoA11y": "{{name}}, profiilipilt",
-      "born": "Sündinud {{date}}",
+      "born": "Sünnikuupäev: {{date}}",
       "temperament": "ISELOOM",
       "photos": "Fotod",
       "photosEmpty": "Lisa esimene foto",
@@ -392,8 +419,8 @@
     "removeProfile": "Eemalda profiilipildist",
     "deleteTitle": "Kustutada foto?",
     "deleteBody": "Fotot ei saa taastada.",
-    "a11y": "Foto, lisatud {{date}}",
-    "a11yProfile": "Foto, lisatud {{date}}, profiilipilt",
+    "a11y": "Foto, lisamise kuupäev {{date}}",
+    "a11yProfile": "Foto, lisamise kuupäev {{date}}, profiilipilt",
     "hint": "Ava valikud: profiilipilt või kustutamine",
     "badge": "PROFIIL"
   },
@@ -552,7 +579,8 @@
     "empty": "Vestlusi veel pole. Ava sõbra profiil ja vajuta „Saada sõnum“.",
     "noMessages": "Sõnumeid veel pole",
     "unread_one": "{{count}} lugemata sõnum",
-    "unread_other": "{{count}} lugemata sõnumit"
+    "unread_other": "{{count}} lugemata sõnumit",
+    "emptyAction": "Leia mängusõbrad"
   },
   "conversation": {
     "empty": "Ütle tere!",
@@ -590,7 +618,7 @@
     "title": "Kutsu parki: {{name}}",
     "subtitle": "Vali park, siis aeg. Kutse läheb sõbrale sõnumina.",
     "favorite": "Lemmikpark",
-    "message": "Lähen {{day}} kell {{from}} parki {{park}}. Tule ka!"
+    "message": "Lähen parki {{park}}: {{day}} kell {{from}}. Tule ka!"
   },
   "pushPrompt": {
     "title": "Kas anname märku?",

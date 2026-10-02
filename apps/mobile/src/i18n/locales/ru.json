@@ -512,7 +512,13 @@
     "notifications": "Уведомления",
     "notificationsSub": "Друзья, сообщения и планы",
     "privacy": "Приватность",
-    "privacySub": "Видимость и безопасность"
+    "privacySub": "Видимость и безопасность",
+    "appearance": "Оформление",
+    "appearanceOptions": {
+      "system": "Как в системе",
+      "light": "Светлое",
+      "dark": "Тёмное"
+    }
   },
   "profileEdit": {
     "title": "Всё как вам нравится.",

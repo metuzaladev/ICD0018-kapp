@@ -476,7 +476,13 @@
     "notifications": "Teavitused",
     "notificationsSub": "Sõbrad, sõnumid ja plaanid",
     "privacy": "Privaatsus",
-    "privacySub": "Nähtavus ja turvalisus"
+    "privacySub": "Nähtavus ja turvalisus",
+    "appearance": "Välimus",
+    "appearanceOptions": {
+      "system": "Süsteem",
+      "light": "Hele",
+      "dark": "Tume"
+    }
   },
   "profileEdit": {
     "title": "Täpselt sinu moodi.",

@@ -476,7 +476,13 @@
     "notifications": "Notifications",
     "notificationsSub": "Friends, messages and plans",
     "privacy": "Privacy",
-    "privacySub": "Visibility and safety"
+    "privacySub": "Visibility and safety",
+    "appearance": "Appearance",
+    "appearanceOptions": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    }
   },
   "profileEdit": {
     "title": "Just your style.",

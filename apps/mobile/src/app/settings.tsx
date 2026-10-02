@@ -5,28 +5,70 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
+import { Icon } from '@/components/icon';
 import { ListRow } from '@/components/list-row';
 import { PressableScale } from '@/components/pressable-scale';
 import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
+import { appearance, useAppearancePreference } from '@/hooks/use-appearance';
 import { useTheme } from '@/hooks/use-theme';
 import { currentLanguage } from '@/i18n';
 import { setLanguagePreference, useLanguagePreference, type LanguagePreference } from '@/i18n/language-preference';
+import { APPEARANCE_PREFERENCES } from '@/lib/appearance';
 import { authClient } from '@/lib/auth-client';
 import { haptic } from '@/lib/haptics';
 import { unregisterPushToken } from '@/lib/push';
 
 const OPTIONS: LanguagePreference[] = ['auto', ...LANGUAGES];
 
+/** One radio group card (language, appearance): one VoiceOver radio per row, a check on the chosen one. */
+function OptionGroup<T extends string>({
+  options,
+  selected,
+  label,
+  onSelect,
+}: {
+  options: readonly T[];
+  selected: T;
+  label: (option: T) => string;
+  onSelect: (option: T) => void;
+}) {
+  const c = useTheme();
+  return (
+    <View style={[styles.group, { backgroundColor: c.surface, borderColor: c.border }]} accessibilityRole="radiogroup">
+      {options.map((option, index) => {
+        const checked = selected === option;
+        return (
+          <PressableScale
+            key={option}
+            accessibilityRole="radio"
+            accessibilityLabel={label(option)}
+            accessibilityState={{ checked }}
+            onPress={() => {
+              haptic('selection');
+              onSelect(option);
+            }}
+            style={[styles.row, index > 0 && { borderTopColor: c.border, borderTopWidth: StyleSheet.hairlineWidth }]}>
+            <ThemedText type="label" style={styles.label}>
+              {label(option)}
+            </ThemedText>
+            {checked ? <Icon name="check" size={20} color={c.brand} /> : null}
+          </PressableScale>
+        );
+      })}
+    </View>
+  );
+}
+
 /**
- * Figma 07 / Settings / Overview: edit profile, notifications, privacy, language, sign out.
+ * Figma 07 / Settings / Overview: edit profile, notifications, privacy, language, appearance, sign out.
  * Location, help and "add a park" from Figma arrive with the features they control.
  */
 export default function SettingsScreen() {
   const { t } = useTranslation();
-  const c = useTheme();
   const preference = useLanguagePreference();
+  const appearancePreference = useAppearancePreference();
   const [signingOut, setSigningOut] = useState(false);
 
   async function signOut() {
@@ -52,30 +94,18 @@ export default function SettingsScreen() {
       <ThemedText type="heading" accessibilityRole="header">
         {t('settings.language')}
       </ThemedText>
-      <View style={[styles.group, { backgroundColor: c.surface, borderColor: c.border }]} accessibilityRole="radiogroup">
-        {OPTIONS.map((option, index) => {
-          const selected = preference === option;
-          return (
-            <PressableScale
-              key={option}
-              accessibilityRole="radio"
-              accessibilityLabel={optionLabel(option)}
-              accessibilityState={{ checked: selected }}
-              onPress={() => {
-                haptic('selection');
-                void setLanguagePreference(option);
-              }}
-              style={[styles.row, index > 0 && { borderTopColor: c.border, borderTopWidth: StyleSheet.hairlineWidth }]}>
-              <ThemedText type="label" style={styles.label}>
-                {optionLabel(option)}
-              </ThemedText>
-              <ThemedText type="heading" style={{ color: c.brand }} accessibilityElementsHidden>
-                {selected ? '✓' : ' '}
-              </ThemedText>
-            </PressableScale>
-          );
-        })}
-      </View>
+      <OptionGroup options={OPTIONS} selected={preference} label={optionLabel} onSelect={(o) => void setLanguagePreference(o)} />
+
+      {/* Default light: the redesign is drawn in light mode; dark and "follow the system" are opt-in (docs/05). */}
+      <ThemedText type="heading" accessibilityRole="header">
+        {t('settings.appearance')}
+      </ThemedText>
+      <OptionGroup
+        options={APPEARANCE_PREFERENCES}
+        selected={appearancePreference}
+        label={(o) => t(`settings.appearanceOptions.${o}`)}
+        onSelect={(o) => void appearance.set(o)}
+      />
 
       <Button label={t('settings.signOut')} variant="tertiary" loading={signingOut} onPress={signOut} />
     </Screen>

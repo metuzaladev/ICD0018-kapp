@@ -45,6 +45,8 @@ export const en: Messages = {
   'validation.searchMin': 'enter at least {{min}} letters',
   'validation.messageEmpty': 'write a message',
   'validation.pushToken': 'is not an Expo push token',
+  'validation.bothCoordinates': 'give both lat and lng',
+  'validation.maxDogs': 'up to {{max}} dogs',
 
   'errors.badRequest': 'Invalid request',
   'errors.unauthorized': 'Please sign in',
@@ -83,6 +85,12 @@ export const en: Messages = {
   'errors.notificationNotFound': 'Notification not found',
   'errors.cannotBlockSelf': 'You cannot block yourself',
   'errors.cannotReportSelf': 'You cannot report yourself',
+  'errors.providerNotFound': 'Service provider not found',
+  'errors.serviceNotFound': 'Service not found',
+  'errors.bookingNotFound': 'Booking not found',
+  'errors.slotUnavailable': 'This time cannot be booked, please choose another',
+  'errors.slotTaken': 'Someone just booked this time, please choose another',
+  'errors.cancelTooLate': 'Bookings can be cancelled up to {{hours}} hours before the start',
 
   'push.friendRequest.title': 'New friend request',
   'push.friendRequest.body': '{{name}} would like to be friends',
@@ -91,6 +99,10 @@ export const en: Messages = {
   'push.message.title': 'Message from {{name}}',
   'push.friendPlan.title': '{{name}} is heading to the park',
   'push.friendPlan.body': '{{park}} · {{when}}',
+  'push.bookingConfirmed.title': 'Booking confirmed',
+  'push.bookingCancelled.title': 'Booking cancelled',
+  'push.bookingReminder.title': 'See you soon!',
+  'push.booking.body': '{{service}} · {{provider}} · {{when}}',
 
   'auth.userExists': 'An account with this email already exists',
   'auth.invalidCredentials': 'Wrong email or password',

@@ -15,6 +15,7 @@ import { Radius, Spacing } from '@/constants/theme';
 import { useBlockUser, useReportUser } from '@/hooks/use-safety';
 import { errorMessage } from '@/lib/api';
 import { validateForm } from '@/lib/form';
+import { haptic } from '@/lib/haptics';
 
 type Reason = (typeof USER_REPORT_REASONS)[number];
 
@@ -44,6 +45,7 @@ export default function ReportUserScreen() {
   }
 
   function confirmBlock() {
+    haptic('warning');
     Alert.alert(t('safety.blockTitle'), t('safety.blockBody'), [
       { text: t('common.cancel'), style: 'cancel' },
       {
@@ -81,7 +83,7 @@ export default function ReportUserScreen() {
         <>
           <View style={styles.chips} accessibilityRole="radiogroup">
             {USER_REPORT_REASONS.map((r) => (
-              <Chip key={r} label={t(`safety.reasons.${r}`)} selected={reason === r} onPress={() => setReason(r)} />
+              <Chip key={r} role="radio" label={t(`safety.reasons.${r}`)} selected={reason === r} onPress={() => setReason(r)} />
             ))}
           </View>
           <TextField
@@ -107,5 +109,5 @@ export default function ReportUserScreen() {
 
 const styles = StyleSheet.create({
   card: { padding: Spacing.three, borderRadius: Radius[16], gap: Spacing.one },
-  chips: { flexDirection: 'row', gap: Spacing.two },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
 });

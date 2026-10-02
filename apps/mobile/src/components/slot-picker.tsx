@@ -55,6 +55,6 @@ const styles = StyleSheet.create({
   dayChip: { minWidth: 96 },
   dim: { opacity: 0.5 },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  // Four per row like the plan-visit hours; no flexGrow so a lone last chip does not stretch.
-  timeChip: { width: '23%' },
+  // Four per row like the plan-visit hours; minWidth (not width) so large text grows the chip.
+  timeChip: { minWidth: '22%' },
 });

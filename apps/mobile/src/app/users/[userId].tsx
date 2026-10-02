@@ -3,10 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { Alert, StyleSheet } from 'react-native';
 
 import { Button } from '@/components/button';
+import { Entering } from '@/components/entering';
+import { ErrorState } from '@/components/error-state';
 import { FormError } from '@/components/form-error';
 import { ListRow } from '@/components/list-row';
 import { OfflineBanner } from '@/components/offline-banner';
 import { Screen } from '@/components/screen';
+import { SkeletonList } from '@/components/skeleton';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
@@ -14,12 +17,14 @@ import { useAcceptFriendRequest, useDeleteFriendRequest, useRemoveFriend, useSen
 import { useStartConversation } from '@/hooks/use-messages';
 import { errorMessage } from '@/lib/api';
 import { ageLabel, formatFriendsSince, personTitle } from '@/lib/format';
+import { haptic } from '@/lib/haptics';
 
 /** Figma 05 / Community / Friend Profile — also the profile of anyone found in search or in a park. */
 export default function UserProfileScreen() {
   const { t } = useTranslation();
   const { userId } = useLocalSearchParams<{ userId: string }>();
-  const { data: person, error, isPending } = useUserProfile(userId);
+  const profile = useUserProfile(userId);
+  const { data: person, error, isPending } = profile;
   const send = useSendFriendRequest();
   const accept = useAcceptFriendRequest();
   const cancel = useDeleteFriendRequest();
@@ -35,6 +40,7 @@ export default function UserProfileScreen() {
 
   function confirmUnfriend() {
     if (!person) return;
+    haptic('warning');
     Alert.alert(t('userProfile.unfriendTitle', { name: person.firstName }), t('userProfile.unfriendBody'), [
       { text: t('common.cancel'), style: 'cancel' },
       { text: t('userProfile.unfriend'), style: 'destructive', onPress: () => unfriend.mutate(userId) },
@@ -52,9 +58,9 @@ export default function UserProfileScreen() {
       <Stack.Screen options={{ title: '' }} />
       <Screen underHeader title={name} subtitle={subtitle}>
         <OfflineBanner />
-        {error && !person ? <FormError message={errorMessage(error)} /> : null}
+        {error && !person ? <ErrorState message={errorMessage(error)} onRetry={() => void profile.refetch()} retrying={profile.isFetching} /> : null}
         {actionError ? <FormError message={errorMessage(actionError)} /> : null}
-        {isPending ? <ThemedText themeColor="muted">{t('common.loading')}</ThemedText> : null}
+        {isPending ? <SkeletonList rows={2} rowHeight={96} /> : null}
 
         {person ? (
           <>
@@ -83,14 +89,17 @@ export default function UserProfileScreen() {
               <Button label={t('friends.cancelRequest')} variant="secondary" loading={cancel.isPending} onPress={() => cancel.mutate(userId)} />
             ) : null}
 
-            {person.dogs.map((dog) => (
-              <ThemedView key={dog.id} type="surface" style={styles.card}>
-                <ThemedText type="heading">{t('userProfile.dogProfile', { name: dog.name })}</ThemedText>
-                <ThemedText themeColor="muted">
-                  {[dog.breed, dog.birthDate ? ageLabel(dog.birthDate) : null].filter(Boolean).join(' · ') || t('common.dog')}
-                </ThemedText>
-                {dog.temperament ? <ThemedText>{dog.temperament}</ThemedText> : null}
-              </ThemedView>
+            {person.dogs.map((dog, i) => (
+              <Entering key={dog.id} index={i}>
+                {/* One VoiceOver element per dog card. */}
+                <ThemedView type="surface" style={styles.card} accessible>
+                  <ThemedText type="heading">{t('userProfile.dogProfile', { name: dog.name })}</ThemedText>
+                  <ThemedText themeColor="muted">
+                    {[dog.breed, dog.birthDate ? ageLabel(dog.birthDate) : null].filter(Boolean).join(' · ') || t('common.dog')}
+                  </ThemedText>
+                  {dog.temperament ? <ThemedText>{dog.temperament}</ThemedText> : null}
+                </ThemedView>
+              </Entering>
             ))}
             {person.relation !== 'friend' ? (
               <ThemedText type="caption" themeColor="muted">

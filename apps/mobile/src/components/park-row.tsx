@@ -21,6 +21,7 @@ export function ParkRow({ park, highlighted = false }: { park: Park; highlighted
     <PressableScale
       accessibilityRole="button"
       accessibilityLabel={`${park.name}, ${meta}`}
+      accessibilityHint={t('parkRow.hint')}
       onPress={() => router.push({ pathname: '/parks/[parkId]', params: { parkId: park.id } })}
       style={[styles.row, { backgroundColor: c.surface, borderColor: highlighted ? c.brand : c.border }]}>
       <View style={styles.text}>

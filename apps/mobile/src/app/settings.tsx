@@ -2,10 +2,11 @@ import { LANGUAGES } from '@kapp/shared';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
 import { ListRow } from '@/components/list-row';
+import { PressableScale } from '@/components/pressable-scale';
 import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
@@ -13,6 +14,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { currentLanguage } from '@/i18n';
 import { setLanguagePreference, useLanguagePreference, type LanguagePreference } from '@/i18n/language-preference';
 import { authClient } from '@/lib/auth-client';
+import { haptic } from '@/lib/haptics';
 import { unregisterPushToken } from '@/lib/push';
 
 const OPTIONS: LanguagePreference[] = ['auto', ...LANGUAGES];
@@ -54,23 +56,23 @@ export default function SettingsScreen() {
         {OPTIONS.map((option, index) => {
           const selected = preference === option;
           return (
-            <Pressable
+            <PressableScale
               key={option}
               accessibilityRole="radio"
-              accessibilityState={{ selected }}
-              onPress={() => setLanguagePreference(option)}
-              style={({ pressed }) => [
-                styles.row,
-                index > 0 && { borderTopColor: c.border, borderTopWidth: StyleSheet.hairlineWidth },
-                { opacity: pressed ? 0.8 : 1 },
-              ]}>
+              accessibilityLabel={optionLabel(option)}
+              accessibilityState={{ checked: selected }}
+              onPress={() => {
+                haptic('selection');
+                void setLanguagePreference(option);
+              }}
+              style={[styles.row, index > 0 && { borderTopColor: c.border, borderTopWidth: StyleSheet.hairlineWidth }]}>
               <ThemedText type="label" style={styles.label}>
                 {optionLabel(option)}
               </ThemedText>
               <ThemedText type="heading" style={{ color: c.brand }} accessibilityElementsHidden>
                 {selected ? '✓' : ' '}
               </ThemedText>
-            </Pressable>
+            </PressableScale>
           );
         })}
       </View>

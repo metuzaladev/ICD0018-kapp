@@ -4,13 +4,17 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { Chip } from '@/components/chip';
-import { FormError } from '@/components/form-error';
+import { EmptyState } from '@/components/empty-state';
+import { Entering } from '@/components/entering';
+import { ErrorState } from '@/components/error-state';
 import { OfflineBanner } from '@/components/offline-banner';
 import { ProviderRow } from '@/components/provider-row';
 import { Screen } from '@/components/screen';
+import { SkeletonList } from '@/components/skeleton';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useDeviceLocation } from '@/hooks/use-device-location';
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { useProviders } from '@/hooks/use-services';
 import { errorMessage } from '@/lib/api';
 
@@ -26,9 +30,10 @@ export default function ServicesScreen() {
   const location = useDeviceLocation();
   const [category, setCategory] = useState<ServiceCategory | null>(null);
   const providers = useProviders(category, location.origin);
+  const refresh = usePullToRefresh(providers.refetch);
 
   return (
-    <Screen underHeader title={t('services.title')} subtitle={t('services.subtitle')}>
+    <Screen underHeader title={t('services.title')} subtitle={t('services.subtitle')} refresh={refresh}>
       <OfflineBanner />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
         {CATEGORIES.map((key) => (
@@ -39,10 +44,16 @@ export default function ServicesScreen() {
         ))}
       </ScrollView>
 
-      {providers.error && !providers.data ? <FormError message={errorMessage(providers.error)} /> : null}
-      {providers.isPending ? <ThemedText themeColor="muted">{t('common.loading')}</ThemedText> : null}
-      {providers.data?.length === 0 ? <ThemedText themeColor="muted">{t('services.empty')}</ThemedText> : null}
-      {providers.data?.map((provider) => <ProviderRow key={provider.id} provider={provider} />)}
+      {providers.error && !providers.data ? (
+        <ErrorState message={errorMessage(providers.error)} onRetry={() => void providers.refetch()} retrying={providers.isFetching} />
+      ) : null}
+      {providers.isPending ? <SkeletonList rowHeight={88} /> : null}
+      {providers.data?.length === 0 ? <EmptyState title={t('services.empty')} /> : null}
+      {providers.data?.map((provider, i) => (
+        <Entering key={provider.id} index={i}>
+          <ProviderRow provider={provider} />
+        </Entering>
+      ))}
 
       <ThemedText type="caption" themeColor="muted">
         {/* Honest about the demo data (Figma: "… on disaini näidisandmed"). */}

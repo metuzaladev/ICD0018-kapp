@@ -15,6 +15,8 @@ type ChipProps = {
   onPress: () => void;
   /** Read by VoiceOver after the label when the chip's effect is not obvious (e.g. opens a screen). */
   accessibilityHint?: string;
+  /** `radio` inside an `accessibilityRole="radiogroup"` (exactly one choice), otherwise a button. */
+  role?: 'button' | 'radio';
 };
 
 /**
@@ -24,7 +26,7 @@ type ChipProps = {
  * as long, and a row of chips should wrap (`flexWrap` on the parent) rather than break a word.
  * Selecting cross-fades the colours (instant with Reduce Motion) and plays the selection haptic.
  */
-export function Chip({ label, selected = false, onPress, accessibilityHint }: ChipProps) {
+export function Chip({ label, selected = false, onPress, accessibilityHint, role = 'button' }: ChipProps) {
   const c = useTheme();
   const reduceMotion = useReduceMotion();
   const progress = useSharedValue(selected ? 1 : 0);
@@ -42,10 +44,10 @@ export function Chip({ label, selected = false, onPress, accessibilityHint }: Ch
 
   return (
     <PressableScale
-      accessibilityRole="button"
+      accessibilityRole={role}
       accessibilityLabel={label}
       accessibilityHint={accessibilityHint}
-      accessibilityState={{ selected }}
+      accessibilityState={role === 'radio' ? { checked: selected } : { selected }}
       onPress={() => {
         haptic('selection');
         onPress();

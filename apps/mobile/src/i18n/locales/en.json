@@ -259,7 +259,8 @@
     "submit": "Check in",
     "noDogs": "Add your dog first.",
     "addDog": "Add a dog",
-    "done": "Checked in. Have fun!"
+    "done": "Checked in. Have fun!",
+    "seeFriends": "See playmates"
   },
   "plan": {
     "title": "Let’s make a play plan.",
@@ -296,7 +297,8 @@
     "experiencePlaceholder": "Friendly dogs and a lovely walk.",
     "submit": "Save review",
     "chooseRating": "Choose a rating from 1 to 5",
-    "saved": "Review saved. Thank you!"
+    "saved": "Review saved. Thank you!",
+    "ratingLabel": "Rating"
   },
   "report": {
     "title": "Let’s keep parks pleasant.",
@@ -326,8 +328,8 @@
       "emptyTitle": "Introduce your dog",
       "emptyBody": "Personality and play preferences help find the right company.",
       "noDetails": "Add breed and other details",
-      "openA11y": "{{name}}, open profile",
-      "add": "Add a dog"
+      "add": "Add a dog",
+      "openHint": "Opens the dog’s profile"
     },
     "profile": {
       "notFound": "Dog not found",

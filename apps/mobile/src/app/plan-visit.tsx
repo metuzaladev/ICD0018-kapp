@@ -16,6 +16,7 @@ import { usePlanVisit } from '@/hooks/use-visits';
 import { errorMessage } from '@/lib/api';
 import { formatDay, formatDurationShort, formatHour, formatTime } from '@/lib/format';
 import { validateForm } from '@/lib/form';
+import { haptic } from '@/lib/haptics';
 
 const DAYS_SHOWN = 7;
 const FIRST_HOUR = 6;
@@ -62,6 +63,7 @@ export default function PlanVisitScreen() {
     setError(null);
     try {
       const saved = await plan.mutateAsync(data);
+      haptic('success');
       if (inviteUserId) {
         // The invitation is an ordinary message in the sender's language, so the friend can reply.
         const { conversation } = await invite.mutateAsync({
@@ -74,6 +76,7 @@ export default function PlanVisitScreen() {
       }
       router.back();
     } catch (e) {
+      haptic('error');
       setError(errorMessage(e));
     }
   }
@@ -110,9 +113,9 @@ export default function PlanVisitScreen() {
       </View>
 
       <ThemedText type="heading">{t('plan.duration')}</ThemedText>
-      <View style={styles.row}>
+      <View style={styles.wrap} accessibilityRole="radiogroup">
         {DURATIONS.map((m) => (
-          <Chip key={m} label={formatDurationShort(m)} selected={duration === m} onPress={() => setDuration(m)} />
+          <Chip key={m} role="radio" label={formatDurationShort(m)} selected={duration === m} onPress={() => setDuration(m)} />
         ))}
       </View>
 
@@ -126,7 +129,7 @@ const styles = StyleSheet.create({
   scrollRow: { gap: Spacing.two },
   dayChip: { minWidth: 96 },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  // Fixed width (no flexGrow) so a lone last chip does not stretch across the row.
-  hourChip: { width: '23%' },
-  row: { flexDirection: 'row', gap: Spacing.two },
+  // Four per row without stretching a lone last chip; minWidth (not width) so "17:00" at 160 %
+  // text size grows instead of being clipped.
+  hourChip: { minWidth: '22%' },
 });

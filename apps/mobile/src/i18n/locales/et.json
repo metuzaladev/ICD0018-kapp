@@ -259,7 +259,8 @@
     "submit": "Märgi kohalolek",
     "noDogs": "Lisa enne oma koer.",
     "addDog": "Lisa koer",
-    "done": "Kohalolek märgitud. Head mängimist!"
+    "done": "Kohalolek märgitud. Head mängimist!",
+    "seeFriends": "Vaata mängusõpru"
   },
   "plan": {
     "title": "Teeme mänguplaani.",
@@ -296,7 +297,8 @@
     "experiencePlaceholder": "Sõbralikud koerad ja mõnus jalutuskäik.",
     "submit": "Salvesta hinnang",
     "chooseRating": "Vali hinne 1–5",
-    "saved": "Hinnang salvestatud. Aitäh!"
+    "saved": "Hinnang salvestatud. Aitäh!",
+    "ratingLabel": "Hinne"
   },
   "report": {
     "title": "Hoiame pargid mõnusad.",
@@ -326,8 +328,8 @@
       "emptyTitle": "Tutvusta oma koera",
       "emptyBody": "Iseloom ja mängueelistused aitavad leida sobivat seltskonda.",
       "noDetails": "Lisa tõug ja muud andmed",
-      "openA11y": "{{name}}, ava profiil",
-      "add": "Lisa koer"
+      "add": "Lisa koer",
+      "openHint": "Avab koera profiili"
     },
     "profile": {
       "notFound": "Koera ei leitud",

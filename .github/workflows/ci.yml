@@ -40,6 +40,8 @@ jobs:
       - run: npm run lint -w mobile
       # Translation tables (keys, {{params}}, plural forms) and no hard-coded UI text (docs/11).
       - run: npm run i18n:check
+      # Touchables have a role and label, inputs a label, images a label or are hidden (docs/14).
+      - run: npm run a11y:check
       - run: npm test
       # MinIO (+ bucket) from docker-compose.yml, so CI and development use the same setup. Not a job
       # service: service containers cannot pass the `server /data` command MinIO needs.

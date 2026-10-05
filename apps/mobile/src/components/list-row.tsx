@@ -22,6 +22,8 @@ type ListRowProps = {
   leading?: ReactNode;
   /** Draws the subtitle in the danger colour (e.g. an overdue vaccination). */
   alert?: boolean;
+  /** Destructive menu row (M10 "Kustuta konto"): title and icon in the danger colour. */
+  danger?: boolean;
   /** Omitted → an informational row (e.g. "Sina" among park visitors): no chevron, read as text. */
   onPress?: () => void;
   onLongPress?: () => void;
@@ -32,7 +34,7 @@ type ListRowProps = {
  * Figma "List Row" (4:24): optional photo or icon, title, subtitle and chevron; at least 64 pt high
  * (HIG ≥ 44 pt target). One VoiceOver element ("title, subtitle"); photo and chevron are decoration.
  */
-export function ListRow({ title, subtitle, photo, icon, leading, alert = false, onPress, onLongPress, accessibilityHint }: ListRowProps) {
+export function ListRow({ title, subtitle, photo, icon, leading, alert = false, danger = false, onPress, onLongPress, accessibilityHint }: ListRowProps) {
   const c = useTheme();
   return (
     <PressableScale
@@ -45,10 +47,12 @@ export function ListRow({ title, subtitle, photo, icon, leading, alert = false, 
       onLongPress={onLongPress}
       style={[styles.row, { backgroundColor: c.surface, borderColor: c.border }]}>
       {photo ? <PhotoTile uri={photo.uri} name={photo.name ?? title} size={44} radius={14} /> : null}
-      {icon ? <Icon name={icon} size={24} color={c.text} /> : null}
+      {icon ? <Icon name={icon} size={24} color={danger ? c.danger : c.text} /> : null}
       {leading}
       <View style={styles.text}>
-        <ThemedText type="label">{title}</ThemedText>
+        <ThemedText type="label" themeColor={danger ? 'danger' : undefined}>
+          {title}
+        </ThemedText>
         {subtitle ? (
           <ThemedText type="caption" themeColor={alert ? 'danger' : 'muted'}>
             {subtitle}

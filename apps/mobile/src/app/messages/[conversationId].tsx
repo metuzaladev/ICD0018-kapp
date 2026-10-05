@@ -58,7 +58,8 @@ export default function ConversationScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: other ? personTitle(other.firstName, other.dogNames) : '' }} />
+      {/* `other` null = the friend deleted their account (M10); while loading it is undefined. */}
+      <Stack.Screen options={{ title: other ? personTitle(other.firstName, other.dogNames) : other === null ? t('conversation.deletedUser') : '' }} />
       <ThemedView style={styles.root}>
         <SafeAreaView edges={['bottom']} style={styles.root}>
           <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={100}>
@@ -80,8 +81,9 @@ export default function ConversationScreen() {
                 )
               }
               renderItem={({ item }) => {
-                const mine = item.senderId !== other?.id;
-                const who = mine ? t('common.you') : (other?.firstName ?? '');
+                // A null sender is the deleted account (M10), never this user.
+                const mine = item.senderId !== null && item.senderId !== other?.id;
+                const who = mine ? t('common.you') : (other?.firstName ?? t('conversation.deletedUser'));
                 return (
                   <View
                     style={[styles.bubble, mine ? styles.mine : styles.theirs, { backgroundColor: mine ? c.brand : c.surface, borderColor: c.border }]}
@@ -114,7 +116,7 @@ export default function ConversationScreen() {
               </View>
             ) : (
               <ThemedText themeColor="muted" style={styles.notice}>
-                {t('conversation.notFriends')}
+                {other === null ? t('conversation.accountDeleted') : t('conversation.notFriends')}
               </ThemedText>
             )}
           </KeyboardAvoidingView>

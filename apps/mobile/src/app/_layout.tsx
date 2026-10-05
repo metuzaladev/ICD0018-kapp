@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Colors, FontAssets } from '@/constants/theme';
 import { appearance } from '@/hooks/use-appearance';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { LegalConsentGate } from '@/components/legal-consent-gate';
 import { useCommunityRuntime } from '@/hooks/use-community-runtime';
 // Initialises i18next before any screen renders.
 import '@/i18n';
@@ -72,11 +73,15 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <CommunityRuntime signedIn={signedIn} />
+      {/* M10: blocks the app until the current terms and privacy policy are accepted (docs/17). */}
+      {signedIn ? <LegalConsentGate /> : null}
       <ThemeProvider value={navigationTheme}>
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.background } }}>
           <Stack.Protected guard={!signedIn}>
             <Stack.Screen name="(auth)" />
           </Stack.Protected>
+          {/* M10: privacy policy and terms are readable signed out (sign-up, Welcome) and signed in. */}
+          <Stack.Screen name="legal/[doc]" options={{ ...pushed, headerTitle: '' }} />
           <Stack.Protected guard={signedIn}>
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="parks/[parkId]" options={pushed} />
@@ -109,6 +114,9 @@ export default function RootLayout() {
             <Stack.Screen name="shop/[productId]" options={{ ...pushed, headerTitle: '' }} />
             <Stack.Screen name="redemptions/index" options={{ ...pushed, headerTitle: '' }} />
             <Stack.Screen name="redemptions/[redemptionId]" options={{ ...pushed, headerTitle: '' }} />
+            {/* M10 account (docs/17). */}
+            <Stack.Screen name="privacy-terms" options={{ ...pushed, headerTitle: '' }} />
+            <Stack.Screen name="delete-account" options={{ ...pushed, headerTitle: '' }} />
             {/* Modals: focused edit tasks with an explicit "done" action (HIG). */}
             <Stack.Screen name="profile-edit" options={{ presentation: 'modal', headerShown: true, title: t('nav.profileEdit') }} />
             <Stack.Screen name="park-filters" options={{ presentation: 'modal', headerShown: true, title: t('nav.filters') }} />

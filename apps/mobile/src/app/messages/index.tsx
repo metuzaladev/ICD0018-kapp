@@ -1,3 +1,4 @@
+import type { Conversation } from '@kapp/shared';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,8 +29,12 @@ export default function InboxScreen() {
   const refresh = usePullToRefresh(conversations.refetch);
   const [filter, setFilter] = useState('');
   const needle = filter.trim().toLocaleLowerCase();
+  // `other` is null when the friend deleted their account (M10): listed as "Kustutatud kasutaja".
+  const nameOf = (conv: Conversation) => (conv.other ? personTitle(conv.other.firstName, conv.other.dogNames) : t('conversation.deletedUser'));
   const shown = (data ?? []).filter(
-    (conv) => !needle || [conv.other.firstName, ...conv.other.dogNames].some((n) => n.toLocaleLowerCase().includes(needle)),
+    (conv) =>
+      !needle ||
+      (conv.other ? [conv.other.firstName, ...conv.other.dogNames] : [t('conversation.deletedUser')]).some((n) => n.toLocaleLowerCase().includes(needle)),
   );
 
   return (
@@ -51,8 +56,8 @@ export default function InboxScreen() {
         return (
           <Entering key={conv.id} index={i}>
             <ListRow
-              photo={{ name: conv.other.dogNames[0] ?? conv.other.firstName }}
-              title={personTitle(conv.other.firstName, conv.other.dogNames)}
+              photo={{ name: conv.other ? (conv.other.dogNames[0] ?? conv.other.firstName) : null }}
+              title={nameOf(conv)}
               subtitle={subtitle}
               accessibilityHint={conv.unreadCount > 0 ? t('inbox.unread', { count: conv.unreadCount }) : undefined}
               leading={

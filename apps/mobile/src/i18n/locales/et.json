@@ -107,7 +107,7 @@
       "name": "Sinu nimi",
       "namePlaceholder": "Ees- ja perekonnanimi",
       "emailPlaceholder": "nimi@näide.ee",
-      "terms": "Konto loomisel nõustud kasutustingimuste ja privaatsuspoliitikaga.",
+      "terms": "Konto luues nõustud kasutustingimustega ja kinnitad, et oled lugenud privaatsuspoliitikat. Käppa võib kasutada alates 13. eluaastast.",
       "submit": "Loo konto",
       "haveAccount": "Juba liige? Logi sisse",
       "socialProof": "Liitu Tallinna koeraomanike kampa"
@@ -552,7 +552,12 @@
       "system": "Süsteem",
       "light": "Hele",
       "dark": "Tume"
-    }
+    },
+    "account": "Konto",
+    "legal": "Privaatsus ja tingimused",
+    "legalSub": "Privaatsuspoliitika, tingimused ja sinu andmed",
+    "deleteAccount": "Kustuta konto",
+    "deleteAccountSub": "Jäädavalt, koos kõigi andmetega"
   },
   "profileEdit": {
     "title": "Täpselt sinu moodi.",
@@ -670,7 +675,9 @@
     "message": "Sõnum",
     "placeholder": "Kirjuta sõnum…",
     "send": "Saada",
-    "notFriends": "Te pole enam sõbrad, seega uusi sõnumeid saata ei saa."
+    "notFriends": "Te pole enam sõbrad, seega uusi sõnumeid saata ei saa.",
+    "deletedUser": "Kustutatud kasutaja",
+    "accountDeleted": "See kasutaja on oma konto kustutanud, uusi sõnumeid saata ei saa."
   },
   "privacy": {
     "title": "Sinu piirid loevad.",
@@ -1150,5 +1157,59 @@
     "cancelBody": "Kood kaob ja saad tagasi {{paws}}.",
     "cancelled": "Kood tühistatud, {{paws}} on tagasi.",
     "allCodes": "Kõik minu koodid"
+  },
+  "legal": {
+    "title": "Privaatsus ja tingimused",
+    "subtitle": "Mida me sinu andmetega teeme ja millised on Käpa reeglid.",
+    "privacy": "Privaatsuspoliitika",
+    "terms": "Kasutustingimused",
+    "version": "Versioon {{version}}",
+    "openHint": "Avab dokumendi",
+    "yourData": "Sinu andmed",
+    "export": "Laadi minu andmed alla",
+    "exportSub": "Kõik, mida Käpp sinu kohta hoiab, JSON-kujul",
+    "exportShareTitle": "Minu Käpa andmed",
+    "deleteHint": "Konto kustutamise leiad Seadetest jaotisest „Konto“.",
+    "consentTitleNew": "Enne alustamist",
+    "consentTitleUpdated": "Tingimused on uuenenud",
+    "consentBodyNew": "Käpa kasutamiseks loe läbi kasutustingimused ja privaatsuspoliitika ning nõustu nendega. Käppa võib kasutada alates 13. eluaastast.",
+    "consentBodyUpdated": "Uuendasime kasutustingimusi või privaatsuspoliitikat. Palun loe need läbi ja nõustu, et Käppa edasi kasutada.",
+    "accept": "Nõustun",
+    "signOut": "Logi välja",
+    "back": "Tagasi"
+  },
+  "account": {
+    "deleteTitle": "Kustuta konto",
+    "deleteSubtitle": "See on jäädav: kustutatud kontot ega andmeid ei saa taastada.",
+    "whatGoes": "Mis kustutatakse",
+    "items": {
+      "profile": "Sinu profiil, e-post ja sisselogimised",
+      "dogs": "Koerad, nende fotod ja tervisekirjed",
+      "visits": "Kohalolekud, plaanid, hinnangud ja lemmikpargid",
+      "community": "Sõbrad, kutsed, blokeeringud ja teavitused",
+      "explore": "Kohasoovitused, meeldimised ja salvestused",
+      "services": "Broneeringud (tulevased tühistatakse), Käpad ja sooduskoodid",
+      "reports": "Sinu esitatud teated"
+    },
+    "messagesNote": "Sinu saadetud sõnumid jäävad vestluskaaslasele nähtavaks nime „Kustutatud kasutaja“ all, ilma sinu nimeta.",
+    "afterNote": "Saadame kinnituse sinu e-posti aadressile. Fotod kustutatakse failihoidlast mõne minuti jooksul ja varukoopiatest hiljemalt 30 päeva pärast.",
+    "exportFirst": "Soovid andmed enne alles hoida?",
+    "passwordLabel": "Parool",
+    "passwordPlaceholder": "Kinnita oma parooliga",
+    "reauthTitle": "Logi uuesti sisse",
+    "reauthBody": "Turvalisuse huvides logi Apple’i või Google’iga uuesti sisse. Seejärel saad konto 10 minuti jooksul kustutada.",
+    "reauthDone": "Sisse logitud. Võid nüüd konto kustutada.",
+    "reauthUnavailable": "Logi välja ja uuesti sisse, seejärel ava see vaade 10 minuti jooksul uuesti.",
+    "submit": "Kustuta konto jäädavalt",
+    "confirmTitle": "Kustutada konto jäädavalt?",
+    "confirmBody": "Kõik sinu andmed kustutatakse kohe. Seda ei saa tagasi võtta.",
+    "confirmAction": "Kustuta",
+    "deletedNotice": "Sinu konto on kustutatud. Aitäh, et olid Käpaga!"
+  },
+  "verifyEmail": {
+    "title": "Kinnita oma e-post",
+    "body": "Saatsime kinnituslingi aadressile {{email}}.",
+    "resend": "Saada uuesti",
+    "sent": "Saadetud! Vaata postkasti, vajadusel ka rämpsposti kausta."
   }
 }

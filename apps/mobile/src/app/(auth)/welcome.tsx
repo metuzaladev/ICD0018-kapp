@@ -8,6 +8,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/components/button';
 import { Fade } from '@/components/fade';
 import { FormError } from '@/components/form-error';
+import { LegalLinks } from '@/components/legal-links';
+import { SessionNoticeBanner } from '@/components/session-notice-banner';
 import { Icon } from '@/components/icon';
 import { PawBackground } from '@/components/paw-background';
 import { PhotoTile } from '@/components/photo-tile';
@@ -88,6 +90,7 @@ export default function WelcomeScreen() {
       </View>
 
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + Spacing.three, paddingBottom: insets.bottom + Spacing.three }]}>
+        <SessionNoticeBanner />
         <View style={[styles.tag, { backgroundColor: c.surface }]}>
           <Icon name="map-pin" size={14} color={c.text} />
           <ThemedText type="caption">{t('auth.welcome.region')}</ThemedText>
@@ -106,6 +109,8 @@ export default function WelcomeScreen() {
           <SocialSignIn onError={setError} showGoogle={false} />
           <Button label={t('auth.welcome.haveAccount')} variant="tertiary" onPress={() => router.push('/sign-in')} />
         </View>
+        {/* M10: the store requires the privacy policy to be reachable before signing up. */}
+        <LegalLinks />
       </ScrollView>
     </ThemedView>
   );

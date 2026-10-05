@@ -107,7 +107,7 @@
       "name": "Your name",
       "namePlaceholder": "First and last name",
       "emailPlaceholder": "name@example.com",
-      "terms": "By creating an account you agree to the terms of use and the privacy policy.",
+      "terms": "By creating an account you accept the terms of use and confirm that you have read the privacy policy. Käpp is for people aged 13 or older.",
       "submit": "Create account",
       "haveAccount": "Already a member? Sign in",
       "socialProof": "Join Tallinn's dog owners"
@@ -552,7 +552,12 @@
       "system": "System",
       "light": "Light",
       "dark": "Dark"
-    }
+    },
+    "account": "Account",
+    "legal": "Privacy & terms",
+    "legalSub": "Privacy policy, terms and your data",
+    "deleteAccount": "Delete account",
+    "deleteAccountSub": "Permanently, with all your data"
   },
   "profileEdit": {
     "title": "Just your style.",
@@ -670,7 +675,9 @@
     "message": "Message",
     "placeholder": "Write a message…",
     "send": "Send",
-    "notFriends": "You are no longer friends, so new messages cannot be sent."
+    "notFriends": "You are no longer friends, so new messages cannot be sent.",
+    "deletedUser": "Deleted user",
+    "accountDeleted": "This person has deleted their account, so no new messages can be sent."
   },
   "privacy": {
     "title": "Your boundaries matter.",
@@ -1150,5 +1157,59 @@
     "cancelBody": "The code disappears and you get back {{paws}}.",
     "cancelled": "Code cancelled, {{paws}} refunded.",
     "allCodes": "All my codes"
+  },
+  "legal": {
+    "title": "Privacy & terms",
+    "subtitle": "What we do with your data and the rules of Käpp.",
+    "privacy": "Privacy policy",
+    "terms": "Terms of use",
+    "version": "Version {{version}}",
+    "openHint": "Opens the document",
+    "yourData": "Your data",
+    "export": "Download my data",
+    "exportSub": "Everything Käpp keeps about you, as JSON",
+    "exportShareTitle": "My Käpp data",
+    "deleteHint": "You can delete your account in Settings under “Account”.",
+    "consentTitleNew": "Before you start",
+    "consentTitleUpdated": "Our terms have changed",
+    "consentBodyNew": "To use Käpp, please read and accept the terms of use and the privacy policy. Käpp is for people aged 13 or older.",
+    "consentBodyUpdated": "We have updated the terms of use or the privacy policy. Please read them and accept to keep using Käpp.",
+    "accept": "I accept",
+    "signOut": "Sign out",
+    "back": "Back"
+  },
+  "account": {
+    "deleteTitle": "Delete account",
+    "deleteSubtitle": "This is permanent: a deleted account and its data cannot be restored.",
+    "whatGoes": "What is deleted",
+    "items": {
+      "profile": "Your profile, email and sign-ins",
+      "dogs": "Your dogs, their photos and health records",
+      "visits": "Check-ins, plans, reviews and favourite parks",
+      "community": "Friends, requests, blocks and notifications",
+      "explore": "Place recommendations, likes and saves",
+      "services": "Bookings (future ones are cancelled), Käpad and discount codes",
+      "reports": "Reports you filed"
+    },
+    "messagesNote": "Messages you sent stay visible to the other person under “Deleted user”, without your name.",
+    "afterNote": "We send a confirmation to your email address. Photos are removed from file storage within minutes and from backups within 30 days at the latest.",
+    "exportFirst": "Want to keep a copy of your data first?",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Confirm with your password",
+    "reauthTitle": "Sign in again",
+    "reauthBody": "For your security, sign in again with Apple or Google. You then have 10 minutes to delete the account.",
+    "reauthDone": "Signed in. You can now delete your account.",
+    "reauthUnavailable": "Sign out and sign in again, then open this screen again within 10 minutes.",
+    "submit": "Delete account permanently",
+    "confirmTitle": "Delete your account permanently?",
+    "confirmBody": "All your data is deleted right away. This cannot be undone.",
+    "confirmAction": "Delete",
+    "deletedNotice": "Your account has been deleted. Thank you for being part of Käpp!"
+  },
+  "verifyEmail": {
+    "title": "Confirm your email",
+    "body": "We sent a confirmation link to {{email}}.",
+    "resend": "Send again",
+    "sent": "Sent! Check your inbox, and the spam folder if needed."
   }
 }

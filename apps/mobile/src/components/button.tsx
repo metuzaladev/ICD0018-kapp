@@ -4,9 +4,11 @@ import { Icon, type IconName } from '@/components/icon';
 import { PressableScale } from '@/components/pressable-scale';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useTheme } from '@/hooks/use-theme';
 
-type Variant = 'primary' | 'secondary' | 'tertiary';
+/** `danger`: irreversible actions only (M10 "Kustuta konto"), never as the default choice. */
+type Variant = 'primary' | 'secondary' | 'tertiary' | 'danger';
 
 type ButtonProps = Omit<PressableProps, 'style' | 'children'> & {
   label: string;
@@ -24,8 +26,11 @@ type ButtonProps = Omit<PressableProps, 'style' | 'children'> & {
  */
 export function Button({ label, variant = 'primary', loading = false, disabled, trailingIcon, ...rest }: ButtonProps) {
   const c = useTheme();
-  const background = variant === 'primary' ? c.brand : variant === 'secondary' ? c.soft : 'transparent';
-  const color = variant === 'primary' ? c.onBrand : variant === 'tertiary' ? c.link : c.text;
+  const scheme = useColorScheme();
+  const background = variant === 'primary' ? c.brand : variant === 'secondary' ? c.soft : variant === 'danger' ? c.danger : 'transparent';
+  // Danger fill is dark red in light mode (white text, 5:1) and light rose in dark mode (dark text).
+  const color =
+    variant === 'primary' ? c.onBrand : variant === 'tertiary' ? c.link : variant === 'danger' ? (scheme === 'light' ? '#FFFFFF' : c.background) : c.text;
   const inactive = disabled || loading;
 
   return (

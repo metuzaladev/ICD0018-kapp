@@ -2,10 +2,11 @@ import { reviewInputSchema } from '@kapp/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { AccessibilityInfo, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
 import { FormError } from '@/components/form-error';
+import { PressableScale } from '@/components/pressable-scale';
 import { Screen } from '@/components/screen';
 import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
@@ -13,6 +14,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useSubmitReview } from '@/hooks/use-visits';
 import { errorMessage } from '@/lib/api';
 import { validateForm } from '@/lib/form';
+import { haptic } from '@/lib/haptics';
 
 /** Figma 03 / Visit / Add Review — modal. Writing again replaces the previous review. */
 export default function ReviewScreen() {
@@ -30,8 +32,11 @@ export default function ReviewScreen() {
     setError(null);
     try {
       await submitReview.mutateAsync(data);
+      haptic('success');
+      AccessibilityInfo.announceForAccessibility(t('review.saved'));
       router.back();
     } catch (e) {
+      haptic('error');
       setError(errorMessage(e));
     }
   }
@@ -40,19 +45,37 @@ export default function ReviewScreen() {
     <Screen underHeader title={t('review.title')} subtitle={parkName}>
       <FormError message={error} />
       <ThemedText themeColor="muted">{t('review.hint')}</ThemedText>
-      <View style={styles.stars} accessibilityRole="adjustable" accessibilityLabel={t('review.ratingA11y', { rating })}>
+      {/*
+        One adjustable element for VoiceOver (swipe up/down changes the rating, HIG), instead of
+        five separate star buttons; touch users still tap a star.
+      */}
+      <View
+        style={styles.stars}
+        accessible
+        accessibilityRole="adjustable"
+        accessibilityLabel={t('review.ratingLabel')}
+        accessibilityValue={{ min: 0, max: 5, now: rating, text: t('review.ratingA11y', { rating }) }}
+        accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
+        onAccessibilityAction={(e) => {
+          const next = e.nativeEvent.actionName === 'increment' ? Math.min(rating + 1, 5) : Math.max(rating - 1, 1);
+          if (next !== rating) haptic('selection');
+          setRating(next);
+        }}>
         {[1, 2, 3, 4, 5].map((n) => (
-          <Pressable
+          <PressableScale
             key={n}
             accessibilityRole="button"
             accessibilityLabel={t('review.star', { count: n })}
             accessibilityState={{ selected: rating >= n }}
-            onPress={() => setRating(n)}
+            onPress={() => {
+              haptic('selection');
+              setRating(n);
+            }}
             style={styles.star}>
             <ThemedText type="hero" style={{ color: rating >= n ? c.brand : c.border }}>
               ★
             </ThemedText>
-          </Pressable>
+          </PressableScale>
         ))}
       </View>
       <TextField

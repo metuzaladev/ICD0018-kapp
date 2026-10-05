@@ -19,11 +19,18 @@ const samples = [
   { name: 'Pirita koerapark', address: 'Pirita, Tallinn', x: 24.834, y: 59.468, fenced: false, smallDogArea: false, water: false, lighting: false },
 ];
 
-await db.delete(parks).where(inArray(parks.name, samples.map((s) => s.name)));
-await db.insert(parks).values(
-  samples.map(({ x, y, ...rest }) => ({ ...rest, location: { x, y }, status: 'approved' as const })),
+// Insert only the missing samples, never delete and recreate: favourites, check-ins, plans, reviews
+// and photos reference parks with ON DELETE CASCADE, so re-running the seed used to wipe all of them.
+const existingParks = new Set(
+  (await db.select({ name: parks.name }).from(parks).where(inArray(parks.name, samples.map((s) => s.name)))).map((r) => r.name),
 );
-console.log(`Seeded ${samples.length} parks`);
+const missingParks = samples.filter((s) => !existingParks.has(s.name));
+if (missingParks.length > 0) {
+  await db.insert(parks).values(
+    missingParks.map(({ x, y, ...rest }) => ({ ...rest, location: { x, y }, status: 'approved' as const })),
+  );
+}
+console.log(`Seeded ${missingParks.length} parks (${existingParks.size} already existed)`);
 
 /* ---------- M6: service providers ---------- */
 

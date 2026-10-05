@@ -7,9 +7,12 @@ import { StyleSheet, View } from 'react-native';
 import { BookingCard } from '@/components/booking-card';
 import { Button } from '@/components/button';
 import { Chip } from '@/components/chip';
+import { Entering } from '@/components/entering';
 import { FormError } from '@/components/form-error';
 import { Screen } from '@/components/screen';
+import { SkeletonList } from '@/components/skeleton';
 import { SlotPicker } from '@/components/slot-picker';
+import { SuccessMark } from '@/components/success-mark';
 import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
@@ -19,16 +22,24 @@ import { useProvider, useServiceSlots } from '@/hooks/use-services';
 import { errorMessage } from '@/lib/api';
 import { formatDuration, priceLabel } from '@/lib/format';
 import { validateForm } from '@/lib/form';
+import { haptic } from '@/lib/haptics';
 
 /** The phone's zone; times are shown in the provider's, and we say so only when the two differ. */
 const DEVICE_TIME_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-/** After booking: Figma 06 / Booking / Confirmed. */
+/** After booking: Figma 06 / Booking / Confirmed — success mark, "Kohtumiseni!", the booking card. */
 function Confirmed({ booking }: { booking: Booking }) {
   const { t } = useTranslation();
   return (
-    <Screen underHeader title={t('booking.confirmed.title')} subtitle={t('booking.confirmed.subtitle')}>
-      <BookingCard booking={booking} />
+    <Screen underHeader>
+      <SuccessMark />
+      <ThemedText type="title" accessibilityRole="header">
+        {t('booking.confirmed.title')}
+      </ThemedText>
+      <ThemedText themeColor="muted">{t('booking.confirmed.subtitle')}</ThemedText>
+      <Entering index={2}>
+        <BookingCard booking={booking} />
+      </Entering>
       <ThemedText type="caption" themeColor="muted">
         {t('booking.confirmed.info')}
       </ThemedText>
@@ -92,8 +103,10 @@ export default function BookScreen() {
     setError(null);
     try {
       setBooked(await create.mutateAsync(data));
+      haptic('success');
     } catch (e) {
       // 409 (taken meanwhile): the hook refetches the free times, the stale one disappears.
+      haptic('error');
       setError(errorMessage(e));
     }
   }
@@ -106,7 +119,7 @@ export default function BookScreen() {
         <ThemedText type="label">{t('booking.serviceLine', { service: service.name, duration: formatDuration(service.durationMinutes) })}</ThemedText>
       ) : null}
 
-      {slots.isPending ? <ThemedText themeColor="muted">{t('common.loading')}</ThemedText> : null}
+      {slots.isPending ? <SkeletonList rows={2} rowHeight={44} /> : null}
       {slots.data && days.every((d) => d.slots.length === 0) ? <ThemedText themeColor="muted">{t('booking.noSlots')}</ThemedText> : null}
       {days.length > 0 ? (
         <SlotPicker

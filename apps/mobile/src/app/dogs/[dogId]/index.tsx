@@ -6,10 +6,13 @@ import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
 import { DogAvatar } from '@/components/dog-avatar';
+import { Entering } from '@/components/entering';
+import { ErrorState } from '@/components/error-state';
 import { FormError } from '@/components/form-error';
 import { ListRow } from '@/components/list-row';
 import { OfflineBanner } from '@/components/offline-banner';
 import { Screen } from '@/components/screen';
+import { SkeletonList } from '@/components/skeleton';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
@@ -23,7 +26,8 @@ import { ageLabel, dogSexLabel, dueLabel, formatDate, formatKg, isOverdue, photo
 export default function DogProfileScreen() {
   const { t } = useTranslation();
   const { dogId } = useLocalSearchParams<{ dogId: string }>();
-  const { data: dogs, error, isPending } = useMyDogs();
+  const query = useMyDogs();
+  const { data: dogs, error, isPending } = query;
   const dog = dogs?.find((d) => d.id === dogId);
 
   return (
@@ -31,8 +35,8 @@ export default function DogProfileScreen() {
       <Stack.Screen options={{ title: dog?.name ?? '' }} />
       <Screen underHeader>
         <OfflineBanner />
-        {error && !dogs ? <FormError message={errorMessage(error)} /> : null}
-        {isPending ? <ThemedText themeColor="muted">{t('common.loading')}</ThemedText> : null}
+        {error && !dogs ? <ErrorState message={errorMessage(error)} onRetry={() => void query.refetch()} retrying={query.isFetching} /> : null}
+        {isPending ? <SkeletonList rows={2} rowHeight={120} /> : null}
         {dogs && !dog ? <FormError message={t('dogs.profile.notFound')} /> : null}
         {dog ? <DogProfile dog={dog} /> : null}
       </Screen>
@@ -59,20 +63,22 @@ function DogProfile({ dog }: { dog: Dog }) {
 
   return (
     <>
-      {dog.profilePhoto ? (
-        <Image
-          source={photoSource(dog.profilePhoto.url)}
-          placeholder={photoSource(dog.profilePhoto.thumbnailUrl)}
-          style={styles.hero}
-          contentFit="cover"
-          transition={200}
-          accessibilityLabel={t('dogs.profile.photoA11y', { name: dog.name })}
-        />
-      ) : (
-        <View style={styles.center}>
-          <DogAvatar dog={dog} size={120} />
-        </View>
-      )}
+      <Entering>
+        {dog.profilePhoto ? (
+          <Image
+            source={photoSource(dog.profilePhoto.url)}
+            placeholder={photoSource(dog.profilePhoto.thumbnailUrl)}
+            style={styles.hero}
+            contentFit="cover"
+            transition={200}
+            accessibilityLabel={t('dogs.profile.photoA11y', { name: dog.name })}
+          />
+        ) : (
+          <View style={styles.center}>
+            <DogAvatar dog={dog} size={120} />
+          </View>
+        )}
+      </Entering>
 
       <ThemedText type="title" accessibilityRole="header">
         {dog.name}

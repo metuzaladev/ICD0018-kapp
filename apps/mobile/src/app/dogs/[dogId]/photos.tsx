@@ -4,12 +4,17 @@ import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Linking, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Alert, Linking, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { Button } from '@/components/button';
+import { EmptyState } from '@/components/empty-state';
+import { Entering } from '@/components/entering';
+import { ErrorState } from '@/components/error-state';
 import { FormError } from '@/components/form-error';
 import { OfflineBanner } from '@/components/offline-banner';
+import { PressableScale } from '@/components/pressable-scale';
 import { Screen } from '@/components/screen';
+import { SkeletonList } from '@/components/skeleton';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useMyDogs } from '@/hooks/use-dogs';
@@ -17,6 +22,7 @@ import { photoSource, useAddPhoto, useDeletePhoto, useDogPhotos, useSetProfilePh
 import { useTheme } from '@/hooks/use-theme';
 import { errorMessage } from '@/lib/api';
 import { formatDate, localIsoDate } from '@/lib/format';
+import { haptic } from '@/lib/haptics';
 
 const COLUMNS = 3;
 const GAP = Spacing.two;
@@ -63,6 +69,7 @@ export default function DogPhotosScreen() {
   }
 
   function confirmDelete(photo: DogPhoto) {
+    haptic('warning');
     Alert.alert(t('photos.deleteTitle'), t('photos.deleteBody'), [
       { text: t('common.cancel'), style: 'cancel' },
       { text: t('common.delete'), style: 'destructive', onPress: () => remove.mutate(photo.id, { onError: (e) => setError(errorMessage(e)) }) },
@@ -86,7 +93,9 @@ export default function DogPhotosScreen() {
       <Screen underHeader title={dog ? t('photos.title', { name: dog.name }) : t('photos.titleFallback')} subtitle={t('photos.subtitle')}>
         <OfflineBanner />
         <FormError message={error} />
-        {photos.error && !photos.data ? <FormError message={errorMessage(photos.error)} /> : null}
+        {photos.error && !photos.data ? (
+          <ErrorState message={errorMessage(photos.error)} onRetry={() => void photos.refetch()} retrying={photos.isFetching} />
+        ) : null}
 
         <View style={styles.actions}>
           <View style={styles.action}>
@@ -102,37 +111,37 @@ export default function DogPhotosScreen() {
           </ThemedText>
         ) : null}
         {full ? <ThemedText themeColor="muted">{t('photos.full', { max: MAX_PHOTOS_PER_DOG })}</ThemedText> : null}
-        {photos.isPending ? <ThemedText themeColor="muted">{t('common.loading')}</ThemedText> : null}
-        {photos.data?.length === 0 ? <ThemedText themeColor="muted">{t('photos.empty')}</ThemedText> : null}
+        {photos.isPending ? <SkeletonList rows={1} rowHeight={tile} /> : null}
+        {photos.data?.length === 0 ? <EmptyState title={t('photos.empty')} /> : null}
 
         <View style={styles.grid}>
-          {photos.data?.map((photo) => {
+          {photos.data?.map((photo, i) => {
             const isProfile = Boolean(dog?.profilePhoto && samePhoto(dog.profilePhoto.thumbnailUrl, photo.thumbnailUrl));
             return (
-              <Pressable
-                key={photo.id}
-                accessibilityRole="button"
-                accessibilityLabel={t(isProfile ? 'photos.a11yProfile' : 'photos.a11y', {
-                  date: formatDate(localIsoDate(new Date(photo.createdAt))),
-                })}
-                accessibilityHint={t('photos.hint')}
-                onPress={() => openActions(photo, isProfile)}
-                onLongPress={() => openActions(photo, isProfile)}
-                style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}>
-                <Image
-                  source={photoSource(photo.thumbnailUrl)}
-                  style={[styles.tile, { width: tile, height: tile, backgroundColor: c.soft, borderColor: isProfile ? c.brand : 'transparent' }]}
-                  contentFit="cover"
-                  transition={150}
-                />
-                {isProfile ? (
-                  <View style={[styles.badge, { backgroundColor: c.brand }]}>
-                    <ThemedText type="micro" style={{ color: c.onBrand }}>
-                      {t('photos.badge')}
-                    </ThemedText>
-                  </View>
-                ) : null}
-              </Pressable>
+              <Entering key={photo.id} index={i}>
+                <PressableScale
+                  accessibilityRole="button"
+                  accessibilityLabel={t(isProfile ? 'photos.a11yProfile' : 'photos.a11y', {
+                    date: formatDate(localIsoDate(new Date(photo.createdAt))),
+                  })}
+                  accessibilityHint={t('photos.hint')}
+                  onPress={() => openActions(photo, isProfile)}
+                  onLongPress={() => openActions(photo, isProfile)}>
+                  <Image
+                    source={photoSource(photo.thumbnailUrl)}
+                    style={[styles.tile, { width: tile, height: tile, backgroundColor: c.soft, borderColor: isProfile ? c.brand : 'transparent' }]}
+                    contentFit="cover"
+                    transition={150}
+                  />
+                  {isProfile ? (
+                    <View style={[styles.badge, { backgroundColor: c.brand }]}>
+                      <ThemedText type="micro" style={{ color: c.onBrand }}>
+                        {t('photos.badge')}
+                      </ThemedText>
+                    </View>
+                  ) : null}
+                </PressableScale>
+              </Entering>
             );
           })}
         </View>

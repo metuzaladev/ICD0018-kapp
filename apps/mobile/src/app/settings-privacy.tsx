@@ -49,6 +49,7 @@ export default function PrivacySettingsScreen() {
         {presenceSharingSchema.options.map((option) => (
           <Chip
             key={option}
+            role="radio"
             label={t(`profileEdit.presence.${option}`)}
             selected={profile.data?.presenceSharing === option}
             onPress={() => update.mutate({ presenceSharing: option })}
@@ -77,8 +78,18 @@ export default function PrivacySettingsScreen() {
 
 const styles = StyleSheet.create({
   card: { padding: Spacing.three, borderRadius: Radius[16], gap: Spacing.one },
-  chips: { flexDirection: 'row', gap: Spacing.two },
-  row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three, padding: Spacing.two, paddingLeft: Spacing.three, borderRadius: Radius[16], borderWidth: StyleSheet.hairlineWidth },
-  flex: { flex: 1 },
-  unblock: { minWidth: 140 },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
+  // Wraps at large text sizes: the name and "Разблокировать" do not fit side by side.
+  row: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: Spacing.three,
+    padding: Spacing.two,
+    paddingLeft: Spacing.three,
+    borderRadius: Radius[16],
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  flex: { flexGrow: 1, flexBasis: 120 },
+  unblock: { minWidth: 140, flexGrow: 1 },
 });

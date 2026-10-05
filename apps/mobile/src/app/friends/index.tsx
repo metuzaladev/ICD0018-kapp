@@ -5,13 +5,16 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
+import { EmptyState } from '@/components/empty-state';
+import { Entering } from '@/components/entering';
+import { ErrorState } from '@/components/error-state';
 import { FormError } from '@/components/form-error';
 import { ListRow } from '@/components/list-row';
 import { OfflineBanner } from '@/components/offline-banner';
 import { Screen } from '@/components/screen';
+import { SkeletonList } from '@/components/skeleton';
 import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
 import {
   useAcceptFriendRequest,
@@ -21,6 +24,7 @@ import {
   useSendFriendRequest,
   useUserSearch,
 } from '@/hooks/use-friends';
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { useTheme } from '@/hooks/use-theme';
 import { errorMessage } from '@/lib/api';
 import { personTitle } from '@/lib/format';
@@ -42,6 +46,7 @@ export default function FriendsScreen() {
   const remove = useDeleteFriendRequest();
   const mutationError = send.error ?? accept.error ?? remove.error;
   const card = [styles.card, { backgroundColor: c.surface, borderColor: c.border }];
+  const refresh = usePullToRefresh(friends.refetch, requests.refetch);
 
   // Debounce: one request when the user pauses typing, not one per letter.
   useEffect(() => {
@@ -59,7 +64,7 @@ export default function FriendsScreen() {
   };
 
   return (
-    <Screen underHeader title={t('friends.title')} subtitle={t('friends.subtitle')}>
+    <Screen underHeader title={t('friends.title')} subtitle={t('friends.subtitle')} refresh={refresh}>
       <OfflineBanner />
       {mutationError ? <FormError message={errorMessage(mutationError)} /> : null}
 
@@ -79,7 +84,11 @@ export default function FriendsScreen() {
         </ThemedText>
       ) : null}
       {search.error ? <FormError message={errorMessage(search.error)} /> : null}
-      {search.data?.length === 0 ? <ThemedText themeColor="muted">{t('friends.noResults')}</ThemedText> : null}
+      {search.data?.length === 0 ? (
+        <ThemedText themeColor="muted" accessibilityLiveRegion="polite">
+          {t('friends.noResults')}
+        </ThemedText>
+      ) : null}
       {search.data?.map((r) => (
         <View key={r.id} style={card}>
           <ListRow title={personTitle(r.firstName, r.dogNames)} subtitle={r.area} onPress={() => openProfile(r.id)} />
@@ -89,7 +98,9 @@ export default function FriendsScreen() {
 
       {requests.data && requests.data.incoming.length > 0 ? (
         <>
-          <ThemedText type="heading">{t('friends.incoming')}</ThemedText>
+          <ThemedText type="heading" accessibilityRole="header">
+            {t('friends.incoming')}
+          </ThemedText>
           {requests.data.incoming.map(({ user }) => (
             <View key={user.id} style={card}>
               <ListRow title={personTitle(user.firstName, user.dogNames)} subtitle={subtitleOf(user)} onPress={() => openProfile(user.id)} />
@@ -108,7 +119,9 @@ export default function FriendsScreen() {
 
       {requests.data && requests.data.outgoing.length > 0 ? (
         <>
-          <ThemedText type="heading">{t('friends.outgoing')}</ThemedText>
+          <ThemedText type="heading" accessibilityRole="header">
+            {t('friends.outgoing')}
+          </ThemedText>
           {requests.data.outgoing.map(({ user }) => (
             <View key={user.id} style={card}>
               <ListRow
@@ -122,16 +135,18 @@ export default function FriendsScreen() {
         </>
       ) : null}
 
-      <ThemedText type="heading">{t('friends.myFriends')}</ThemedText>
-      {friends.error && !friends.data ? <FormError message={errorMessage(friends.error)} /> : null}
-      {friends.data?.length === 0 ? (
-        <ThemedView type="soft" style={styles.empty}>
-          <ThemedText type="label">{t('friends.emptyTitle')}</ThemedText>
-          <ThemedText themeColor="muted">{t('friends.emptyBody')}</ThemedText>
-        </ThemedView>
+      <ThemedText type="heading" accessibilityRole="header">
+        {t('friends.myFriends')}
+      </ThemedText>
+      {friends.error && !friends.data ? (
+        <ErrorState message={errorMessage(friends.error)} onRetry={() => void friends.refetch()} retrying={friends.isFetching} />
       ) : null}
-      {friends.data?.map((f) => (
-        <ListRow key={f.id} title={personTitle(f.firstName, f.dogNames)} subtitle={f.area} onPress={() => openProfile(f.id)} />
+      {friends.isPending ? <SkeletonList /> : null}
+      {friends.data?.length === 0 ? <EmptyState title={t('friends.emptyTitle')} body={t('friends.emptyBody')} /> : null}
+      {friends.data?.map((f, i) => (
+        <Entering key={f.id} index={i}>
+          <ListRow title={personTitle(f.firstName, f.dogNames)} subtitle={f.area} onPress={() => openProfile(f.id)} />
+        </Entering>
       ))}
     </Screen>
   );
@@ -139,7 +154,7 @@ export default function FriendsScreen() {
 
 const styles = StyleSheet.create({
   card: { padding: Spacing.two, borderRadius: Radius[16], borderWidth: StyleSheet.hairlineWidth, gap: Spacing.two },
-  actions: { flexDirection: 'row', gap: Spacing.two },
-  flex: { flex: 1 },
-  empty: { padding: Spacing.four, borderRadius: Radius[16], gap: Spacing.one },
+  // Wraps at large text sizes: "Принять" / "Отклонить" side by side need room.
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
+  flex: { flexGrow: 1, flexBasis: 140 },
 });

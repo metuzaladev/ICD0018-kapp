@@ -13,6 +13,7 @@ import { StyleSheet, useColorScheme, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Radius } from '@/constants/theme';
+import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { useTheme } from '@/hooks/use-theme';
 import { dogsLabel } from '@/lib/format';
 
@@ -46,6 +47,8 @@ function boundsOf(center: { lat: number; lng: number }, parks: Park[]): LngLatBo
 /** Figma "Map / Tallinn schematic", now a real map. Markers show how many dogs are there now. */
 export function ParkMap({ parks, center, showUserLocation, selectedId, onSelect }: ParkMapProps) {
   const c = useTheme();
+  // Camera moves jump instead of gliding when Reduce Motion is on.
+  const cameraDuration = useReduceMotion() ? 0 : 600;
   const { t } = useTranslation();
   const scheme = useColorScheme() === 'light' ? 'light' : 'dark';
   const camera = useRef<CameraRef>(null);
@@ -59,9 +62,9 @@ export function ParkMap({ parks, center, showUserLocation, selectedId, onSelect 
   useEffect(() => {
     if (!loaded) return;
     if (parks.length === 0) {
-      camera.current?.easeTo({ center: [center.lng, center.lat], zoom: 13, duration: 600 });
+      camera.current?.easeTo({ center: [center.lng, center.lat], zoom: 13, duration: cameraDuration });
     } else {
-      camera.current?.fitBounds(bounds, { padding: FIT_PADDING, duration: 600, easing: 'ease' });
+      camera.current?.fitBounds(bounds, { padding: FIT_PADDING, duration: cameraDuration, easing: 'ease' });
     }
     // fitKey captures center + park ids; bounds is derived from the same values.
     // eslint-disable-next-line react-hooks/exhaustive-deps

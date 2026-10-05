@@ -19,6 +19,8 @@ export default function AuthLayout() {
         contentStyle: { backgroundColor: c.background },
       }}>
       <Stack.Screen name="welcome" options={{ headerShown: false }} />
+      {/* First launch only (Welcome redirects here); no back button, it is replaced when done. */}
+      <Stack.Screen name="onboarding" options={{ headerShown: false, gestureEnabled: false }} />
     </Stack>
   );
 }

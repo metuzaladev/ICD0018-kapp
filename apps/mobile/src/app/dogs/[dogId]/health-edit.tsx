@@ -14,6 +14,7 @@ import { Button } from '@/components/button';
 import { Chip } from '@/components/chip';
 import { FormError } from '@/components/form-error';
 import { Screen } from '@/components/screen';
+import { SkeletonList } from '@/components/skeleton';
 import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
@@ -22,6 +23,7 @@ import { useDeleteHealthRecord, useHealthRecords, useSaveHealthRecord } from '@/
 import { errorMessage } from '@/lib/api';
 import { localIsoDate } from '@/lib/format';
 import { validateForm } from '@/lib/form';
+import { haptic } from '@/lib/haptics';
 
 type FormValues = { kind: HealthRecordKind; title: string; date: string; nextDue: string; clinic: string; notes: string };
 
@@ -71,7 +73,7 @@ export default function HealthEditScreen() {
       <Stack.Screen options={{ title: recordId ? t('nav.healthRecordEdit') : t(KIND_TEXT[initialKind].screen) }} />
       {recordId && isPending ? (
         <Screen underHeader>
-          <ThemedText themeColor="muted">{t('common.loading')}</ThemedText>
+          <SkeletonList rows={3} rowHeight={72} />
         </Screen>
       ) : recordId && !existing ? (
         <Screen underHeader>
@@ -115,6 +117,7 @@ function HealthForm({ dogId, existing, kind }: { dogId: string; existing?: Healt
 
   function confirmDelete() {
     if (!existing) return;
+    haptic('warning');
     Alert.alert(t('health.deleteTitle', { title: existing.title }), t('health.deleteBody'), [
       { text: t('common.cancel'), style: 'cancel' },
       {
@@ -129,13 +132,15 @@ function HealthForm({ dogId, existing, kind }: { dogId: string; existing?: Healt
     <Screen underHeader subtitle={dog ? t('health.edit.subtitle', { name: dog.name }) : undefined}>
       <FormError message={formError} />
       <ThemedText type="label">{t('health.edit.kind')}</ThemedText>
-      <View style={styles.chips}>
+      <View style={styles.chips} accessibilityRole="radiogroup">
         <Chip
+          role="radio"
           label={t('health.edit.vaccination')}
           selected={values.kind === 'vaccination'}
           onPress={() => setValues((v) => ({ ...v, kind: 'vaccination' }))}
         />
         <Chip
+          role="radio"
           label={t('health.edit.vetVisit')}
           selected={values.kind === 'vet_visit'}
           onPress={() => setValues((v) => ({ ...v, kind: 'vet_visit' }))}
@@ -184,5 +189,5 @@ function HealthForm({ dogId, existing, kind }: { dogId: string; existing?: Healt
 }
 
 const styles = StyleSheet.create({
-  chips: { flexDirection: 'row', gap: Spacing.two },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
 });

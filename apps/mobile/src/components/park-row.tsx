@@ -1,8 +1,9 @@
 import type { Park } from '@kapp/shared';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { PressableScale } from '@/components/pressable-scale';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -17,14 +18,12 @@ export function ParkRow({ park, highlighted = false }: { park: Park; highlighted
   const meta = [formatKm(park.distanceKm), presence].filter(Boolean).join(' · ');
 
   return (
-    <Pressable
+    <PressableScale
       accessibilityRole="button"
       accessibilityLabel={`${park.name}, ${meta}`}
+      accessibilityHint={t('parkRow.hint')}
       onPress={() => router.push({ pathname: '/parks/[parkId]', params: { parkId: park.id } })}
-      style={({ pressed }) => [
-        styles.row,
-        { backgroundColor: c.surface, borderColor: highlighted ? c.brand : c.border, opacity: pressed ? 0.8 : 1 },
-      ]}>
+      style={[styles.row, { backgroundColor: c.surface, borderColor: highlighted ? c.brand : c.border }]}>
       <View style={styles.text}>
         <ThemedText type="label">{park.name}</ThemedText>
         <ThemedText type="caption" themeColor="muted">
@@ -34,7 +33,7 @@ export function ParkRow({ park, highlighted = false }: { park: Park; highlighted
       <ThemedText type="heading" themeColor="muted" accessibilityElementsHidden>
         ›
       </ThemedText>
-    </Pressable>
+    </PressableScale>
   );
 }
 

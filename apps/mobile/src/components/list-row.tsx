@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { PressableScale } from '@/components/pressable-scale';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -21,13 +22,13 @@ type ListRowProps = {
 export function ListRow({ title, subtitle, leading, alert = false, onPress, onLongPress, accessibilityHint }: ListRowProps) {
   const c = useTheme();
   return (
-    <Pressable
+    <PressableScale
       accessibilityRole="button"
       accessibilityLabel={[title, subtitle].filter(Boolean).join(', ')}
       accessibilityHint={accessibilityHint}
       onPress={onPress}
       onLongPress={onLongPress}
-      style={({ pressed }) => [styles.row, { backgroundColor: c.surface, borderColor: c.border, opacity: pressed ? 0.8 : 1 }]}>
+      style={[styles.row, { backgroundColor: c.surface, borderColor: c.border }]}>
       {leading}
       <View style={styles.text}>
         <ThemedText type="label">{title}</ThemedText>
@@ -40,7 +41,7 @@ export function ListRow({ title, subtitle, leading, alert = false, onPress, onLo
       <ThemedText type="heading" themeColor="muted" accessibilityElementsHidden>
         ›
       </ThemedText>
-    </Pressable>
+    </PressableScale>
   );
 }
 

@@ -8,7 +8,8 @@
     "openSettings": "Open Settings",
     "you": "You",
     "dog": "dog",
-    "until": "until {{time}}"
+    "until": "until {{time}}",
+    "retry": "Try again"
   },
   "units": {
     "km": "{{value}} km",
@@ -130,6 +131,23 @@
       "appleFailed": "Signing in with Apple failed"
     }
   },
+  "onboarding": {
+    "discover": {
+      "title": "A good park is closer than you think.",
+      "body": "See who’s at the park right now and find company that matches your pace.",
+      "photoLabel": "A dog park in autumn"
+    },
+    "connect": {
+      "title": "Less waiting. More playing.",
+      "body": "Plan a walk, bring a friend along and find your own little community.",
+      "sampleTitle": "Freddy is waiting for friends",
+      "sampleSubtitle": "Kadriorg dog park · today 17:00–18:00"
+    },
+    "step": "Step {{current}} of {{total}}",
+    "next": "Next",
+    "skip": "Skip",
+    "createAccount": "Create account"
+  },
   "location": {
     "title": "What’s near you?",
     "body": "Your location helps find parks nearby.",
@@ -176,11 +194,14 @@
     "count_other": "{{count}} spots for little adventures.",
     "fallbackNote": "Distances are measured from Tallinn city centre.",
     "empty": "No parks found in this radius. Try a larger distance or fewer filters.",
-    "marker": "{{name}}, {{dogs}} now"
+    "marker": "{{name}}, {{dogs}} now",
+    "filtersHint": "Opens the filters",
+    "emptyAction": "Clear filters"
   },
   "parkRow": {
     "dogsNow": "{{dogs}} now",
-    "quiet": "quiet right now"
+    "quiet": "quiet right now",
+    "hint": "Opens the park page"
   },
   "filters": {
     "title": "Just right for you.",
@@ -237,7 +258,9 @@
     "privacy": "Others see you according to your privacy setting.",
     "submit": "Check in",
     "noDogs": "Add your dog first.",
-    "addDog": "Add a dog"
+    "addDog": "Add a dog",
+    "done": "Checked in. Have fun!",
+    "seeFriends": "See playmates"
   },
   "plan": {
     "title": "Let’s make a play plan.",
@@ -258,7 +281,11 @@
     "cancelPlan": "Cancel plan",
     "done": "Visited",
     "empty": "No visits yet. Check in at a park and the visit will be remembered here.",
-    "addReview": "Add a review"
+    "addReview": "Add a review",
+    "plannedEmptyTitle": "Another empty calendar.",
+    "plannedEmptyBody": "You have no meetups planned yet. Pick a park and a time, and invite your friends.",
+    "plannedEmptyAction": "See parks nearby",
+    "emptyAction": "Find the nearest park"
   },
   "review": {
     "title": "How did it go?",
@@ -269,7 +296,9 @@
     "experience": "Your experience",
     "experiencePlaceholder": "Friendly dogs and a lovely walk.",
     "submit": "Save review",
-    "chooseRating": "Choose a rating from 1 to 5"
+    "chooseRating": "Choose a rating from 1 to 5",
+    "saved": "Review saved. Thank you!",
+    "ratingLabel": "Rating"
   },
   "report": {
     "title": "Let’s keep parks pleasant.",
@@ -299,8 +328,8 @@
       "emptyTitle": "Introduce your dog",
       "emptyBody": "Personality and play preferences help find the right company.",
       "noDetails": "Add breed and other details",
-      "openA11y": "{{name}}, open profile",
-      "add": "Add a dog"
+      "add": "Add a dog",
+      "openHint": "Opens the dog’s profile"
     },
     "profile": {
       "notFound": "Dog not found",
@@ -552,7 +581,8 @@
     "empty": "No conversations yet. Open a friend’s profile and tap “Send a message”.",
     "noMessages": "No messages yet",
     "unread_one": "{{count}} unread message",
-    "unread_other": "{{count}} unread messages"
+    "unread_other": "{{count}} unread messages",
+    "emptyAction": "Find playmates"
   },
   "conversation": {
     "empty": "Say hello!",

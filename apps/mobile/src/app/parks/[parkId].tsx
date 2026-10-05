@@ -3,19 +3,28 @@ import { Image } from 'expo-image';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
+import Animated, { ReduceMotion, ZoomIn } from 'react-native-reanimated';
 
 import { Button } from '@/components/button';
+import { Entering } from '@/components/entering';
+import { ErrorState } from '@/components/error-state';
 import { FormError } from '@/components/form-error';
 import { OfflineBanner } from '@/components/offline-banner';
+import { PressableScale } from '@/components/pressable-scale';
 import { Screen } from '@/components/screen';
+import { SkeletonList } from '@/components/skeleton';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
 import { useParkDetail, useToggleFavorite } from '@/hooks/use-parks';
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
+import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { useActiveCheckIn, useEndCheckIn, useParkReviews, useParkVisitors } from '@/hooks/use-visits';
 import { useTheme } from '@/hooks/use-theme';
 import { errorMessage } from '@/lib/api';
 import { formatKm, formatRating, formatTime, reviewsLabel } from '@/lib/format';
+import { haptic } from '@/lib/haptics';
+import { POP_SPRING } from '@/lib/motion';
 
 const FEATURES = ['fenced', 'smallDogArea', 'water', 'lighting'] as const satisfies readonly (keyof ParkDetail)[];
 
@@ -29,12 +38,40 @@ function openDirections(park: ParkDetail) {
   Linking.openURL(url);
 }
 
-/** Figma 02 / Park / Overview, with the Visitors and Reviews tabs as sections of one scroll. */
+/** The header heart; re-keyed on change so it pops (one spring) when toggled. Static with Reduce Motion. */
+function Heart({ filled }: { filled: boolean }) {
+  const c = useTheme();
+  const reduceMotion = useReduceMotion();
+  const glyph = (
+    <ThemedText type="hero" style={{ color: c.brand }}>
+      {filled ? '♥' : '♡'}
+    </ThemedText>
+  );
+  if (reduceMotion) return glyph;
+  return (
+    <Animated.View
+      key={String(filled)}
+      entering={ZoomIn.springify().damping(POP_SPRING.damping).stiffness(POP_SPRING.stiffness).reduceMotion(ReduceMotion.System)}>
+      {glyph}
+    </Animated.View>
+  );
+}
+
+/**
+ * Figma 02 / Park / Overview, with the Visitors and Reviews tabs as sections of one scroll.
+ *
+ * Park row → detail transition: the native stack push (iOS slide) carries the spatial link and the
+ * photo and title settle in with `Entering`. A Reanimated shared element transition was not used:
+ * in Reanimated 4.5 it sits behind the static ENABLE_SHARED_ELEMENT_TRANSITIONS flag (native
+ * rebuild, conflicts with IOS_SYNCHRONOUSLY_UPDATE_UI_PROPS) and is still marked experimental;
+ * see docs/14-animatsioonid-ja-ligipaasetavus.md.
+ */
 export default function ParkDetailScreen() {
   const { t } = useTranslation();
   const c = useTheme();
   const { parkId } = useLocalSearchParams<{ parkId: string }>();
-  const { data: park, error, isPending } = useParkDetail(parkId);
+  const detail = useParkDetail(parkId);
+  const { data: park, error, isPending } = detail;
   const favorite = useToggleFavorite(parkId);
   const active = useActiveCheckIn();
   const endVisit = useEndCheckIn();
@@ -42,8 +79,7 @@ export default function ParkDetailScreen() {
   const reviews = useParkReviews(parkId);
   const hereNow = active.data?.park.id === parkId ? active.data : null;
   const parkParams = { parkId, parkName: park?.name ?? '' };
-
-  const heart = park?.isFavorite ? '♥' : '♡';
+  const refresh = usePullToRefresh(detail.refetch, visitors.refetch, reviews.refetch, active.refetch);
 
   return (
     <>
@@ -59,29 +95,32 @@ export default function ParkDetailScreen() {
                 hitSlop={12}
                 style={styles.heart}
                 disabled={favorite.isPending}
-                onPress={() => favorite.mutate(!park.isFavorite)}>
-                <ThemedText type="hero" style={{ color: c.brand }}>
-                  {heart}
-                </ThemedText>
+                onPress={() => {
+                  haptic('selection');
+                  favorite.mutate(!park.isFavorite);
+                }}>
+                <Heart filled={Boolean(park.isFavorite)} />
               </Pressable>
             ) : null,
         }}
       />
-      <Screen underHeader>
+      <Screen underHeader refresh={park ? refresh : undefined}>
         <OfflineBanner />
-        {error && !park ? <FormError message={errorMessage(error)} /> : null}
+        {error && !park ? <ErrorState message={errorMessage(error)} onRetry={() => void detail.refetch()} retrying={detail.isFetching} /> : null}
         {favorite.error ? <FormError message={errorMessage(favorite.error)} /> : null}
-        {isPending ? <ThemedText themeColor="muted">{t('common.loading')}</ThemedText> : null}
+        {isPending ? <SkeletonList rows={2} rowHeight={120} /> : null}
 
         {park ? (
           <>
-            <Image
-              source={require('@/assets/images/park-placeholder.jpg')}
-              style={styles.photo}
-              contentFit="cover"
-              accessibilityLabel={t('park.photoLabel')}
-            />
-            <View style={styles.header}>
+            <Entering>
+              <Image
+                source={require('@/assets/images/park-placeholder.jpg')}
+                style={styles.photo}
+                contentFit="cover"
+                accessibilityLabel={t('park.photoLabel')}
+              />
+            </Entering>
+            <Entering index={1} style={styles.header}>
               <ThemedText type="title" accessibilityRole="header">
                 {park.name}
               </ThemedText>
@@ -89,7 +128,7 @@ export default function ParkDetailScreen() {
               {park.address || park.distanceKm !== undefined ? (
                 <ThemedText themeColor="muted">{[formatKm(park.distanceKm), park.address].filter(Boolean).join(' · ')}</ThemedText>
               ) : null}
-            </View>
+            </Entering>
 
             {hereNow ? (
               <ThemedView type="tint" style={styles.summary}>
@@ -137,26 +176,31 @@ export default function ParkDetailScreen() {
             {visitors.data && (visitors.data.visitors.length > 0 || visitors.data.hiddenDogs > 0) ? (
               <>
                 <ThemedText type="heading">{t('park.visitorsTitle')}</ThemedText>
-                {visitors.data.visitors.map((v) => (
-                  <Pressable
-                    key={v.checkInId}
-                    // Figma: "Ava koera profiil ja saada omanikule sõbrakutse" — a visitor opens their profile.
-                    disabled={v.isMe}
-                    accessibilityRole={v.isMe ? undefined : 'button'}
-                    accessibilityHint={v.isMe ? undefined : t('park.visitorHint')}
-                    onPress={() => router.push({ pathname: '/users/[userId]', params: { userId: v.userId } })}
-                    style={({ pressed }) => [styles.row, { backgroundColor: c.surface, borderColor: c.border, opacity: pressed ? 0.8 : 1 }]}>
-                    <ThemedText type="label">
-                      {[v.isMe ? t('common.you') : v.ownerFirstName, v.dogs.map((d) => d.name).join(', ')].join(' · ')}
-                    </ThemedText>
-                    <ThemedText type="caption" themeColor="muted">
-                      {t('park.visitorDetails', {
-                        breeds: v.dogs.map((d) => d.breed).filter(Boolean).join(', ') || t('common.dog'),
-                        time: formatTime(v.until),
-                      })}
-                    </ThemedText>
-                  </Pressable>
-                ))}
+                {visitors.data.visitors.map((v, i) => {
+                  const title = [v.isMe ? t('common.you') : v.ownerFirstName, v.dogs.map((d) => d.name).join(', ')].join(' · ');
+                  const details = t('park.visitorDetails', {
+                    breeds: v.dogs.map((d) => d.breed).filter(Boolean).join(', ') || t('common.dog'),
+                    time: formatTime(v.until),
+                  });
+                  return (
+                    <Entering key={v.checkInId} index={i}>
+                      <PressableScale
+                        // Figma: "Ava koera profiil ja saada omanikule sõbrakutse" — a visitor opens their profile.
+                        disabled={v.isMe}
+                        dimWhenDisabled={false}
+                        accessibilityRole={v.isMe ? 'text' : 'button'}
+                        accessibilityLabel={`${title}, ${details}`}
+                        accessibilityHint={v.isMe ? undefined : t('park.visitorHint')}
+                        onPress={() => router.push({ pathname: '/users/[userId]', params: { userId: v.userId } })}
+                        style={[styles.row, { backgroundColor: c.surface, borderColor: c.border }]}>
+                        <ThemedText type="label">{title}</ThemedText>
+                        <ThemedText type="caption" themeColor="muted">
+                          {details}
+                        </ThemedText>
+                      </PressableScale>
+                    </Entering>
+                  );
+                })}
                 {visitors.data.hiddenDogs > 0 ? (
                   <ThemedText type="caption" themeColor="muted">
                     {t('park.hiddenDogs', { count: visitors.data.hiddenDogs })}

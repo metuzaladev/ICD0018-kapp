@@ -18,13 +18,16 @@
     "db:migrate": "npm run db:migrate -w @kapp/api",
     "db:seed": "npm run db:seed -w @kapp/api",
     "typecheck": "npm run typecheck --workspaces --if-present && tsc --noEmit -p scripts",
-    "test": "npm run test --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present && npm run test:scripts",
+    "test:scripts": "vitest run --root scripts",
     "lint": "npm run lint --workspaces --if-present",
-    "i18n:check": "tsx scripts/i18n-check.ts"
+    "i18n:check": "tsx scripts/i18n-check.ts",
+    "a11y:check": "tsx scripts/a11y-check.ts"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
     "tsx": "^4.23.15",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.3"
   }
 }

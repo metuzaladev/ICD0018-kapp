@@ -6,14 +6,17 @@ import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
 import { Chip } from '@/components/chip';
-import { FormError } from '@/components/form-error';
+import { EmptyState } from '@/components/empty-state';
+import { Entering } from '@/components/entering';
+import { ErrorState } from '@/components/error-state';
 import { ListRow } from '@/components/list-row';
 import { OfflineBanner } from '@/components/offline-banner';
 import { PushPrompt } from '@/components/push-prompt';
 import { Screen } from '@/components/screen';
-import { ThemedText } from '@/components/themed-text';
+import { SkeletonList } from '@/components/skeleton';
 import { Radius, Spacing } from '@/constants/theme';
 import { useMarkAllNotificationsRead, useMarkNotificationRead, useNotificationFeed, useUnreadCount } from '@/hooks/use-notifications';
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { useTheme } from '@/hooks/use-theme';
 import { errorMessage } from '@/lib/api';
 import { formatDay, formatMessageTime, formatTime } from '@/lib/format';
@@ -35,6 +38,7 @@ export default function NotificationsScreen() {
   const markAll = useMarkAllNotificationsRead();
   const [filter, setFilter] = useState<Filter>('all');
   const items = (feed.data?.pages.flatMap((p) => p.items) ?? []).filter((n) => matches(n, filter));
+  const refresh = usePullToRefresh(feed.refetch, unread.refetch);
 
   function text(n: AppNotification): { title: string; subtitle: string } {
     const name = n.actor?.firstName ?? t('notifications.someone');
@@ -91,7 +95,7 @@ export default function NotificationsScreen() {
   }
 
   return (
-    <Screen title={t('notifications.title')} subtitle={t('notifications.subtitle')}>
+    <Screen title={t('notifications.title')} subtitle={t('notifications.subtitle')} refresh={refresh}>
       <OfflineBanner />
       <PushPrompt />
       <View style={styles.chips}>
@@ -102,19 +106,21 @@ export default function NotificationsScreen() {
       {(unread.data?.count ?? 0) > 0 ? (
         <Button label={t('notifications.markAll')} variant="tertiary" loading={markAll.isPending} onPress={() => markAll.mutate()} />
       ) : null}
-      {feed.error && !feed.data ? <FormError message={errorMessage(feed.error)} /> : null}
-      {feed.data && items.length === 0 ? <ThemedText themeColor="muted">{t('notifications.body')}</ThemedText> : null}
-      {items.map((n) => {
+      {feed.error && !feed.data ? <ErrorState message={errorMessage(feed.error)} onRetry={() => void feed.refetch()} retrying={feed.isFetching} /> : null}
+      {feed.isPending ? <SkeletonList /> : null}
+      {feed.data && items.length === 0 ? <EmptyState title={t('notifications.body')} /> : null}
+      {items.map((n, i) => {
         const { title, subtitle } = text(n);
         return (
-          <ListRow
-            key={n.id}
-            title={title}
-            subtitle={subtitle}
-            accessibilityHint={n.readAt ? undefined : t('notifications.unreadHint')}
-            leading={<View style={[styles.dot, { backgroundColor: n.readAt ? 'transparent' : c.brand }]} accessibilityElementsHidden />}
-            onPress={() => open(n)}
-          />
+          <Entering key={n.id} index={i}>
+            <ListRow
+              title={title}
+              subtitle={subtitle}
+              accessibilityHint={n.readAt ? undefined : t('notifications.unreadHint')}
+              leading={<View style={[styles.dot, { backgroundColor: n.readAt ? 'transparent' : c.brand }]} accessibilityElementsHidden />}
+              onPress={() => open(n)}
+            />
+          </Entering>
         );
       })}
       {feed.hasNextPage ? (
@@ -125,6 +131,6 @@ export default function NotificationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  chips: { flexDirection: 'row', gap: Spacing.two },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   dot: { width: 10, height: 10, borderRadius: Radius.full },
 });

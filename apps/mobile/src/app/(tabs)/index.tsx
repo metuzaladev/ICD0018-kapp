@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet } from 'react-native';
 
 import { Button } from '@/components/button';
+import { Entering } from '@/components/entering';
 import { ListRow } from '@/components/list-row';
 import { OfflineBanner } from '@/components/offline-banner';
 import { ParkRow } from '@/components/park-row';
@@ -15,6 +16,7 @@ import { useMyDogs } from '@/hooks/use-dogs';
 import { useFriendPlans } from '@/hooks/use-friends';
 import { useHealthReminders } from '@/hooks/use-health';
 import { useNearbyParks } from '@/hooks/use-parks';
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { useActiveCheckIn, usePlannedVisits } from '@/hooks/use-visits';
 import { authClient } from '@/lib/auth-client';
 import { dueLabel, formatDate, formatDay, formatTime, formatToday } from '@/lib/format';
@@ -29,12 +31,18 @@ export default function HomeScreen() {
   const { data: session } = authClient.useSession();
   const location = useDeviceLocation();
   // Same query key as the map tab, so both screens share one cached request.
-  const { data: parks = [] } = useNearbyParks(location.origin, useParkFilters());
-  const { data: active } = useActiveCheckIn();
-  const { data: plans = [] } = usePlannedVisits();
-  const { data: reminders = [] } = useHealthReminders();
+  const nearby = useNearbyParks(location.origin, useParkFilters());
+  const activeQuery = useActiveCheckIn();
+  const plansQuery = usePlannedVisits();
+  const remindersQuery = useHealthReminders();
   const { data: dogs } = useMyDogs();
-  const { data: friendPlans = [] } = useFriendPlans();
+  const friendPlansQuery = useFriendPlans();
+  const { data: parks = [] } = nearby;
+  const { data: active } = activeQuery;
+  const { data: plans = [] } = plansQuery;
+  const { data: reminders = [] } = remindersQuery;
+  const { data: friendPlans = [] } = friendPlansQuery;
+  const refresh = usePullToRefresh(nearby.refetch, activeQuery.refetch, plansQuery.refetch, remindersQuery.refetch, friendPlansQuery.refetch);
   // Figma asks the dog ("Õue, Freddy?"); with several dogs (or none) the owner is greeted instead.
   const greetName = dogs?.length === 1 ? dogs[0]!.name : session?.user.name.split(' ')[0];
   const openPark = (parkId: string) => router.push({ pathname: '/parks/[parkId]', params: { parkId } });
@@ -42,11 +50,12 @@ export default function HomeScreen() {
   return (
     <Screen
       title={greetName ? t('home.greeting', { name: greetName }) : t('home.greetingNoName')}
-      subtitle={t('home.subtitle', { date: formatToday() })}>
+      subtitle={t('home.subtitle', { date: formatToday() })}
+      refresh={refresh}>
       <OfflineBanner />
 
       {active ? (
-        <ThemedView type="tint" style={styles.card}>
+        <ThemedView type="tint" style={styles.card} accessibilityLiveRegion="polite">
           {/* Park names are never declined ("Kadrioru koerapargis"), so the name stands on its own line. */}
           <ThemedText type="heading">{t('home.activeTitle')}</ThemedText>
           <ThemedText type="label">{active.park.name}</ThemedText>
@@ -62,13 +71,16 @@ export default function HomeScreen() {
         </ThemedView>
       )}
 
-      {plans.slice(0, 2).map((p) => (
-        <ThemedView key={p.id} type="surface" style={styles.card}>
-          <ThemedText type="label">{p.park.name}</ThemedText>
-          <ThemedText type="caption" themeColor="muted">
-            {t('home.planned', { day: formatDay(p.startsAt), from: formatTime(p.startsAt), to: formatTime(p.endsAt) })}
-          </ThemedText>
-        </ThemedView>
+      {plans.slice(0, 2).map((p, i) => (
+        <Entering key={p.id} index={i}>
+          {/* One VoiceOver element: park and time belong together. */}
+          <ThemedView type="surface" style={styles.card} accessible>
+            <ThemedText type="label">{p.park.name}</ThemedText>
+            <ThemedText type="caption" themeColor="muted">
+              {t('home.planned', { day: formatDay(p.startsAt), from: formatTime(p.startsAt), to: formatTime(p.endsAt) })}
+            </ThemedText>
+          </ThemedView>
+        </Entering>
       ))}
 
       {/* Figma "Täna võiks koos mängida": friends' plans in the next 48 hours (M5). */}
@@ -88,7 +100,9 @@ export default function HomeScreen() {
 
       {reminders.length > 0 ? (
         <>
-          <ThemedText type="heading">{t('home.remindersTitle')}</ThemedText>
+          <ThemedText type="heading" accessibilityRole="header">
+            {t('home.remindersTitle')}
+          </ThemedText>
           {reminders.slice(0, 3).map((r) => (
             <ListRow
               key={r.recordId}
@@ -108,9 +122,13 @@ export default function HomeScreen() {
 
       {parks.length > 0 ? (
         <>
-          <ThemedText type="heading">{t('home.nearby')}</ThemedText>
-          {parks.slice(0, 3).map((park) => (
-            <ParkRow key={park.id} park={park} />
+          <ThemedText type="heading" accessibilityRole="header">
+            {t('home.nearby')}
+          </ThemedText>
+          {parks.slice(0, 3).map((park, i) => (
+            <Entering key={park.id} index={i}>
+              <ParkRow park={park} />
+            </Entering>
           ))}
         </>
       ) : null}

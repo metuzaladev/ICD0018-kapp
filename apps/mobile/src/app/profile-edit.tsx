@@ -2,22 +2,21 @@ import { presenceSharingSchema, updateProfileInputSchema, type PresenceSharing, 
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
+import { Chip } from '@/components/chip';
 import { FormError } from '@/components/form-error';
 import { Screen } from '@/components/screen';
 import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
-import { Radius, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+import { Spacing } from '@/constants/theme';
 import { apiGet, apiSend, errorMessage } from '@/lib/api';
 import { validateForm } from '@/lib/form';
 
 /** Figma 07 / Profile / Edit — presented as a modal (iOS pattern for a focused edit task). */
 export default function ProfileEditScreen() {
   const { t } = useTranslation();
-  const c = useTheme();
   const [values, setValues] = useState({ name: '', area: '', bio: '', presenceSharing: 'friends' as PresenceSharing });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -68,21 +67,15 @@ export default function ProfileEditScreen() {
 
       <ThemedText type="label">{t('profileEdit.presenceTitle')}</ThemedText>
       <View style={styles.chips} accessibilityRole="radiogroup">
-        {presenceSharingSchema.options.map((option) => {
-          const selected = values.presenceSharing === option;
-          return (
-            <Pressable
-              key={option}
-              accessibilityRole="radio"
-              accessibilityState={{ selected }}
-              onPress={() => setValues((v) => ({ ...v, presenceSharing: option }))}
-              style={[styles.chip, { backgroundColor: selected ? c.brand : c.surface, borderColor: c.border }]}>
-              <ThemedText type="caption" style={{ color: selected ? c.onBrand : c.text }}>
-                {t(`profileEdit.presence.${option}`)}
-              </ThemedText>
-            </Pressable>
-          );
-        })}
+        {presenceSharingSchema.options.map((option) => (
+          <Chip
+            key={option}
+            role="radio"
+            label={t(`profileEdit.presence.${option}`)}
+            selected={values.presenceSharing === option}
+            onPress={() => setValues((v) => ({ ...v, presenceSharing: option }))}
+          />
+        ))}
       </View>
 
       <Button label={t('profileEdit.save')} loading={saving} disabled={loading} onPress={save} />
@@ -91,13 +84,5 @@ export default function ProfileEditScreen() {
 }
 
 const styles = StyleSheet.create({
-  chips: { flexDirection: 'row', gap: Spacing.two },
-  chip: {
-    flex: 1,
-    minHeight: 44,
-    borderRadius: Radius.full,
-    borderWidth: StyleSheet.hairlineWidth,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
 });

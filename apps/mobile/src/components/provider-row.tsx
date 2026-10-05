@@ -1,8 +1,9 @@
 import type { ProviderSummary } from '@kapp/shared';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { PressableScale } from '@/components/pressable-scale';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -27,11 +28,11 @@ export function ProviderRow({ provider }: { provider: ProviderSummary }) {
   const a11yLabel = [title, provider.area, formatKm(provider.distanceKm), price, ratingA11y].filter(Boolean).join(', ');
 
   return (
-    <Pressable
+    <PressableScale
       accessibilityRole="button"
       accessibilityLabel={a11yLabel}
       onPress={() => router.push({ pathname: '/services/[providerId]', params: { providerId: provider.id } })}
-      style={({ pressed }) => [styles.row, { backgroundColor: c.surface, borderColor: c.border, opacity: pressed ? 0.8 : 1 }]}>
+      style={[styles.row, { backgroundColor: c.surface, borderColor: c.border }]}>
       <View style={styles.text}>
         <ThemedText type="label">{title}</ThemedText>
         {provider.tagline ? <ThemedText type="caption">{provider.tagline}</ThemedText> : null}
@@ -42,7 +43,7 @@ export function ProviderRow({ provider }: { provider: ProviderSummary }) {
       <ThemedText type="heading" themeColor="muted" accessibilityElementsHidden>
         ›
       </ThemedText>
-    </Pressable>
+    </PressableScale>
   );
 }
 

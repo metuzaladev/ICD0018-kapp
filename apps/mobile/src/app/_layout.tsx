@@ -12,6 +12,7 @@ import { useCommunityRuntime } from '@/hooks/use-community-runtime';
 import '@/i18n';
 import { loadLanguagePreference } from '@/i18n/language-preference';
 import { authClient } from '@/lib/auth-client';
+import { onboarding } from '@/lib/onboarding';
 import { queryClient } from '@/lib/query-client';
 
 SplashScreen.preventAutoHideAsync();
@@ -34,15 +35,20 @@ export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts(FontAssets);
   const { data: session, isPending } = authClient.useSession();
   const signedIn = Boolean(session);
-  const [languageLoaded, setLanguageLoaded] = useState(false);
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
 
   useEffect(() => {
-    loadLanguagePreference().finally(() => setLanguageLoaded(true));
+    // Both never reject; the onboarding flag decides whether Welcome redirects to the intro.
+    Promise.all([loadLanguagePreference(), onboarding.load()]).finally(() => setPreferencesLoaded(true));
   }, []);
 
-  // Keep the splash until fonts, the stored session and the chosen language are known, to avoid a
-  // flash of the welcome screen (or of the wrong language). A font error must not block the app.
-  const ready = (fontsLoaded || fontError !== null) && !isPending && languageLoaded;
+  // "Has an account → skip the intro after signing out" is handled in lib/auth-client.ts on a
+  // server-confirmed session, not here: `session` can briefly be a stale copy restored from the
+  // Keychain (which survives a reinstall), and that wrongly hid the intro on fresh installs.
+
+  // Keep the splash until fonts, the stored session, the chosen language and the onboarding flag are
+  // known, to avoid a flash of the welcome screen (or of the wrong language). A font error must not block the app.
+  const ready = (fontsLoaded || fontError !== null) && !isPending && preferencesLoaded;
   useEffect(() => {
     if (ready) SplashScreen.hideAsync();
   }, [ready]);

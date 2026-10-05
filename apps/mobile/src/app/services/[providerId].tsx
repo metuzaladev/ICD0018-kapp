@@ -3,18 +3,21 @@ import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
-import { FormError } from '@/components/form-error';
+import { ErrorState } from '@/components/error-state';
 import { OfflineBanner } from '@/components/offline-banner';
+import { PressableScale } from '@/components/pressable-scale';
 import { Screen } from '@/components/screen';
+import { SkeletonList } from '@/components/skeleton';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useProvider } from '@/hooks/use-services';
 import { useTheme } from '@/hooks/use-theme';
 import { errorMessage } from '@/lib/api';
 import { formatDuration, formatRating, priceLabel, reviewsLabel } from '@/lib/format';
+import { haptic } from '@/lib/haptics';
 
 /** One service as a radio row: "Pesu ja kammimine / 60 min · alates 35 €". */
 function ServiceOption({ service, selected, onPress }: { service: Service; selected: boolean; onPress: () => void }) {
@@ -22,16 +25,16 @@ function ServiceOption({ service, selected, onPress }: { service: Service; selec
   const c = useTheme();
   const meta = t('provider.serviceMeta', { duration: formatDuration(service.durationMinutes), price: priceLabel(service.priceCents, service.priceIsFrom) });
   return (
-    <Pressable
+    <PressableScale
       accessibilityRole="radio"
       accessibilityState={{ checked: selected }}
-      accessibilityLabel={`${service.name}, ${meta}`}
+      accessibilityLabel={[service.name, meta, service.description].filter(Boolean).join(', ')}
       accessibilityHint={t('provider.serviceHint')}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.option,
-        { backgroundColor: selected ? c.soft : c.surface, borderColor: selected ? c.brand : c.border, opacity: pressed ? 0.8 : 1 },
-      ]}>
+      onPress={() => {
+        haptic('selection');
+        onPress();
+      }}
+      style={[styles.option, { backgroundColor: selected ? c.soft : c.surface, borderColor: selected ? c.brand : c.border }]}>
       <View style={styles.flex}>
         <ThemedText type="label">{service.name}</ThemedText>
         <ThemedText type="caption" themeColor="muted">
@@ -42,7 +45,7 @@ function ServiceOption({ service, selected, onPress }: { service: Service; selec
       <View style={[styles.radio, { borderColor: selected ? c.brand : c.border }]} accessibilityElementsHidden>
         {selected ? <View style={[styles.radioDot, { backgroundColor: c.brand }]} /> : null}
       </View>
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -50,7 +53,8 @@ function ServiceOption({ service, selected, onPress }: { service: Service; selec
 export default function ProviderScreen() {
   const { t } = useTranslation();
   const { providerId } = useLocalSearchParams<{ providerId: string }>();
-  const { data: provider, error, isPending } = useProvider(providerId);
+  const query = useProvider(providerId);
+  const { data: provider, error, isPending } = query;
   // null = not chosen yet; the cheapest (first) service is preselected so one tap books.
   const [chosen, setChosen] = useState<string | null>(null);
   const selectedId = chosen ?? provider?.services[0]?.id ?? null;
@@ -58,8 +62,8 @@ export default function ProviderScreen() {
   if (!provider) {
     return (
       <Screen underHeader>
-        {error ? <FormError message={errorMessage(error)} /> : null}
-        {isPending ? <ThemedText themeColor="muted">{t('common.loading')}</ThemedText> : null}
+        {error ? <ErrorState message={errorMessage(error)} onRetry={() => void query.refetch()} retrying={query.isFetching} /> : null}
+        {isPending ? <SkeletonList rows={3} rowHeight={80} /> : null}
       </Screen>
     );
   }
@@ -73,7 +77,8 @@ export default function ProviderScreen() {
     <Screen underHeader title={provider.name} subtitle={`${t(`services.kindTitle.${provider.category}`)} · ${provider.area}`}>
       <OfflineBanner />
       {provider.photoUrl ? (
-        <Image source={{ uri: provider.photoUrl }} style={styles.photo} contentFit="cover" accessibilityIgnoresInvertColors />
+        // Decorative: the provider's name and description say who they are.
+        <Image source={{ uri: provider.photoUrl }} style={styles.photo} contentFit="cover" accessibilityIgnoresInvertColors accessible={false} />
       ) : null}
       {provider.tagline ? <ThemedText type="heading">{provider.tagline}</ThemedText> : null}
       {provider.description ? <ThemedText>{provider.description}</ThemedText> : null}

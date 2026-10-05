@@ -8,12 +8,14 @@ import { Button } from '@/components/button';
 import { Chip } from '@/components/chip';
 import { FormError } from '@/components/form-error';
 import { Screen } from '@/components/screen';
+import { SkeletonList } from '@/components/skeleton';
 import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useDeleteDog, useMyDogs, useSaveDog } from '@/hooks/use-dogs';
 import { errorMessage } from '@/lib/api';
 import { validateForm } from '@/lib/form';
+import { haptic } from '@/lib/haptics';
 
 /** Text fields hold strings; this turns them into the API shape (empty → null, "12,5" → 12.5). */
 function toInput(values: FormValues) {
@@ -57,7 +59,7 @@ export default function DogEditScreen() {
       <Stack.Screen options={{ title: dogId ? t('nav.dogEdit') : t('nav.dogAdd') }} />
       {dogId && isPending ? (
         <Screen underHeader>
-          <ThemedText themeColor="muted">{t('common.loading')}</ThemedText>
+          <SkeletonList rows={3} rowHeight={72} />
         </Screen>
       ) : dogId && !existing ? (
         <Screen underHeader>
@@ -95,6 +97,7 @@ function DogForm({ dogId, existing }: { dogId?: string; existing?: Dog }) {
 
   function confirmDelete() {
     // Destructive and irreversible: confirm with the system alert (HIG), destructive style.
+    haptic('warning');
     Alert.alert(t('dogs.edit.deleteTitle', { name: existing?.name ?? '' }), t('dogs.edit.deleteBody'), [
       { text: t('common.cancel'), style: 'cancel' },
       {
@@ -142,5 +145,5 @@ function DogForm({ dogId, existing }: { dogId?: string; existing?: Dog }) {
 }
 
 const styles = StyleSheet.create({
-  chips: { flexDirection: 'row', gap: Spacing.two },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
 });

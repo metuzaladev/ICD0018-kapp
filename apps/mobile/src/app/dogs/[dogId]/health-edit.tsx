@@ -1,6 +1,13 @@
-import { healthRecordInputSchema, updateHealthRecordInputSchema, type HealthRecord, type HealthRecordKind } from '@kapp/shared';
+import {
+  healthRecordInputSchema,
+  REMINDER_WINDOW_DAYS,
+  updateHealthRecordInputSchema,
+  type HealthRecord,
+  type HealthRecordKind,
+} from '@kapp/shared';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -10,6 +17,7 @@ import { Screen } from '@/components/screen';
 import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
+import { useMyDogs } from '@/hooks/use-dogs';
 import { useDeleteHealthRecord, useHealthRecords, useSaveHealthRecord } from '@/hooks/use-health';
 import { errorMessage } from '@/lib/api';
 import { localIsoDate } from '@/lib/format';
@@ -17,9 +25,20 @@ import { validateForm } from '@/lib/form';
 
 type FormValues = { kind: HealthRecordKind; title: string; date: string; nextDue: string; clinic: string; notes: string };
 
+/** Per-kind texts: Figma "Health / Add Vaccination" and "Health / Vet Visit". */
 const KIND_TEXT = {
-  vaccination: { add: 'Lisa vaktsineerimine', title: 'Vaktsiin', placeholder: 'Näiteks marutaud', next: 'Järgmine vaktsineerimine' },
-  vet_visit: { add: 'Lisa arstivisiit', title: 'Visiidi põhjus', placeholder: 'Näiteks hambakontroll', next: 'Järgmine kontroll' },
+  vaccination: {
+    screen: 'nav.vaccinationAdd',
+    title: 'health.edit.vaccinationTitle',
+    placeholder: 'health.edit.vaccinationPlaceholder',
+    save: 'common.save',
+  },
+  vet_visit: {
+    screen: 'nav.vetVisitAdd',
+    title: 'health.edit.vetVisitTitle',
+    placeholder: 'health.edit.vetVisitPlaceholder',
+    save: 'health.edit.saveVetVisit',
+  },
 } as const;
 
 function initialValues(record: HealthRecord | undefined, kind: HealthRecordKind): FormValues {
@@ -37,10 +56,11 @@ function initialValues(record: HealthRecord | undefined, kind: HealthRecordKind)
 const toInput = (v: FormValues) => ({ ...v, date: v.date.trim(), nextDue: v.nextDue.trim() || null });
 
 /**
- * "Lisa vaktsineerimine" / "Lisa arstivisiit" and editing (recordId) — a modal like dogs/edit.
+ * "Lisa vaktsineerimine" / "Loomaarsti külastus" and editing (recordId) — a modal like dogs/edit.
  * The form mounts once the record is known, so fields start with the stored values.
  */
 export default function HealthEditScreen() {
+  const { t } = useTranslation();
   const { dogId, recordId, kind } = useLocalSearchParams<{ dogId: string; recordId?: string; kind?: HealthRecordKind }>();
   const { data: records, isPending } = useHealthRecords(dogId);
   const existing = records?.find((r) => r.id === recordId);
@@ -48,14 +68,14 @@ export default function HealthEditScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: recordId ? 'Muuda kirjet' : KIND_TEXT[initialKind].add }} />
+      <Stack.Screen options={{ title: recordId ? t('nav.healthRecordEdit') : t(KIND_TEXT[initialKind].screen) }} />
       {recordId && isPending ? (
         <Screen underHeader>
-          <ThemedText themeColor="muted">Laen…</ThemedText>
+          <ThemedText themeColor="muted">{t('common.loading')}</ThemedText>
         </Screen>
       ) : recordId && !existing ? (
         <Screen underHeader>
-          <FormError message="Tervisekirjet ei leitud" />
+          <FormError message={t('health.edit.notFound')} />
         </Screen>
       ) : (
         <HealthForm dogId={dogId} existing={existing} kind={initialKind} />
@@ -65,6 +85,8 @@ export default function HealthEditScreen() {
 }
 
 function HealthForm({ dogId, existing, kind }: { dogId: string; existing?: HealthRecord; kind: HealthRecordKind }) {
+  const { t } = useTranslation();
+  const dog = useMyDogs().data?.find((d) => d.id === dogId);
   const save = useSaveHealthRecord(dogId, existing?.id);
   const remove = useDeleteHealthRecord(dogId);
   const [values, setValues] = useState<FormValues>(() => initialValues(existing, kind));
@@ -93,10 +115,10 @@ function HealthForm({ dogId, existing, kind }: { dogId: string; existing?: Healt
 
   function confirmDelete() {
     if (!existing) return;
-    Alert.alert(`Kustutada „${existing.title}"?`, 'Kirjet ei saa taastada.', [
-      { text: 'Loobu', style: 'cancel' },
+    Alert.alert(t('health.deleteTitle', { title: existing.title }), t('health.deleteBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Kustuta',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: () => remove.mutate(existing.id, { onSuccess: () => router.back(), onError: (e) => setFormError(errorMessage(e)) }),
       },
@@ -104,44 +126,59 @@ function HealthForm({ dogId, existing, kind }: { dogId: string; existing?: Healt
   }
 
   return (
-    <Screen underHeader>
+    <Screen underHeader subtitle={dog ? t('health.edit.subtitle', { name: dog.name }) : undefined}>
       <FormError message={formError} />
-      <ThemedText type="label">Liik</ThemedText>
+      <ThemedText type="label">{t('health.edit.kind')}</ThemedText>
       <View style={styles.chips}>
-        <Chip label="Vaktsineerimine" selected={values.kind === 'vaccination'} onPress={() => setValues((v) => ({ ...v, kind: 'vaccination' }))} />
-        <Chip label="Arstivisiit" selected={values.kind === 'vet_visit'} onPress={() => setValues((v) => ({ ...v, kind: 'vet_visit' }))} />
+        <Chip
+          label={t('health.edit.vaccination')}
+          selected={values.kind === 'vaccination'}
+          onPress={() => setValues((v) => ({ ...v, kind: 'vaccination' }))}
+        />
+        <Chip
+          label={t('health.edit.vetVisit')}
+          selected={values.kind === 'vet_visit'}
+          onPress={() => setValues((v) => ({ ...v, kind: 'vet_visit' }))}
+        />
       </View>
-      <TextField label={text.title} placeholder={text.placeholder} value={values.title} onChangeText={set('title')} error={errors.title} />
+      <TextField label={t(text.title)} placeholder={t(text.placeholder)} value={values.title} onChangeText={set('title')} error={errors.title} />
       <TextField
-        label="Kuupäev"
-        placeholder="AAAA-KK-PP"
+        label={t('health.edit.date')}
+        placeholder={t('health.edit.datePlaceholder')}
         value={values.date}
         onChangeText={set('date')}
         error={errors.date}
         keyboardType="numbers-and-punctuation"
       />
       <TextField
-        label={`${text.next} (valikuline)`}
-        placeholder="AAAA-KK-PP"
+        label={t('health.edit.nextDue')}
+        placeholder={t('health.edit.datePlaceholder')}
         value={values.nextDue}
         onChangeText={set('nextDue')}
         error={errors.nextDue}
         keyboardType="numbers-and-punctuation"
       />
       <ThemedText type="caption" themeColor="muted">
-        Tähtaja lähenedes (30 päeva) ilmub meeldetuletus avalehele.
+        {t('health.edit.reminderHint', { count: REMINDER_WINDOW_DAYS })}
       </ThemedText>
-      <TextField label="Kliinik (valikuline)" value={values.clinic} onChangeText={set('clinic')} error={errors.clinic} />
       <TextField
-        label="Märkmed (valikuline)"
+        label={t('health.edit.clinic')}
+        placeholder={t('health.edit.clinicPlaceholder')}
+        value={values.clinic}
+        onChangeText={set('clinic')}
+        error={errors.clinic}
+      />
+      <TextField
+        label={t('health.edit.notes')}
+        placeholder={t('health.edit.notesPlaceholder')}
         value={values.notes}
         onChangeText={set('notes')}
         error={errors.notes}
         multiline
         maxLength={2000}
       />
-      <Button label={existing ? 'Salvesta' : text.add} loading={save.isPending} onPress={submit} />
-      {existing ? <Button label="Kustuta kirje" variant="tertiary" loading={remove.isPending} onPress={confirmDelete} /> : null}
+      <Button label={existing ? t('common.save') : t(text.save)} loading={save.isPending} onPress={submit} />
+      {existing ? <Button label={t('health.edit.delete')} variant="tertiary" loading={remove.isPending} onPress={confirmDelete} /> : null}
     </Screen>
   );
 }

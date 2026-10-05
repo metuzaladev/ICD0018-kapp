@@ -21,13 +21,13 @@ export function createProfileService({
     async getOwnProfile(userId) {
       const profile = await withTimeout(repository.findById(userId), timeoutMs, 'profile.findById');
       // A valid session for a deleted user (race with account deletion) — treat as gone.
-      if (!profile) throw new NotFoundError('Kasutajat ei leitud');
+      if (!profile) throw new NotFoundError('errors.userNotFound');
       return profile;
     },
 
     async updateOwnProfile(userId, patch) {
       const profile = await withTimeout(repository.update(userId, patch), timeoutMs, 'profile.update');
-      if (!profile) throw new NotFoundError('Kasutajat ei leitud');
+      if (!profile) throw new NotFoundError('errors.userNotFound');
       return profile;
     },
   };

@@ -1,0 +1,447 @@
+{
+  "common": {
+    "loading": "Laen…",
+    "save": "Salvesta",
+    "cancel": "Loobu",
+    "delete": "Kustuta",
+    "close": "Sulge",
+    "openSettings": "Ava seaded",
+    "you": "Sina",
+    "dog": "koer",
+    "until": "kuni {{time}}"
+  },
+  "units": {
+    "km": "{{value}} km",
+    "kg": "{{value}} kg",
+    "minutes": "{{value}} min",
+    "hours": "{{value}} h",
+    "hoursMinutes": "{{hours}} h {{minutes}} min"
+  },
+  "counts": {
+    "dogs_one": "{{count}} koer",
+    "dogs_other": "{{count}} koera",
+    "reviews_one": "{{count}} arvustus",
+    "reviews_other": "{{count}} arvustust",
+    "photos_one": "{{count}} foto",
+    "photos_other": "{{count}} fotot",
+    "visits_one": "{{count}} külastus",
+    "visits_other": "{{count}} külastust"
+  },
+  "dates": {
+    "today": "täna",
+    "tomorrow": "homme",
+    "yesterday": "eile",
+    "inDays_one": "{{count}} päeva pärast",
+    "inDays_other": "{{count}} päeva pärast",
+    "overdue_one": "{{count}} päev hilinenud",
+    "overdue_other": "{{count}} päeva hilinenud",
+    "ageNewborn": "alla kuu",
+    "ageMonths_one": "{{count}} kuu",
+    "ageMonths_other": "{{count}} kuud",
+    "ageYears_one": "{{count}} aasta",
+    "ageYears_other": "{{count}} aastat"
+  },
+  "errors": {
+    "network": "Internetiühendus puudub või server ei vasta",
+    "unknown": "Midagi läks valesti",
+    "generic": "Midagi läks valesti, proovi uuesti",
+    "genericDev": "Midagi läks valesti: {{detail}}",
+    "checkChoices": "Kontrolli valikuid",
+    "photoTooLarge": "Pilt on liiga suur (kuni {{max}} MB)",
+    "uploadNetwork": "Pildi üleslaadimine ebaõnnestus, kontrolli internetiühendust",
+    "uploadFailed": "Pildi üleslaadimine ebaõnnestus, proovi uuesti"
+  },
+  "tabs": {
+    "home": "Avaleht",
+    "map": "Kaart",
+    "notifications": "Teated",
+    "profile": "Profiil"
+  },
+  "nav": {
+    "profileEdit": "Muuda profiili",
+    "filters": "Filtrid",
+    "checkIn": "Märgi kohalolek",
+    "planVisit": "Planeeri külastus",
+    "review": "Hinnang",
+    "report": "Teavita",
+    "dogAdd": "Lisa koer",
+    "dogEdit": "Muuda koera",
+    "vaccinationAdd": "Lisa vaktsineerimine",
+    "vetVisitAdd": "Loomaarsti külastus",
+    "healthRecordEdit": "Muuda kirjet"
+  },
+  "auth": {
+    "email": "E-post",
+    "emailPlaceholder": "Sinu e-posti aadress",
+    "password": "Parool",
+    "passwordHint": "Vähemalt {{min}} tähemärki",
+    "backToSignIn": "Tagasi sisselogimisse",
+    "welcome": {
+      "region": "TALLINN · EESTI",
+      "tagline": "Koerad ühendavad inimesi.",
+      "photoLabel": "Cardigan corgi murul",
+      "intro": "Leia oma koerale mängusõber ja endale uus lemmikpark.",
+      "start": "Alustame",
+      "haveAccount": "Mul on juba konto"
+    },
+    "signUp": {
+      "title": "Tere tulemast meie kampa.",
+      "subtitle": "Üks konto sulle ja sinu koertele.",
+      "name": "Sinu nimi",
+      "namePlaceholder": "Ees- ja perekonnanimi",
+      "emailPlaceholder": "nimi@näide.ee",
+      "terms": "Konto loomisel nõustud kasutustingimuste ja privaatsuspoliitikaga.",
+      "submit": "Loo konto",
+      "haveAccount": "Juba liige? Logi sisse"
+    },
+    "signIn": {
+      "title": "Tore sind jälle näha.",
+      "subtitle": "Mängusõbrad juba ootavad.",
+      "passwordPlaceholder": "••••••••",
+      "submit": "Logi sisse",
+      "forgot": "Unustasid parooli?",
+      "createAccount": "Loo uus konto",
+      "passwordChanged": "Parool on muudetud. Logi uue parooliga sisse."
+    },
+    "resetPassword": {
+      "title": "Uus algus?",
+      "subtitle": "Saadame sulle lingi parooli taastamiseks.",
+      "submit": "Saada taastamislink",
+      "hintTitle": "Vaata oma postkasti",
+      "hintBody": "Pärast saatmist kontrolli ka rämpsposti. Link kehtib piiratud aja."
+    },
+    "resetSent": {
+      "title": "Vaata oma postkasti",
+      "subtitle": "Kui selle aadressiga konto on olemas, saatsime sinna lingi. Link kehtib üks tund."
+    },
+    "newPassword": {
+      "title": "Uus parool",
+      "subtitle": "Vali parool, mida sa mujal ei kasuta.",
+      "label": "Uus parool",
+      "submit": "Salvesta parool",
+      "requestNew": "Küsi uus link",
+      "linkInvalid": "Link on aegunud või vigane, küsi uus"
+    },
+    "social": {
+      "google": "Jätka Google’iga",
+      "appleFailed": "Apple’iga sisselogimine ebaõnnestus"
+    }
+  },
+  "location": {
+    "title": "Mis on teie lähedal?",
+    "body": "Asukoht aitab leida lähedal olevaid parke.",
+    "privacy": "Asukohta kasutame pargi leidmiseks. Teised näevad sind pargis ainult siis, kui märgid enda kohaloleku.",
+    "allow": "Luba rakenduse kasutamisel",
+    "notNow": "Mitte praegu",
+    "deniedTitle": "Asukoht on välja lülitatud",
+    "deniedBody": "Näitame parke Tallinna kesklinna ümbruses. Asukoha saad lubada seadetes."
+  },
+  "offline": {
+    "title": "Internetiühendus puudub.",
+    "body": "Näitame viimati laaditud andmeid ja uuendame, kui ühendus taastub."
+  },
+  "home": {
+    "greeting": "Õue, {{name}}?",
+    "greetingNoName": "Õue?",
+    "subtitle": "{{date}} · Tallinn",
+    "activeTitle": "Head mängimist!",
+    "activeDogs": "{{dogs}} · kuni {{time}}",
+    "openPark": "Ava park",
+    "idleTitle": "Täna võiks koos mängida",
+    "idleBody": "Märgi pargis kohalolek või planeeri käik, et sõbrad teaksid tulla.",
+    "planned": "Plaanis {{day}} {{from}}–{{to}}",
+    "remindersTitle": "Tervise meeldetuletused",
+    "reminderDue": "Tähtaeg {{date}} · {{due}}",
+    "findPark": "Leia lähim park",
+    "nearby": "Teie lähedal"
+  },
+  "map": {
+    "title": "Avastame Tallinna.",
+    "subtitle": "Sinu järgmine lemmikpaik on siin.",
+    "all": "Kõik",
+    "near": "Lähedal",
+    "filters": "Filtrid",
+    "filtersCount": "Filtrid ({{count}})",
+    "listTitle": "Pargid sinu ümber",
+    "count_one": "{{count}} paik väikesteks seiklusteks.",
+    "count_other": "{{count}} paika väikesteks seiklusteks.",
+    "fallbackNote": "Kaugused on arvutatud Tallinna kesklinnast.",
+    "empty": "Selles raadiuses parke ei leitud. Proovi suuremat kaugust või vähem filtreid.",
+    "marker": "{{name}}, {{dogs}} praegu"
+  },
+  "parkRow": {
+    "dogsNow": "{{dogs}} praegu",
+    "quiet": "hetkel vaikne"
+  },
+  "filters": {
+    "title": "Just teile sobiv.",
+    "subtitle": "Vali, mis teeb ühe pargi heaks.",
+    "features": "Pargi võimalused",
+    "smallDogArea": "Eraldi ala väikestele koertele",
+    "water": "Joogivesi olemas",
+    "lighting": "Valgustatud",
+    "fenced": "Aiaga piiratud",
+    "distance": "Kaugus",
+    "apply": "Näita parke",
+    "clear": "Tühjenda filtrid"
+  },
+  "park": {
+    "favoriteAdd": "Lisa lemmikutesse",
+    "favoriteRemove": "Eemalda lemmikutest",
+    "photoLabel": "Pargi foto (näidis)",
+    "hereUntil": "Oled pargis kuni {{time}}",
+    "endVisit": "Lõpeta külastus",
+    "dogsNow_zero": "Praegu on pargis vaikne.",
+    "dogsNow_one": "{{count}} koer, uus tutvus ootab.",
+    "dogsNow_other": "{{count}} koera, palju häid tutvusi.",
+    "rating": "{{rating}} / 5 · {{reviews}}",
+    "noReviews": "Arvustusi veel pole",
+    "goodToKnow": "Hea teada",
+    "feature": {
+      "fenced": "Aiaga piiratud",
+      "smallDogArea": "Eraldi väike ala",
+      "water": "Vesi",
+      "lighting": "Valgustus"
+    },
+    "checkIn": "Oleme siin",
+    "plan": "Planeeri külastus",
+    "directions": "Juhata kohale",
+    "visitorsTitle": "Praegu pargis",
+    "visitorDetails": "{{breeds}} · kuni {{time}}",
+    "hiddenDogs_one": "+ {{count}} koer, kelle omanik ei jaga oma kohalolekut",
+    "hiddenDogs_other": "+ {{count}} koera, kelle omanikud ei jaga oma kohalolekut",
+    "firstMeetTitle": "Esimene kohtumine?",
+    "firstMeetBody": "Küsi enne omanikult ja anna koertele ruumi omas tempos tutvuda.",
+    "reviewsTitle": "Teiste käpaliste mõtted",
+    "reviewA11y": "{{name}}, hinne {{rating}} viiest",
+    "reviewsEmpty": "Ole esimene, kes parki hindab.",
+    "addReview": "Lisa oma kogemus",
+    "report": "Märkasid probleemi?"
+  },
+  "checkIn": {
+    "title": "Oletegi kohal!",
+    "who": "Kes täna mängima tuli?",
+    "duration": "Kui kauaks?",
+    "expiry_one": "Kohalolek aegub {{count}} minuti pärast. Saad selle igal ajal lõpetada.",
+    "expiry_other": "Kohalolek aegub {{count}} minuti pärast. Saad selle igal ajal lõpetada.",
+    "privacy": "Teised näevad sind vastavalt sinu privaatsusseadele.",
+    "submit": "Märgi kohalolek",
+    "noDogs": "Lisa enne oma koer.",
+    "addDog": "Lisa koer"
+  },
+  "plan": {
+    "title": "Teeme mänguplaani.",
+    "subtitle": "Anna sõpradele teada, millal tuled.",
+    "date": "Kuupäev",
+    "time": "Kellaaeg",
+    "duration": "Kestus",
+    "tooLate": "Tänaseks on hilja, vali teine päev.",
+    "chooseTime": "Vali kellaaeg",
+    "note": "Sõnum sõpradele",
+    "notePlaceholder": "Ootame rahulikke mängusõpru!",
+    "submit": "Planeeri külastus"
+  },
+  "visits": {
+    "title": "Meie jalajäljed",
+    "subtitle": "Iga käik on üks väike lugu.",
+    "planned": "Planeeritud",
+    "cancelPlan": "Tühista plaan",
+    "done": "Käidud",
+    "empty": "Külastusi veel pole. Märgi pargis kohalolek, siis jääb käik siia meelde.",
+    "addReview": "Lisa hinnang"
+  },
+  "review": {
+    "title": "Kuidas teil läks?",
+    "hint": "Sinu hinnang aitab teistel õige pargi valida.",
+    "ratingA11y": "Hinne {{rating}} viiest",
+    "star_one": "{{count}} tärn",
+    "star_other": "{{count}} tärni",
+    "experience": "Sinu kogemus",
+    "experiencePlaceholder": "Sõbralikud koerad ja mõnus jalutuskäik.",
+    "submit": "Salvesta hinnang",
+    "chooseRating": "Vali hinne 1–5"
+  },
+  "report": {
+    "title": "Hoiame pargid mõnusad.",
+    "examples": "Näiteks katkine värav, klaasikillud või mürgikahtlus. Ohu korral helista 112.",
+    "what": "Mis juhtus?",
+    "whatPlaceholder": "Kirjelda ohtu ja selle täpset asukohta",
+    "calmTitle": "Kirjelda olukorda rahulikult",
+    "calmBody": "Lisa kontrollitavad asjaolud. Vahetu ohu korral hoia ise ja oma koer ohutus kauguses.",
+    "submit": "Saada teavitus",
+    "thanksTitle": "Aitäh!",
+    "thanksBody": "Vaatame teate üle ja anname teistele pargikülastajatele teada, kui see on oluline."
+  },
+  "favorites": {
+    "title": "Meie lemmikpaigad",
+    "subtitle": "Paigad, kuhu ikka tagasi tulla.",
+    "empty": "Lemmikuid veel pole. Vajuta pargi lehel südamele.",
+    "explore": "Avasta veel parke"
+  },
+  "dogs": {
+    "sex": {
+      "male": "isane",
+      "female": "emane"
+    },
+    "list": {
+      "title": "Minu käpalised",
+      "subtitle": "Sinu parimad sõbrad, ühes kohas.",
+      "emptyTitle": "Tutvusta oma koera",
+      "emptyBody": "Iseloom ja mängueelistused aitavad leida sobivat seltskonda.",
+      "noDetails": "Lisa tõug ja muud andmed",
+      "openA11y": "{{name}}, ava profiil",
+      "add": "Lisa koer"
+    },
+    "profile": {
+      "notFound": "Koera ei leitud",
+      "photoA11y": "{{name}}, profiilipilt",
+      "born": "Sündinud {{date}}",
+      "temperament": "ISELOOM",
+      "photos": "Fotod",
+      "photosEmpty": "Lisa esimene foto",
+      "photosCount": "Meie väikesed seiklused · {{photos}}",
+      "health": "Tervis ja vaktsiinid",
+      "healthPrivate": "Privaatne · ainult sulle",
+      "nextDue": "Järgmine tähtaeg {{due}}",
+      "edit": "Muuda profiili"
+    },
+    "edit": {
+      "title": "Räägi oma sõbrast.",
+      "subtitle": "Need detailid aitavad leida mängukaaslasi.",
+      "name": "Koera nimi",
+      "breed": "Tõug",
+      "breedPlaceholder": "Näiteks cardigan corgi",
+      "sex": "Sugu",
+      "male": "Isane",
+      "female": "Emane",
+      "birthDate": "Sünnikuupäev",
+      "datePlaceholder": "AAAA-KK-PP",
+      "weight": "Kaal (kg)",
+      "weightPlaceholder": "12,5",
+      "temperament": "Iseloom ja eelistused",
+      "temperamentPlaceholder": "Alguses veidi arg, hiljem väga mänguline.",
+      "save": "Salvesta profiil",
+      "add": "Lisa koer",
+      "delete": "Kustuta koer",
+      "deleteTitle": "Kustutada koer {{name}}?",
+      "deleteBody": "Kustuvad ka koera fotod ja tervisekirjed ning koer eemaldatakse külastuste ajaloost."
+    }
+  },
+  "health": {
+    "title": "{{name}} tervis",
+    "titleFallback": "Tervis",
+    "subtitle": "Privaatne tervisepäevik.",
+    "introTitle": "Kõik oluline, ühes kohas",
+    "introBody": "Tervisekirjed on nähtavad ainult sulle.",
+    "vaccinations": "Vaktsineerimised",
+    "vetVisits": "Loomaarsti külastused",
+    "addVaccination": "Lisa vaktsineerimine",
+    "addVetVisit": "Lisa arstivisiit",
+    "emptyVaccinations": "Vaktsineerimisi pole veel lisatud.",
+    "emptyVetVisits": "Loomaarsti külastusi pole veel lisatud.",
+    "next": "järgmine {{due}}",
+    "rowHint": "Muuda kirjet. Pikk vajutus kustutab.",
+    "deleteTitle": "Kustutada „{{title}}“?",
+    "deleteBody": "Kirjet ei saa taastada.",
+    "edit": {
+      "subtitle": "{{name}} · privaatne",
+      "kind": "Liik",
+      "vaccination": "Vaktsineerimine",
+      "vetVisit": "Arstivisiit",
+      "vaccinationTitle": "Vaktsiini nimi",
+      "vaccinationPlaceholder": "Marutaud",
+      "vetVisitTitle": "Visiidi nimetus",
+      "vetVisitPlaceholder": "Üldkontroll",
+      "date": "Kuupäev",
+      "nextDue": "Järgmine tähtaeg",
+      "datePlaceholder": "AAAA-KK-PP",
+      "reminderHint_one": "Meeldetuletus ilmub avalehele {{count}} päev enne tähtaega.",
+      "reminderHint_other": "Meeldetuletus ilmub avalehele {{count}} päeva enne tähtaega.",
+      "clinic": "Kliinik",
+      "clinicPlaceholder": "Lisa kliiniku nimi",
+      "notes": "Märkmed",
+      "notesPlaceholder": "Kontrolli tulemused ja loomaarsti juhised",
+      "saveVetVisit": "Salvesta visiit",
+      "delete": "Kustuta kirje",
+      "notFound": "Tervisekirjet ei leitud"
+    }
+  },
+  "photos": {
+    "title": "{{name}} fotoalbum",
+    "titleFallback": "Fotoalbum",
+    "subtitle": "Väikesed hetked, mida alles hoida.",
+    "camera": "Pildista",
+    "library": "Vali galeriist",
+    "uploading": "Laen pilti üles…",
+    "full": "Koeral on juba {{max}} fotot. Lisamiseks kustuta mõni vanem.",
+    "empty": "Fotosid veel pole. Asukohaandmed eemaldatakse piltidelt enne salvestamist.",
+    "cameraDeniedTitle": "Kaamera kasutamine pole lubatud",
+    "cameraDeniedBody": "Luba seadetes kaamera kasutamine, et koerast pilti teha.",
+    "actionsTitle": "Foto {{date}}",
+    "setProfile": "Määra profiilipildiks",
+    "removeProfile": "Eemalda profiilipildist",
+    "deleteTitle": "Kustutada foto?",
+    "deleteBody": "Fotot ei saa taastada.",
+    "a11y": "Foto, lisatud {{date}}",
+    "a11yProfile": "Foto, lisatud {{date}}, profiilipilt",
+    "hint": "Ava valikud: profiilipilt või kustutamine",
+    "badge": "PROFIIL"
+  },
+  "profile": {
+    "greeting": "Tere, {{name}}.",
+    "greetingNoName": "Tere!",
+    "subtitle_zero": "Sinu väike maailm.",
+    "subtitle_one": "Sinu ja su käpalise väike maailm.",
+    "subtitle_other": "Sinu ja su käpaliste väike maailm.",
+    "stats": "{{dogs}} · {{visits}}",
+    "presence": "Kohalolek nähtav: {{who}}",
+    "presenceWho": {
+      "nobody": "mitte kellelegi",
+      "friends": "ainult sõpradele",
+      "everyone": "kõigile"
+    },
+    "myDogs": "Minu koerad",
+    "myVisits": "Minu külastused",
+    "myVisitsSub": "Plaanid ja mälestused",
+    "favorites": "Lemmikpargid",
+    "favoritesSub": "Alati hea tagasi tulla",
+    "settings": "Seaded",
+    "settingsSub": "Tee Käpp enda omaks"
+  },
+  "settings": {
+    "title": "Sinu Käpp.",
+    "subtitle": "Kõik oluline, sinu kontrolli all.",
+    "editProfile": "Muuda profiili",
+    "editProfileSub": "Nimi, piirkond ja tutvustus",
+    "language": "Keel",
+    "languageAuto": "automaatne",
+    "languageAutoCurrent": "automaatne · praegu {{language}}",
+    "languageNames": {
+      "et": "eesti",
+      "en": "English",
+      "ru": "русский"
+    },
+    "signOut": "Logi välja"
+  },
+  "profileEdit": {
+    "title": "Täpselt sinu moodi.",
+    "subtitle": "Muuda oma profiili.",
+    "name": "Nimi",
+    "area": "Piirkond",
+    "areaPlaceholder": "Näiteks Kadriorg",
+    "bio": "Tutvustus",
+    "bioPlaceholder": "Paar sõna sinust ja su koerast",
+    "presenceTitle": "Kes näeb, kui oled pargis?",
+    "presence": {
+      "nobody": "Mitte keegi",
+      "friends": "Sõbrad",
+      "everyone": "Kõik"
+    },
+    "save": "Salvesta muudatused"
+  },
+  "notifications": {
+    "title": "Mis uut?",
+    "subtitle": "Head uudised sinu väikesele kambale.",
+    "body": "Siia jõuavad sõprade plaanid, sõbrakutsed ja pargiteated."
+  }
+}

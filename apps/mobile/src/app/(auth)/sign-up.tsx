@@ -1,6 +1,7 @@
-import { signUpInputSchema } from '@kapp/shared';
+import { PASSWORD_MIN, signUpInputSchema } from '@kapp/shared';
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/button';
 import { FormError } from '@/components/form-error';
@@ -13,6 +14,7 @@ import { validateForm } from '@/lib/form';
 
 /** Figma 01 / Account / Sign Up. On success the root layout switches to the app automatically. */
 export default function SignUpScreen() {
+  const { t } = useTranslation();
   const [values, setValues] = useState({ name: '', email: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -33,11 +35,11 @@ export default function SignUpScreen() {
   }
 
   return (
-    <Screen underHeader title="Tere tulemast meie kampa." subtitle="Üks konto sulle ja sinu koertele.">
+    <Screen underHeader title={t('auth.signUp.title')} subtitle={t('auth.signUp.subtitle')}>
       <FormError message={formError} />
       <TextField
-        label="Sinu nimi"
-        placeholder="Ees- ja perekonnanimi"
+        label={t('auth.signUp.name')}
+        placeholder={t('auth.signUp.namePlaceholder')}
         value={values.name}
         onChangeText={set('name')}
         error={errors.name}
@@ -46,8 +48,8 @@ export default function SignUpScreen() {
         returnKeyType="next"
       />
       <TextField
-        label="E-post"
-        placeholder="nimi@näide.ee"
+        label={t('auth.email')}
+        placeholder={t('auth.signUp.emailPlaceholder')}
         value={values.email}
         onChangeText={set('email')}
         error={errors.email}
@@ -59,8 +61,8 @@ export default function SignUpScreen() {
         returnKeyType="next"
       />
       <TextField
-        label="Parool"
-        placeholder="Vähemalt 8 tähemärki"
+        label={t('auth.password')}
+        placeholder={t('auth.passwordHint', { min: PASSWORD_MIN })}
         value={values.password}
         onChangeText={set('password')}
         error={errors.password}
@@ -71,11 +73,11 @@ export default function SignUpScreen() {
         onSubmitEditing={submit}
       />
       <ThemedText type="caption" themeColor="muted">
-        Konto loomisel nõustud kasutustingimuste ja privaatsuspoliitikaga.
+        {t('auth.signUp.terms')}
       </ThemedText>
-      <Button label="Loo konto" loading={loading} onPress={submit} />
+      <Button label={t('auth.signUp.submit')} loading={loading} onPress={submit} />
       <SocialSignIn onError={setFormError} />
-      <Button label="Juba liige? Logi sisse" variant="tertiary" onPress={() => router.replace('/sign-in')} />
+      <Button label={t('auth.signUp.haveAccount')} variant="tertiary" onPress={() => router.replace('/sign-in')} />
     </Screen>
   );
 }

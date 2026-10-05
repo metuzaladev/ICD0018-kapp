@@ -54,10 +54,10 @@ apps/api/test
 Iga vastus, mis ei ole 2xx, on täpselt kujul:
 
 ```json
-{ "error": true, "message": "Inimloetav eestikeelne tekst" }
+{ "error": true, "message": "Inimloetav tekst kasutaja keeles" }
 ```
 
-`message` on alati kasutajale näitamiseks ohutu (UI on eestikeelne, seega ka tekst). Sisemised detailid (SQL, stack trace, failiteed) logitakse serverisse ega jõua kunagi kliendini.
+`message` on alati kasutajale näitamiseks ohutu ja päringu `Accept-Language` keeles (vaikimisi eesti, lisaks inglise ja vene; vt [11-tolked-ja-figma.md](11-tolked-ja-figma.md#api-veateated)). Tabelis on eestikeelsed tekstid. Sisemised detailid (SQL, stack trace, failiteed) logitakse serverisse (inglise keeles) ega jõua kunagi kliendini.
 
 | Olukord | Staatus | Näide |
 |---|---|---|
@@ -80,7 +80,7 @@ Iga vastus, mis ei ole 2xx, on täpselt kujul:
 
 Sama kehtib `/api/v1/auth/*` kohta: Better Authi vastused `{ code, message }` tõlgitakse failis `modules/auth/auth-errors.ts`.
 
-Kuidas lisada: viska teenuses või marsruudis `HttpError` alamklass (`throw new NotFoundError('Koera ei leitud')`). Ära kasuta `reply.code(...).send({...})` vigade jaoks.
+Kuidas lisada: lisa teate võti kolme faili `packages/shared/src/i18n/{et,en,ru}.ts` ja viska teenuses või marsruudis `HttpError` alamklass võtmega (`throw new NotFoundError('errors.dogNotFound')`, parameetritega `new ConflictError('errors.dogLimit', { max: 10 })`). Veakäsitleja tõlgib selle päringu keelde. Ära kasuta `reply.code(...).send({...})` vigade jaoks ega kirjuta teenusesse valmis teksti.
 
 ## 6.4 Valideerimine ja turvalisus
 

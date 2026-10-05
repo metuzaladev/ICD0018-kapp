@@ -35,7 +35,7 @@ export interface PhotoKeys {
   thumbnailKey: string;
 }
 
-export const STORAGE_UNAVAILABLE = 'Pildihoidla ei vasta, proovi hetke pärast uuesti';
+export const STORAGE_UNAVAILABLE = 'errors.storageUnavailable';
 
 /**
  * Runs a storage call with the service time budget. A failing storage (network, credentials,

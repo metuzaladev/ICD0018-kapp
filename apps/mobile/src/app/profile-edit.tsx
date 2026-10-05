@@ -1,6 +1,7 @@
 import { presenceSharingSchema, updateProfileInputSchema, type PresenceSharing, type Profile } from '@kapp/shared';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -13,14 +14,9 @@ import { useTheme } from '@/hooks/use-theme';
 import { apiGet, apiSend, errorMessage } from '@/lib/api';
 import { validateForm } from '@/lib/form';
 
-const PRESENCE_LABEL: Record<PresenceSharing, string> = {
-  nobody: 'Mitte keegi',
-  friends: 'Sõbrad',
-  everyone: 'Kõik',
-};
-
 /** Figma 07 / Profile / Edit — presented as a modal (iOS pattern for a focused edit task). */
 export default function ProfileEditScreen() {
+  const { t } = useTranslation();
   const c = useTheme();
   const [values, setValues] = useState({ name: '', area: '', bio: '', presenceSharing: 'friends' as PresenceSharing });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -55,13 +51,13 @@ export default function ProfileEditScreen() {
   }
 
   return (
-    <Screen underHeader>
+    <Screen underHeader title={t('profileEdit.title')} subtitle={t('profileEdit.subtitle')}>
       <FormError message={formError} />
-      <TextField label="Nimi" value={values.name} onChangeText={set('name')} error={errors.name} autoComplete="name" editable={!loading} />
-      <TextField label="Piirkond" placeholder="Näiteks Kadriorg" value={values.area} onChangeText={set('area')} error={errors.area} editable={!loading} />
+      <TextField label={t('profileEdit.name')} value={values.name} onChangeText={set('name')} error={errors.name} autoComplete="name" editable={!loading} />
+      <TextField label={t('profileEdit.area')} placeholder={t('profileEdit.areaPlaceholder')} value={values.area} onChangeText={set('area')} error={errors.area} editable={!loading} />
       <TextField
-        label="Tutvustus"
-        placeholder="Paar sõna sinust ja su koerast"
+        label={t('profileEdit.bio')}
+        placeholder={t('profileEdit.bioPlaceholder')}
         value={values.bio}
         onChangeText={set('bio')}
         error={errors.bio}
@@ -70,7 +66,7 @@ export default function ProfileEditScreen() {
         editable={!loading}
       />
 
-      <ThemedText type="label">Kes näeb, kui oled pargis?</ThemedText>
+      <ThemedText type="label">{t('profileEdit.presenceTitle')}</ThemedText>
       <View style={styles.chips} accessibilityRole="radiogroup">
         {presenceSharingSchema.options.map((option) => {
           const selected = values.presenceSharing === option;
@@ -82,14 +78,14 @@ export default function ProfileEditScreen() {
               onPress={() => setValues((v) => ({ ...v, presenceSharing: option }))}
               style={[styles.chip, { backgroundColor: selected ? c.brand : c.surface, borderColor: c.border }]}>
               <ThemedText type="caption" style={{ color: selected ? c.onBrand : c.text }}>
-                {PRESENCE_LABEL[option]}
+                {t(`profileEdit.presence.${option}`)}
               </ThemedText>
             </Pressable>
           );
         })}
       </View>
 
-      <Button label="Salvesta muudatused" loading={saving} disabled={loading} onPress={save} />
+      <Button label={t('profileEdit.save')} loading={saving} disabled={loading} onPress={save} />
     </Screen>
   );
 }

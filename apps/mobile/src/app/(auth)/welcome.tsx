@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -11,31 +12,32 @@ import { Radius, Spacing } from '@/constants/theme';
 
 /** Figma 01 / Welcome. */
 export default function WelcomeScreen() {
+  const { t } = useTranslation();
   return (
     <ThemedView style={styles.root}>
       <PawBackground />
       <SafeAreaView style={styles.safe}>
         <View style={styles.top}>
           <ThemedText type="label" themeColor="muted">
-            TALLINN · EESTI
+            {t('auth.welcome.region')}
           </ThemedText>
           <ThemedText type="display" accessibilityRole="header">
             käpp
           </ThemedText>
-          <ThemedText type="hero">Koerad ühendavad inimesi.</ThemedText>
+          <ThemedText type="hero">{t('auth.welcome.tagline')}</ThemedText>
         </View>
 
         <Image
           source={require('@/assets/images/welcome-dog.jpg')}
           style={styles.photo}
           contentFit="cover"
-          accessibilityLabel="Cardigan corgi murul"
+          accessibilityLabel={t('auth.welcome.photoLabel')}
         />
 
         <View style={styles.bottom}>
-          <ThemedText themeColor="muted">Leia oma koerale mängusõber ja endale uus lemmikpark.</ThemedText>
-          <Button label="Alustame" onPress={() => router.push('/sign-up')} />
-          <Button label="Mul on juba konto" variant="secondary" onPress={() => router.push('/sign-in')} />
+          <ThemedText themeColor="muted">{t('auth.welcome.intro')}</ThemedText>
+          <Button label={t('auth.welcome.start')} onPress={() => router.push('/sign-up')} />
+          <Button label={t('auth.welcome.haveAccount')} variant="secondary" onPress={() => router.push('/sign-in')} />
         </View>
       </SafeAreaView>
     </ThemedView>

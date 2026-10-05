@@ -59,7 +59,7 @@ describe('dogs', () => {
     await app();
     const bad = await ctx!.app.inject({ method: 'DELETE', url: '/api/v1/me/dogs/abc', headers: auth });
     expect(bad.statusCode).toBe(400);
-    ctx!.dogs.create.mockRejectedValue(new ConflictError('Kuni 10 koera kasutaja kohta'));
+    ctx!.dogs.create.mockRejectedValue(new ConflictError('errors.dogLimit', { max: 10 }));
     const full = await ctx!.app.inject({ method: 'POST', url: '/api/v1/me/dogs', headers: auth, payload: { name: 'X' } });
     expect(full.statusCode).toBe(409);
     expectApiError(full, 'Kuni 10 koera');
@@ -157,7 +157,7 @@ describe('reviews & reports', () => {
 
   it('403 is passed through when the user has not visited', async () => {
     await app();
-    ctx!.reviews.submit.mockRejectedValue(new ForbiddenError('Hinnata saab parki, mida oled külastanud'));
+    ctx!.reviews.submit.mockRejectedValue(new ForbiddenError('errors.reviewNeedsVisit'));
     const res = await ctx!.app.inject({ method: 'PUT', url: `/api/v1/parks/${PARK_ID}/reviews/mine`, headers: auth, payload: { rating: 5 } });
     expect(res.statusCode).toBe(403);
     expectApiError(res, 'külastanud');

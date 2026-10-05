@@ -1,8 +1,9 @@
 import { MAX_PHOTOS_PER_DOG, type DogPhoto } from '@kapp/shared';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Linking, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -26,6 +27,7 @@ const samePhoto = (a: string, b: string) => a.split('?')[0] === b.split('?')[0];
 
 /** Figma 04 / Dog / Photos: thumbnail grid, add from camera or library, long press for actions. */
 export default function DogPhotosScreen() {
+  const { t } = useTranslation();
   const c = useTheme();
   const { dogId } = useLocalSearchParams<{ dogId: string }>();
   const { width } = useWindowDimensions();
@@ -45,9 +47,9 @@ export default function DogPhotosScreen() {
       const permission = await ImagePicker.requestCameraPermissionsAsync();
       if (!permission.granted) {
         // iOS asks only once; after a "no" the setting can only be changed in Settings.
-        Alert.alert('Kaamera kasutamine pole lubatud', 'Luba Käpp-il kaamerat kasutada, et koerast pilti teha.', [
-          { text: 'Loobu', style: 'cancel' },
-          { text: 'Ava seaded', onPress: () => Linking.openSettings() },
+        Alert.alert(t('photos.cameraDeniedTitle'), t('photos.cameraDeniedBody'), [
+          { text: t('common.cancel'), style: 'cancel' },
+          { text: t('common.openSettings'), onPress: () => Linking.openSettings() },
         ]);
         return;
       }
@@ -61,49 +63,47 @@ export default function DogPhotosScreen() {
   }
 
   function confirmDelete(photo: DogPhoto) {
-    Alert.alert('Kustutada foto?', 'Fotot ei saa taastada.', [
-      { text: 'Loobu', style: 'cancel' },
-      { text: 'Kustuta', style: 'destructive', onPress: () => remove.mutate(photo.id, { onError: (e) => setError(errorMessage(e)) }) },
+    Alert.alert(t('photos.deleteTitle'), t('photos.deleteBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('common.delete'), style: 'destructive', onPress: () => remove.mutate(photo.id, { onError: (e) => setError(errorMessage(e)) }) },
     ]);
   }
 
   function openActions(photo: DogPhoto, isProfile: boolean) {
     setError(null);
-    Alert.alert(`Foto ${formatDate(localIsoDate(new Date(photo.createdAt)))}`, undefined, [
+    Alert.alert(t('photos.actionsTitle', { date: formatDate(localIsoDate(new Date(photo.createdAt))) }), undefined, [
       isProfile
-        ? { text: 'Eemalda profiilipildist', onPress: () => setProfile.mutate(null, { onError: (e) => setError(errorMessage(e)) }) }
-        : { text: 'Määra profiilipildiks', onPress: () => setProfile.mutate(photo.id, { onError: (e) => setError(errorMessage(e)) }) },
-      { text: 'Kustuta', style: 'destructive', onPress: () => confirmDelete(photo) },
-      { text: 'Loobu', style: 'cancel' },
+        ? { text: t('photos.removeProfile'), onPress: () => setProfile.mutate(null, { onError: (e) => setError(errorMessage(e)) }) }
+        : { text: t('photos.setProfile'), onPress: () => setProfile.mutate(photo.id, { onError: (e) => setError(errorMessage(e)) }) },
+      { text: t('common.delete'), style: 'destructive', onPress: () => confirmDelete(photo) },
+      { text: t('common.cancel'), style: 'cancel' },
     ]);
   }
 
   return (
     <>
-      <Stack.Screen options={{ title: dog ? `${dog.name} · fotod` : 'Fotod' }} />
-      <Screen underHeader>
+      {/* The dog's name is not declined, see docs/11 ("Freddy fotoalbum"). */}
+      <Screen underHeader title={dog ? t('photos.title', { name: dog.name }) : t('photos.titleFallback')} subtitle={t('photos.subtitle')}>
         <OfflineBanner />
         <FormError message={error} />
         {photos.error && !photos.data ? <FormError message={errorMessage(photos.error)} /> : null}
 
         <View style={styles.actions}>
           <View style={styles.action}>
-            <Button label="Pildista" variant="secondary" disabled={add.isPending || full} onPress={() => pick('camera')} />
+            <Button label={t('photos.camera')} variant="secondary" disabled={add.isPending || full} onPress={() => pick('camera')} />
           </View>
           <View style={styles.action}>
-            <Button label="Vali galeriist" variant="secondary" disabled={add.isPending || full} onPress={() => pick('library')} />
+            <Button label={t('photos.library')} variant="secondary" disabled={add.isPending || full} onPress={() => pick('library')} />
           </View>
         </View>
         {add.isPending ? (
           <ThemedText themeColor="muted" accessibilityLiveRegion="polite">
-            Laen pilti üles…
+            {t('photos.uploading')}
           </ThemedText>
         ) : null}
-        {full ? <ThemedText themeColor="muted">Koeral on juba {MAX_PHOTOS_PER_DOG} fotot. Lisamiseks kustuta mõni vanem.</ThemedText> : null}
-        {photos.isPending ? <ThemedText themeColor="muted">Laen…</ThemedText> : null}
-        {photos.data?.length === 0 ? (
-          <ThemedText themeColor="muted">Fotosid veel pole. Asukohaandmed eemaldatakse piltidelt enne salvestamist.</ThemedText>
-        ) : null}
+        {full ? <ThemedText themeColor="muted">{t('photos.full', { max: MAX_PHOTOS_PER_DOG })}</ThemedText> : null}
+        {photos.isPending ? <ThemedText themeColor="muted">{t('common.loading')}</ThemedText> : null}
+        {photos.data?.length === 0 ? <ThemedText themeColor="muted">{t('photos.empty')}</ThemedText> : null}
 
         <View style={styles.grid}>
           {photos.data?.map((photo) => {
@@ -112,8 +112,10 @@ export default function DogPhotosScreen() {
               <Pressable
                 key={photo.id}
                 accessibilityRole="button"
-                accessibilityLabel={`Foto, lisatud ${formatDate(localIsoDate(new Date(photo.createdAt)))}${isProfile ? ', profiilipilt' : ''}`}
-                accessibilityHint="Ava valikud: profiilipilt või kustutamine"
+                accessibilityLabel={t(isProfile ? 'photos.a11yProfile' : 'photos.a11y', {
+                  date: formatDate(localIsoDate(new Date(photo.createdAt))),
+                })}
+                accessibilityHint={t('photos.hint')}
                 onPress={() => openActions(photo, isProfile)}
                 onLongPress={() => openActions(photo, isProfile)}
                 style={({ pressed }) => ({ opacity: pressed ? 0.8 : 1 })}>
@@ -126,7 +128,7 @@ export default function DogPhotosScreen() {
                 {isProfile ? (
                   <View style={[styles.badge, { backgroundColor: c.brand }]}>
                     <ThemedText type="micro" style={{ color: c.onBrand }}>
-                      PROFIIL
+                      {t('photos.badge')}
                     </ThemedText>
                   </View>
                 ) : null}

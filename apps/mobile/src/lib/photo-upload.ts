@@ -1,6 +1,8 @@
 import { MAX_PHOTO_BYTES, type PhotoUpload } from '@kapp/shared';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 
+import i18n from '@/i18n';
+
 import { ApiRequestError } from './api';
 
 /**
@@ -31,7 +33,7 @@ export async function preparePhoto(source: { uri: string; width: number; height:
   const image = await context.renderAsync();
   const saved = await image.saveAsync({ format: SaveFormat.JPEG, compress: 0.85 });
   const blob = await (await fetch(saved.uri)).blob();
-  if (blob.size > MAX_PHOTO_BYTES) throw new ApiRequestError('Pilt on liiga suur (kuni 10 MB)', 400);
+  if (blob.size > MAX_PHOTO_BYTES) throw new ApiRequestError(i18n.t('errors.photoTooLarge', { max: MAX_PHOTO_BYTES / 1024 / 1024 }), 400);
   return { uri: saved.uri, blob };
 }
 
@@ -46,8 +48,8 @@ export async function uploadToStorage(upload: PhotoUpload, photo: PreparedPhoto)
       signal: AbortSignal.timeout(UPLOAD_TIMEOUT_MS),
     });
   } catch {
-    throw new ApiRequestError('Pildi üleslaadimine ebaõnnestus, kontrolli internetiühendust', 0);
+    throw new ApiRequestError(i18n.t('errors.uploadNetwork'), 0);
   }
   // Storage answers in XML, not in our { error, message } shape — map it to one safe text.
-  if (!res.ok) throw new ApiRequestError('Pildi üleslaadimine ebaõnnestus, proovi uuesti', res.status);
+  if (!res.ok) throw new ApiRequestError(i18n.t('errors.uploadFailed'), res.status);
 }

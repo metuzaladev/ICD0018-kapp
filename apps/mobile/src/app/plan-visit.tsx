@@ -1,6 +1,7 @@
 import { plannedVisitInputSchema } from '@kapp/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -12,7 +13,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { usePlanVisit } from '@/hooks/use-visits';
 import { errorMessage } from '@/lib/api';
-import { formatDay, formatDurationShort } from '@/lib/format';
+import { formatDay, formatDurationShort, formatHour } from '@/lib/format';
 import { validateForm } from '@/lib/form';
 
 const DAYS_SHOWN = 7;
@@ -27,6 +28,7 @@ function upcomingDays(now = new Date()) {
 
 /** Figma 03 / Visit / Plan — modal. Chips instead of a date picker: plans are "today 17:00", not exact. */
 export default function PlanVisitScreen() {
+  const { t } = useTranslation();
   const { parkId, parkName } = useLocalSearchParams<{ parkId: string; parkName?: string }>();
   const plan = usePlanVisit();
   const days = useMemo(() => upcomingDays(), []);
@@ -43,7 +45,7 @@ export default function PlanVisitScreen() {
   );
 
   async function submit() {
-    if (hour === null) return setError('Vali kellaaeg');
+    if (hour === null) return setError(t('plan.chooseTime'));
     const start = new Date(days[day]!);
     start.setHours(hour, 0, 0, 0);
     const end = new Date(start.getTime() + duration * 60_000);
@@ -53,7 +55,7 @@ export default function PlanVisitScreen() {
       endsAt: end.toISOString(),
       note,
     });
-    if (!data) return setError(Object.values(errors)[0] ?? 'Kontrolli valikuid');
+    if (!data) return setError(Object.values(errors)[0] ?? t('errors.checkChoices'));
     setError(null);
     try {
       await plan.mutateAsync(data);
@@ -64,10 +66,11 @@ export default function PlanVisitScreen() {
   }
 
   return (
-    <Screen underHeader title={parkName ?? 'Planeeri külastus'} subtitle="Anna sõpradele teada, millal tuled.">
+    <Screen underHeader title={t('plan.title')} subtitle={t('plan.subtitle')}>
       <FormError message={error} />
+      {parkName ? <ThemedText type="label">{parkName}</ThemedText> : null}
 
-      <ThemedText type="heading">Päev</ThemedText>
+      <ThemedText type="heading">{t('plan.date')}</ThemedText>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollRow}>
         {days.map((d, i) => (
           <View key={d.toISOString()} style={styles.dayChip}>
@@ -83,25 +86,25 @@ export default function PlanVisitScreen() {
         ))}
       </ScrollView>
 
-      <ThemedText type="heading">Kell</ThemedText>
+      <ThemedText type="heading">{t('plan.time')}</ThemedText>
       <View style={styles.wrap}>
-        {hours.length === 0 ? <ThemedText themeColor="muted">Tänaseks on hilja, vali teine päev.</ThemedText> : null}
+        {hours.length === 0 ? <ThemedText themeColor="muted">{t('plan.tooLate')}</ThemedText> : null}
         {hours.map((h) => (
           <View key={h} style={styles.hourChip}>
-            <Chip label={`${String(h).padStart(2, '0')}:00`} selected={hour === h} onPress={() => setHour(h)} />
+            <Chip label={formatHour(h)} selected={hour === h} onPress={() => setHour(h)} />
           </View>
         ))}
       </View>
 
-      <ThemedText type="heading">Kestus</ThemedText>
+      <ThemedText type="heading">{t('plan.duration')}</ThemedText>
       <View style={styles.row}>
         {DURATIONS.map((m) => (
           <Chip key={m} label={formatDurationShort(m)} selected={duration === m} onPress={() => setDuration(m)} />
         ))}
       </View>
 
-      <TextField label="Sõnum sõpradele (valikuline)" placeholder="Ootame rahulikke mängusõpru!" value={note} onChangeText={setNote} maxLength={200} />
-      <Button label="Planeeri külastus" loading={plan.isPending} onPress={submit} />
+      <TextField label={t('plan.note')} placeholder={t('plan.notePlaceholder')} value={note} onChangeText={setNote} maxLength={200} />
+      <Button label={t('plan.submit')} loading={plan.isPending} onPress={submit} />
     </Screen>
   );
 }

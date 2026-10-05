@@ -99,9 +99,9 @@ describe('POST /me/dogs/:dogId/photos/uploads', () => {
   it('404 / 409 / 503 from the service keep the error shape', async () => {
     await app();
     ctx!.photos.createUpload
-      .mockRejectedValueOnce(new NotFoundError('Koera ei leitud'))
-      .mockRejectedValueOnce(new ConflictError('Kuni 50 fotot koera kohta'))
-      .mockRejectedValueOnce(new ServiceUnavailableError('Pildihoidla ei vasta, proovi hetke pärast uuesti'))
+      .mockRejectedValueOnce(new NotFoundError('errors.dogNotFound'))
+      .mockRejectedValueOnce(new ConflictError('errors.photoLimit', { max: 50 }))
+      .mockRejectedValueOnce(new ServiceUnavailableError('errors.storageUnavailable'))
       .mockRejectedValueOnce(new TimeoutError('storage.presignPut', 8000));
     const payload = { contentType: 'image/png', byteSize: 10 };
     const results = [];
@@ -154,9 +154,9 @@ describe('POST /me/dogs/:dogId/photos', () => {
   it('400 (not an image / too large), 404 (foreign key), 503 (storage) pass through', async () => {
     await app();
     ctx!.photos.addPhoto
-      .mockRejectedValueOnce(new BadRequestError('Faili ei saanud pildina lugeda, proovi JPEG- või PNG-pildiga'))
-      .mockRejectedValueOnce(new NotFoundError('Üleslaaditud pilti ei leitud, proovi uuesti'))
-      .mockRejectedValueOnce(new ServiceUnavailableError('Pildihoidla ei vasta, proovi hetke pärast uuesti'));
+      .mockRejectedValueOnce(new BadRequestError('errors.notAnImage'))
+      .mockRejectedValueOnce(new NotFoundError('errors.uploadNotFound'))
+      .mockRejectedValueOnce(new ServiceUnavailableError('errors.storageUnavailable'));
     const statuses = [];
     for (let i = 0; i < 3; i++) {
       const res = await call('POST', url, { uploadKey: UPLOAD_KEY });
@@ -188,14 +188,14 @@ describe('GET /me/dogs/:dogId/photos and DELETE …/:photoId', () => {
 
   it('404 for a foreign dog, 503 on timeout', async () => {
     await app();
-    ctx!.photos.list.mockRejectedValueOnce(new NotFoundError('Koera ei leitud')).mockRejectedValueOnce(new TimeoutError('photos.list', 8000));
+    ctx!.photos.list.mockRejectedValueOnce(new NotFoundError('errors.dogNotFound')).mockRejectedValueOnce(new TimeoutError('photos.list', 8000));
     expect((await call('GET', `/me/dogs/${DOG_ID}/photos`)).statusCode).toBe(404);
     expect((await call('GET', `/me/dogs/${DOG_ID}/photos`)).statusCode).toBe(503);
   });
 
   it('DELETE → 204 with an empty body, 404 when the photo is not there', async () => {
     await app();
-    ctx!.photos.remove.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new NotFoundError('Fotot ei leitud'));
+    ctx!.photos.remove.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new NotFoundError('errors.photoNotFound'));
     const ok = await call('DELETE', `/me/dogs/${DOG_ID}/photos/${PHOTO_ID}`);
     expect(ok.statusCode).toBe(204);
     expect(ok.body).toBe('');
@@ -232,7 +232,7 @@ describe('PUT /me/dogs/:dogId/profile-photo', () => {
 
   it('404 for a photo of another dog', async () => {
     await app();
-    ctx!.photos.setProfilePhoto.mockRejectedValue(new NotFoundError('Fotot ei leitud'));
+    ctx!.photos.setProfilePhoto.mockRejectedValue(new NotFoundError('errors.photoNotFound'));
     const res = await call('PUT', url, { photoId: PHOTO_ID });
     expect(res.statusCode).toBe(404);
     expectApiError(res, 'Fotot ei leitud');
@@ -292,22 +292,22 @@ describe('health records', () => {
   it('PATCH passes the service 400 (nextDue vs stored date) and 404', async () => {
     await app();
     ctx!.health.update
-      .mockRejectedValueOnce(new BadRequestError('Väli "nextDue" järgmine tähtaeg peab olema pärast kuupäeva'))
-      .mockRejectedValueOnce(new NotFoundError('Tervisekirjet ei leitud'));
+      .mockRejectedValueOnce(new BadRequestError('errors.nextDueBeforeDate'))
+      .mockRejectedValueOnce(new NotFoundError('errors.healthRecordNotFound'));
     expect((await call('PATCH', one, { nextDue: '2026-01-01' })).statusCode).toBe(400);
     expect((await call('PATCH', one, { title: 'X' })).statusCode).toBe(404);
   });
 
   it('DELETE 204, then 404', async () => {
     await app();
-    ctx!.health.remove.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new NotFoundError('Tervisekirjet ei leitud'));
+    ctx!.health.remove.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new NotFoundError('errors.healthRecordNotFound'));
     expect((await call('DELETE', one)).statusCode).toBe(204);
     expect((await call('DELETE', one)).statusCode).toBe(404);
   });
 
   it("404 for someone else's dog and 503 on timeout", async () => {
     await app();
-    ctx!.health.list.mockRejectedValueOnce(new NotFoundError('Koera ei leitud')).mockRejectedValueOnce(new TimeoutError('health.list', 8000));
+    ctx!.health.list.mockRejectedValueOnce(new NotFoundError('errors.dogNotFound')).mockRejectedValueOnce(new TimeoutError('health.list', 8000));
     const foreign = await call('GET', list);
     expect(foreign.statusCode).toBe(404);
     expectApiError(foreign, 'Koera ei leitud');

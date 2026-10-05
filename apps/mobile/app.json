@@ -10,7 +10,10 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "ee.icd0018.kapp",
-      "usesAppleSignIn": true
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "CFBundleAllowMixedLocalizations": true
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -51,11 +54,33 @@
           "cameraPermission": "Käpp kasutab kaamerat, et saaksid oma koerast pilti teha. Pildi asukohaandmed eemaldatakse enne salvestamist.",
           "microphonePermission": false
         }
+      ],
+      [
+        "expo-localization",
+        {
+          "supportedLocales": {
+            "ios": [
+              "et",
+              "en",
+              "ru"
+            ],
+            "android": [
+              "et",
+              "en",
+              "ru"
+            ]
+          }
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "locales": {
+      "et": "./src/i18n/native/et.json",
+      "en": "./src/i18n/native/en.json",
+      "ru": "./src/i18n/native/ru.json"
     }
   }
 }

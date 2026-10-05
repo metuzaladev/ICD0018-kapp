@@ -58,7 +58,7 @@ describe('/api/v1/me/favorites', () => {
 
   it('404 when the park is not public', async () => {
     ctx = await buildTestApp({ resolveUserId: fakeAuth });
-    ctx.favorites.add.mockRejectedValue(new NotFoundError('Parki ei leitud'));
+    ctx.favorites.add.mockRejectedValue(new NotFoundError('errors.parkNotFound'));
     const res = await ctx.app.inject({ method: 'PUT', url, headers: auth });
     expect(res.statusCode).toBe(404);
     expectApiError(res, 'Parki ei leitud');

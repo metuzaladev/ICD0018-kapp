@@ -1,6 +1,7 @@
 import { CHECK_IN_DURATIONS, checkInInputSchema } from '@kapp/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -17,6 +18,7 @@ import { validateForm } from '@/lib/form';
 
 /** Figma 03 / Visit / Check In — modal: which dogs, how long. */
 export default function CheckInScreen() {
+  const { t } = useTranslation();
   const { parkId, parkName } = useLocalSearchParams<{ parkId: string; parkName?: string }>();
   const { data: dogs, isPending } = useMyDogs();
   const checkIn = useCheckIn();
@@ -30,7 +32,7 @@ export default function CheckInScreen() {
 
   async function submit() {
     const { data, errors } = validateForm(checkInInputSchema, { parkId, dogIds: selected, durationMinutes: duration });
-    if (!data) return setError(Object.values(errors)[0] ?? 'Kontrolli valikuid');
+    if (!data) return setError(Object.values(errors)[0] ?? t('errors.checkChoices'));
     setError(null);
     try {
       await checkIn.mutateAsync(data);
@@ -41,23 +43,20 @@ export default function CheckInScreen() {
   }
 
   return (
-    <Screen
-      underHeader
-      title={parkName ?? 'Märgi kohalolek'}
-      subtitle="Teised näevad sind vastavalt sinu privaatsusseadele. Kohalolek lõpeb ise.">
+    <Screen underHeader title={t('checkIn.title')} subtitle={parkName}>
       <FormError message={error} />
-      {isPending ? <ThemedText themeColor="muted">Laen…</ThemedText> : null}
+      {isPending ? <ThemedText themeColor="muted">{t('common.loading')}</ThemedText> : null}
 
       {dogs?.length === 0 ? (
         <>
-          <ThemedText themeColor="muted">Lisa enne oma koer.</ThemedText>
-          <Button label="Lisa koer" variant="secondary" onPress={() => router.push('/dogs/edit')} />
+          <ThemedText themeColor="muted">{t('checkIn.noDogs')}</ThemedText>
+          <Button label={t('checkIn.addDog')} variant="secondary" onPress={() => router.push('/dogs/edit')} />
         </>
       ) : null}
 
       {dogs && dogs.length > 0 ? (
         <>
-          <ThemedText type="heading">Kes tulevad?</ThemedText>
+          <ThemedText type="heading">{t('checkIn.who')}</ThemedText>
           <View style={styles.wrap}>
             {dogs.map((dog) => (
               <View key={dog.id} style={styles.half}>
@@ -66,14 +65,17 @@ export default function CheckInScreen() {
             ))}
           </View>
 
-          <ThemedText type="heading">Kui kauaks?</ThemedText>
+          <ThemedText type="heading">{t('checkIn.duration')}</ThemedText>
           <View style={styles.row}>
             {CHECK_IN_DURATIONS.map((m) => (
               <Chip key={m} label={formatDurationShort(m)} selected={duration === m} onPress={() => setDuration(m)} />
             ))}
           </View>
 
-          <Button label="Oleme siin" loading={checkIn.isPending} onPress={submit} />
+          <ThemedText type="caption" themeColor="muted">
+            {t('checkIn.expiry', { count: duration })} {t('checkIn.privacy')}
+          </ThemedText>
+          <Button label={t('checkIn.submit')} loading={checkIn.isPending} onPress={submit} />
         </>
       ) : null}
     </Screen>

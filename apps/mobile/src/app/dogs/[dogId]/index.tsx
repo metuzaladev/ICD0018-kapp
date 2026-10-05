@@ -1,6 +1,7 @@
 import type { Dog } from '@kapp/shared';
 import { Image } from 'expo-image';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -16,17 +17,11 @@ import { useMyDogs } from '@/hooks/use-dogs';
 import { useHealthRecords } from '@/hooks/use-health';
 import { photoSource, useDogPhotos } from '@/hooks/use-photos';
 import { errorMessage } from '@/lib/api';
-import { DOG_SEX_LABEL, dueLabel, formatDate } from '@/lib/format';
+import { ageLabel, dogSexLabel, dueLabel, formatDate, formatKg, isOverdue, photosLabel } from '@/lib/format';
 
-/** "4 a", "7 kuud" — age from the birth date, for the profile facts. */
-function ageLabel(birthDate: string, now = new Date()): string {
-  const [y, m] = birthDate.split('-').map(Number);
-  const months = (now.getFullYear() - y!) * 12 + (now.getMonth() + 1 - m!);
-  return months >= 12 ? `${Math.floor(months / 12)} a` : `${Math.max(months, 0)} kuud`;
-}
-
-/** Figma 04 / Dog / Profile: picture, facts, links to photos and health, "Muuda". */
+/** Figma 04 / Dog / Profile: picture, "Cardigan corgi · isane · 5 kuud", links to photos and health, "Muuda profiili". */
 export default function DogProfileScreen() {
+  const { t } = useTranslation();
   const { dogId } = useLocalSearchParams<{ dogId: string }>();
   const { data: dogs, error, isPending } = useMyDogs();
   const dog = dogs?.find((d) => d.id === dogId);
@@ -37,8 +32,8 @@ export default function DogProfileScreen() {
       <Screen underHeader>
         <OfflineBanner />
         {error && !dogs ? <FormError message={errorMessage(error)} /> : null}
-        {isPending ? <ThemedText themeColor="muted">Laen…</ThemedText> : null}
-        {dogs && !dog ? <FormError message="Koera ei leitud" /> : null}
+        {isPending ? <ThemedText themeColor="muted">{t('common.loading')}</ThemedText> : null}
+        {dogs && !dog ? <FormError message={t('dogs.profile.notFound')} /> : null}
         {dog ? <DogProfile dog={dog} /> : null}
       </Screen>
     </>
@@ -46,13 +41,14 @@ export default function DogProfileScreen() {
 }
 
 function DogProfile({ dog }: { dog: Dog }) {
+  const { t } = useTranslation();
   const photos = useDogPhotos(dog.id);
   const health = useHealthRecords(dog.id);
   const facts = [
     dog.breed,
-    dog.sex ? DOG_SEX_LABEL[dog.sex] : null,
+    dog.sex ? dogSexLabel(dog.sex) : null,
     dog.birthDate ? ageLabel(dog.birthDate) : null,
-    dog.weightKg ? `${dog.weightKg.toLocaleString('et-EE')} kg` : null,
+    dog.weightKg ? formatKg(dog.weightKg) : null,
   ].filter(Boolean);
   // The soonest upcoming (or overdue) due date, as a hint on the health row.
   const nextDue = health.data
@@ -70,7 +66,7 @@ function DogProfile({ dog }: { dog: Dog }) {
           style={styles.hero}
           contentFit="cover"
           transition={200}
-          accessibilityLabel={`${dog.name} profiilipilt`}
+          accessibilityLabel={t('dogs.profile.photoA11y', { name: dog.name })}
         />
       ) : (
         <View style={styles.center}>
@@ -84,30 +80,40 @@ function DogProfile({ dog }: { dog: Dog }) {
       {facts.length > 0 ? <ThemedText themeColor="muted">{facts.join(' · ')}</ThemedText> : null}
       {dog.birthDate ? (
         <ThemedText type="caption" themeColor="muted">
-          Sündinud {formatDate(dog.birthDate)}
+          {t('dogs.profile.born', { date: formatDate(dog.birthDate) })}
         </ThemedText>
       ) : null}
       {dog.temperament ? (
         <ThemedView type="soft" style={styles.card}>
           <ThemedText type="caption" themeColor="muted">
-            ISELOOM
+            {t('dogs.profile.temperament')}
           </ThemedText>
           <ThemedText>{dog.temperament}</ThemedText>
         </ThemedView>
       ) : null}
 
       <ListRow
-        title="Fotod"
-        subtitle={photoCount === undefined ? null : photoCount === 0 ? 'Lisa esimene foto' : `${photoCount} fotot`}
+        title={t('dogs.profile.photos')}
+        subtitle={
+          photoCount === undefined
+            ? null
+            : photoCount === 0
+              ? t('dogs.profile.photosEmpty')
+              : t('dogs.profile.photosCount', { photos: photosLabel(photoCount) })
+        }
         onPress={() => router.push({ pathname: '/dogs/[dogId]/photos', params: { dogId: dog.id } })}
       />
       <ListRow
-        title="Tervis ja vaktsiinid"
-        subtitle={nextDue ? `Järgmine tähtaeg ${dueLabel(nextDue)}` : 'Ainult sinule nähtav'}
-        alert={nextDue ? dueLabel(nextDue).endsWith('hilinenud') : false}
+        title={t('dogs.profile.health')}
+        subtitle={nextDue ? t('dogs.profile.nextDue', { due: dueLabel(nextDue) }) : t('dogs.profile.healthPrivate')}
+        alert={nextDue ? isOverdue(nextDue) : false}
         onPress={() => router.push({ pathname: '/dogs/[dogId]/health', params: { dogId: dog.id } })}
       />
-      <Button label="Muuda" variant="secondary" onPress={() => router.push({ pathname: '/dogs/edit', params: { dogId: dog.id } })} />
+      <Button
+        label={t('dogs.profile.edit')}
+        variant="secondary"
+        onPress={() => router.push({ pathname: '/dogs/edit', params: { dogId: dog.id } })}
+      />
     </>
   );
 }

@@ -17,8 +17,14 @@
     "db:down": "docker compose down",
     "db:migrate": "npm run db:migrate -w @kapp/api",
     "db:seed": "npm run db:seed -w @kapp/api",
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present && tsc --noEmit -p scripts",
     "test": "npm run test --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present"
+    "lint": "npm run lint --workspaces --if-present",
+    "i18n:check": "tsx scripts/i18n-check.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3"
   }
 }

@@ -43,20 +43,20 @@ export function createDogsService({
       // Not race-proof (two parallel requests could both pass), but the limit protects against
       // abuse, not against a user who adds their 11th dog in the same millisecond.
       const existing = await withTimeout(repository.countByOwner(ownerId), timeoutMs, 'dogs.count');
-      if (existing >= MAX_DOGS_PER_USER) throw new ConflictError(`Kuni ${MAX_DOGS_PER_USER} koera kasutaja kohta`);
+      if (existing >= MAX_DOGS_PER_USER) throw new ConflictError('errors.dogLimit', { max: MAX_DOGS_PER_USER });
       return toDog(await withTimeout(repository.create(ownerId, input), timeoutMs, 'dogs.create'));
     },
 
     async update(ownerId, dogId, patch) {
       const dog = await withTimeout(repository.update(ownerId, dogId, patch), timeoutMs, 'dogs.update');
       // Same 404 for "missing" and "someone else's" — never confirm that another user's dog id exists.
-      if (!dog) throw new NotFoundError('Koera ei leitud');
+      if (!dog) throw new NotFoundError('errors.dogNotFound');
       return toDog(dog);
     },
 
     async remove(ownerId, dogId) {
       const removed = await withTimeout(repository.remove(ownerId, dogId), timeoutMs, 'dogs.remove');
-      if (!removed) throw new NotFoundError('Koera ei leitud');
+      if (!removed) throw new NotFoundError('errors.dogNotFound');
       // Photo rows went with the dog (on delete cascade); now the objects. The database is the
       // source of truth, so a storage hiccup must not resurrect the dog — leftovers are private
       // and unreachable, and a later prefix delete would still find them.

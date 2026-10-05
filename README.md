@@ -21,6 +21,7 @@ TalTechi kursuse **ICD0018 Hübriidmobiilirakendused** projekt · autor Kristofe
 | [08 Pargid ja kaart](docs/08-pargid-ja-kaart.md) | Kaart, filtrid, lemmikud, asukoht, development build |
 | [09 Kohalolek ja külastused](docs/09-kulastused.md) | Check-in, privaatsusreeglid, ajalugu, plaanid, hinnangud, teated |
 | [10 Koerad ja tervis](docs/10-koerad-ja-tervis.md) | Fotod (privaatne hoidla, EXIF/GPS eemaldamine), profiilipilt, tervisekirjed, meeldetuletused |
+| [11 Tõlked ja Figma tekstid](docs/11-tolked-ja-figma.md) | Eesti, inglise ja vene keel, keelevalik, API veateadete tõlkimine, CI kontrollid, erinevused Figmast |
 
 ## Käivitamine
 
@@ -48,7 +49,10 @@ npm run typecheck                          # kõik paketid
 npm test                                   # API unit- ja HTTP-testid (ilma andmebaasita)
 npm run test:integration -w @kapp/api      # PostGIS-i päringud ja MinIO (vajab db:up)
 npm run lint -w mobile
+npm run i18n:check                         # tõlgete võtmed/parameetrid/mitmused, kõvakodeeritud UI-tekst
 ```
+
+Äpp on eesti, inglise ja vene keeles (seadme keel või Seaded → Keel); eestikeelsed tekstid tulevad Figmast. Uus tekst lisatakse kõigisse kolme faili `apps/mobile/src/i18n/locales/` — vt [docs/11](docs/11-tolked-ja-figma.md).
 
 ## Struktuur
 

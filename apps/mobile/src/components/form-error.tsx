@@ -4,7 +4,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
 
-/** Form-level error (e.g. "Vale e-post või parool"). Announced to VoiceOver when it appears. */
+/** Form-level error (e.g. a wrong password). Announced to VoiceOver when it appears. */
 export function FormError({ message }: { message: string | null }) {
   if (!message) return null;
   return (

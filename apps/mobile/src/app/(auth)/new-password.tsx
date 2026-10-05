@@ -1,6 +1,7 @@
-import { resetPasswordInputSchema } from '@kapp/shared';
+import { PASSWORD_MIN, resetPasswordInputSchema } from '@kapp/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/button';
 import { FormError } from '@/components/form-error';
@@ -11,11 +12,12 @@ import { validateForm } from '@/lib/form';
 
 /** Opened from the reset email (deep link with ?token=…). Not in Figma yet — follows Reset Password. */
 export default function NewPasswordScreen() {
+  const { t } = useTranslation();
   const { token, error: linkError } = useLocalSearchParams<{ token?: string; error?: string }>();
   const [newPassword, setNewPassword] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(
-    !token || linkError ? 'Link on aegunud või vigane, küsi uus' : null,
+    !token || linkError ? t('auth.newPassword.linkInvalid') : null,
   );
   const [loading, setLoading] = useState(false);
 
@@ -33,11 +35,11 @@ export default function NewPasswordScreen() {
   }
 
   return (
-    <Screen underHeader title="Uus parool" subtitle="Vali parool, mida sa mujal ei kasuta.">
+    <Screen underHeader title={t('auth.newPassword.title')} subtitle={t('auth.newPassword.subtitle')}>
       <FormError message={formError} />
       <TextField
-        label="Uus parool"
-        placeholder="Vähemalt 8 tähemärki"
+        label={t('auth.newPassword.label')}
+        placeholder={t('auth.passwordHint', { min: PASSWORD_MIN })}
         value={newPassword}
         onChangeText={setNewPassword}
         error={errors.newPassword}
@@ -47,8 +49,8 @@ export default function NewPasswordScreen() {
         returnKeyType="go"
         onSubmitEditing={submit}
       />
-      <Button label="Salvesta parool" loading={loading} disabled={!token} onPress={submit} />
-      {!token ? <Button label="Küsi uus link" variant="tertiary" onPress={() => router.replace('/reset-password')} /> : null}
+      <Button label={t('auth.newPassword.submit')} loading={loading} disabled={!token} onPress={submit} />
+      {!token ? <Button label={t('auth.newPassword.requestNew')} variant="tertiary" onPress={() => router.replace('/reset-password')} /> : null}
     </Screen>
   );
 }

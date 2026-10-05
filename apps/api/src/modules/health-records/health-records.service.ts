@@ -24,9 +24,9 @@ export interface HealthRecordsService {
   reminders(ownerId: string): Promise<HealthReminder[]>;
 }
 
-const RECORD_NOT_FOUND = 'Tervisekirjet ei leitud';
+const RECORD_NOT_FOUND = 'errors.healthRecordNotFound';
 /** Same wording as the shared schema's refine, so device and server show the same text. */
-const NEXT_DUE_BEFORE_DATE = 'Väli "nextDue" järgmine tähtaeg peab olema pärast kuupäeva';
+const NEXT_DUE_BEFORE_DATE = 'errors.nextDueBeforeDate';
 
 export function createHealthRecordsService({
   records,
@@ -41,7 +41,7 @@ export function createHealthRecordsService({
 
   async function requireOwnedDog(ownerId: string, dogId: string) {
     // Same 404 for a missing dog and someone else's dog (no id enumeration).
-    if ((await t(dogs.ownedIds(ownerId, [dogId]), 'dogs.ownedIds')).length === 0) throw new NotFoundError('Koera ei leitud');
+    if ((await t(dogs.ownedIds(ownerId, [dogId]), 'dogs.ownedIds')).length === 0) throw new NotFoundError('errors.dogNotFound');
   }
 
   return {

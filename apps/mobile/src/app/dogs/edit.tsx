@@ -1,6 +1,7 @@
 import { dogInputSchema, updateDogInputSchema, type Dog, type DogSex } from '@kapp/shared';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -46,20 +47,21 @@ function initialValues(dog: Dog | undefined): FormValues {
  * (no state copying in an effect).
  */
 export default function DogEditScreen() {
+  const { t } = useTranslation();
   const { dogId } = useLocalSearchParams<{ dogId?: string }>();
   const { data: dogs, isPending } = useMyDogs();
   const existing = dogs?.find((d) => d.id === dogId);
 
   return (
     <>
-      <Stack.Screen options={{ title: dogId ? 'Muuda koera' : 'Lisa koer' }} />
+      <Stack.Screen options={{ title: dogId ? t('nav.dogEdit') : t('nav.dogAdd') }} />
       {dogId && isPending ? (
         <Screen underHeader>
-          <ThemedText themeColor="muted">Laen…</ThemedText>
+          <ThemedText themeColor="muted">{t('common.loading')}</ThemedText>
         </Screen>
       ) : dogId && !existing ? (
         <Screen underHeader>
-          <FormError message="Koera ei leitud" />
+          <FormError message={t('dogs.profile.notFound')} />
         </Screen>
       ) : (
         <DogForm dogId={dogId} existing={existing} />
@@ -69,6 +71,7 @@ export default function DogEditScreen() {
 }
 
 function DogForm({ dogId, existing }: { dogId?: string; existing?: Dog }) {
+  const { t } = useTranslation();
   const save = useSaveDog(dogId);
   const remove = useDeleteDog(dogId ?? '');
   const [values, setValues] = useState<FormValues>(() => initialValues(existing));
@@ -92,10 +95,10 @@ function DogForm({ dogId, existing }: { dogId?: string; existing?: Dog }) {
 
   function confirmDelete() {
     // Destructive and irreversible: confirm with the system alert (HIG), destructive style.
-    Alert.alert(`Kustutada ${existing?.name ?? 'koer'}?`, 'Kustuvad ka koera fotod ja tervisekirjed ning koer eemaldatakse külastuste ajaloost.', [
-      { text: 'Loobu', style: 'cancel' },
+    Alert.alert(t('dogs.edit.deleteTitle', { name: existing?.name ?? '' }), t('dogs.edit.deleteBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Kustuta',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: () =>
           // Back to the list: the profile underneath belongs to the dog that no longer exists.
@@ -105,35 +108,35 @@ function DogForm({ dogId, existing }: { dogId?: string; existing?: Dog }) {
   }
 
   return (
-    <Screen underHeader>
+    <Screen underHeader title={t('dogs.edit.title')} subtitle={t('dogs.edit.subtitle')}>
       <FormError message={formError} />
-      <TextField label="Koera nimi" value={values.name} onChangeText={set('name')} error={errors.name} autoCapitalize="words" />
-      <TextField label="Tõug" placeholder="Näiteks cardigan corgi" value={values.breed} onChangeText={set('breed')} error={errors.breed} />
-      <ThemedText type="label">Sugu</ThemedText>
+      <TextField label={t('dogs.edit.name')} value={values.name} onChangeText={set('name')} error={errors.name} autoCapitalize="words" />
+      <TextField label={t('dogs.edit.breed')} placeholder={t('dogs.edit.breedPlaceholder')} value={values.breed} onChangeText={set('breed')} error={errors.breed} />
+      <ThemedText type="label">{t('dogs.edit.sex')}</ThemedText>
       <View style={styles.chips}>
-        <Chip label="Isane" selected={values.sex === 'male'} onPress={() => setValues((v) => ({ ...v, sex: v.sex === 'male' ? null : 'male' }))} />
-        <Chip label="Emane" selected={values.sex === 'female'} onPress={() => setValues((v) => ({ ...v, sex: v.sex === 'female' ? null : 'female' }))} />
+        <Chip label={t('dogs.edit.male')} selected={values.sex === 'male'} onPress={() => setValues((v) => ({ ...v, sex: v.sex === 'male' ? null : 'male' }))} />
+        <Chip label={t('dogs.edit.female')} selected={values.sex === 'female'} onPress={() => setValues((v) => ({ ...v, sex: v.sex === 'female' ? null : 'female' }))} />
       </View>
       <TextField
-        label="Sünnikuupäev"
-        placeholder="AAAA-KK-PP"
+        label={t('dogs.edit.birthDate')}
+        placeholder={t('dogs.edit.datePlaceholder')}
         value={values.birthDate}
         onChangeText={set('birthDate')}
         error={errors.birthDate}
         keyboardType="numbers-and-punctuation"
       />
-      <TextField label="Kaal (kg)" placeholder="12,5" value={values.weightKg} onChangeText={set('weightKg')} error={errors.weightKg} keyboardType="decimal-pad" />
+      <TextField label={t('dogs.edit.weight')} placeholder={t('dogs.edit.weightPlaceholder')} value={values.weightKg} onChangeText={set('weightKg')} error={errors.weightKg} keyboardType="decimal-pad" />
       <TextField
-        label="Iseloom ja eelistused"
-        placeholder="Näiteks alguses veidi arg, hiljem väga mänguline"
+        label={t('dogs.edit.temperament')}
+        placeholder={t('dogs.edit.temperamentPlaceholder')}
         value={values.temperament}
         onChangeText={set('temperament')}
         error={errors.temperament}
         multiline
         maxLength={500}
       />
-      <Button label={dogId ? 'Salvesta' : 'Lisa koer'} loading={save.isPending} onPress={submit} />
-      {dogId ? <Button label="Kustuta koer" variant="tertiary" loading={remove.isPending} onPress={confirmDelete} /> : null}
+      <Button label={dogId ? t('dogs.edit.save') : t('dogs.edit.add')} loading={save.isPending} onPress={submit} />
+      {dogId ? <Button label={t('dogs.edit.delete')} variant="tertiary" loading={remove.isPending} onPress={confirmDelete} /> : null}
     </Screen>
   );
 }

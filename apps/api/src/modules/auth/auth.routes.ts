@@ -1,5 +1,6 @@
 import type { FastifyPluginAsync } from 'fastify';
 
+import { requestLanguage } from '../../http/language';
 import { translateAuthError } from './auth-errors';
 
 export interface AuthRoutesOptions {
@@ -55,7 +56,7 @@ export const authRoutes: FastifyPluginAsync<AuthRoutesOptions> = async (app, { h
           // non-JSON error page — translated by status below
         }
         reply.header('content-type', 'application/json; charset=utf-8');
-        return reply.send(translateAuthError(response.status, parsed));
+        return reply.send(translateAuthError(response.status, parsed, requestLanguage(request)));
       }
       return reply.send(text || null);
     },

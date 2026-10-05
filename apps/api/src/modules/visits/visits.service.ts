@@ -43,7 +43,7 @@ export function createVisitsService({
   const t = <T>(p: Promise<T>, label: string) => withTimeout(p, timeoutMs, label);
 
   async function requirePublicPark(parkId: string) {
-    if (!isPublic(await t(parks.findById(parkId), 'parks.findById'))) throw new NotFoundError('Parki ei leitud');
+    if (!isPublic(await t(parks.findById(parkId), 'parks.findById'))) throw new NotFoundError('errors.parkNotFound');
   }
 
   return {
@@ -51,13 +51,13 @@ export function createVisitsService({
       await requirePublicPark(input.parkId);
       // Only the user's own dogs; same 404 for missing and foreign ids (no enumeration).
       const owned = await t(dogs.ownedIds(userId, input.dogIds), 'dogs.ownedIds');
-      if (owned.length !== input.dogIds.length) throw new NotFoundError('Koera ei leitud');
+      if (owned.length !== input.dogIds.length) throw new NotFoundError('errors.dogNotFound');
       try {
         return await t(visits.createCheckIn({ userId, ...input }), 'visits.createCheckIn');
       } catch (error) {
         // Two check-ins at the same moment: the unique index lets exactly one through.
         if (isUniqueViolation(error, 'check_ins_one_open_per_user_uq')) {
-          throw new ConflictError('Kohalolek on juba märgitud, värskenda vaadet');
+          throw new ConflictError('errors.checkInExists');
         }
         throw error;
       }
@@ -68,7 +68,7 @@ export function createVisitsService({
     async endCheckIn(userId, checkInId) {
       const result = await t(visits.endCheckIn(userId, checkInId), 'visits.endCheckIn');
       // Ending an already finished visit is fine (idempotent); someone else's is "not found".
-      if (result === 'not-found') throw new NotFoundError('Külastust ei leitud');
+      if (result === 'not-found') throw new NotFoundError('errors.visitNotFound');
     },
 
     async listVisitors(parkId, viewerId) {
@@ -86,7 +86,7 @@ export function createVisitsService({
     listPlans: (userId) => t(visits.listUpcomingPlans(userId), 'visits.listPlans'),
 
     async cancelPlan(userId, planId) {
-      if (!(await t(visits.deletePlan(userId, planId), 'visits.deletePlan'))) throw new NotFoundError('Plaani ei leitud');
+      if (!(await t(visits.deletePlan(userId, planId), 'visits.deletePlan'))) throw new NotFoundError('errors.planNotFound');
     },
   };
 }

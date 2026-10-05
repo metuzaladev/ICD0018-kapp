@@ -22,7 +22,7 @@ export function createReportsService({
   return {
     async reportPark(userId, parkId, { description }) {
       if (!isPublic(await withTimeout(parks.findById(parkId), timeoutMs, 'parks.findById'))) {
-        throw new NotFoundError('Parki ei leitud');
+        throw new NotFoundError('errors.parkNotFound');
       }
       return withTimeout(reports.create({ userId, parkId, description }), timeoutMs, 'reports.create');
     },

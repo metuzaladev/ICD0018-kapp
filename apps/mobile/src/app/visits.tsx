@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -15,6 +16,7 @@ import { formatDay, formatDuration, formatTime } from '@/lib/format';
 
 /** Figma 03 / Visits / History, plus the user's upcoming plans. */
 export default function VisitsScreen() {
+  const { t } = useTranslation();
   const c = useTheme();
   const history = useVisitHistory();
   const plans = usePlannedVisits();
@@ -22,14 +24,14 @@ export default function VisitsScreen() {
   const card = [styles.card, { backgroundColor: c.surface, borderColor: c.border }];
 
   return (
-    <Screen underHeader title="Minu külastused" subtitle="Iga käik on üks väike seiklus.">
+    <Screen underHeader title={t('visits.title')} subtitle={t('visits.subtitle')}>
       <OfflineBanner />
       {history.error && !history.data ? <FormError message={errorMessage(history.error)} /> : null}
       {cancel.error ? <FormError message={errorMessage(cancel.error)} /> : null}
 
       {plans.data && plans.data.length > 0 ? (
         <>
-          <ThemedText type="heading">Plaanis</ThemedText>
+          <ThemedText type="heading">{t('visits.planned')}</ThemedText>
           {plans.data.map((p) => (
             <ThemedView key={p.id} style={card}>
               <ThemedText type="label">{p.park.name}</ThemedText>
@@ -37,16 +39,14 @@ export default function VisitsScreen() {
                 {formatDay(p.startsAt)} · {formatTime(p.startsAt)}–{formatTime(p.endsAt)}
               </ThemedText>
               {p.note ? <ThemedText type="caption">{p.note}</ThemedText> : null}
-              <Button label="Tühista plaan" variant="tertiary" disabled={cancel.isPending} onPress={() => cancel.mutate(p.id)} />
+              <Button label={t('visits.cancelPlan')} variant="tertiary" disabled={cancel.isPending} onPress={() => cancel.mutate(p.id)} />
             </ThemedView>
           ))}
         </>
       ) : null}
 
-      <ThemedText type="heading">Varasemad</ThemedText>
-      {history.data?.length === 0 ? (
-        <ThemedText themeColor="muted">Külastusi veel pole. Pargis märgi kohalolek, siis jääb käik siia meelde.</ThemedText>
-      ) : null}
+      <ThemedText type="heading">{t('visits.done')}</ThemedText>
+      {history.data?.length === 0 ? <ThemedText themeColor="muted">{t('visits.empty')}</ThemedText> : null}
       {history.data?.map((v) => (
         <ThemedView key={v.id} style={card}>
           <View style={styles.headerRow}>
@@ -62,7 +62,7 @@ export default function VisitsScreen() {
           </ThemedText>
           {!v.hasReview ? (
             <Button
-              label="Lisa hinnang"
+              label={t('visits.addReview')}
               variant="tertiary"
               onPress={() => router.push({ pathname: '/review', params: { parkId: v.park.id, parkName: v.park.name } })}
             />

@@ -1,6 +1,6 @@
 import type { ParkDetail } from '@kapp/shared';
 import { Image } from 'expo-image';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -11,8 +11,10 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
 import { useParkDetail, useToggleFavorite } from '@/hooks/use-parks';
+import { useActiveCheckIn, useEndCheckIn, useParkReviews, useParkVisitors } from '@/hooks/use-visits';
 import { useTheme } from '@/hooks/use-theme';
 import { errorMessage } from '@/lib/api';
+import { dogsLabel, formatTime, reviewsLabel } from '@/lib/format';
 
 const FEATURE_LABELS: [keyof Pick<ParkDetail, 'fenced' | 'smallDogArea' | 'water' | 'lighting'>, string][] = [
   ['fenced', 'Aiaga piiratud'],
@@ -37,6 +39,12 @@ export default function ParkDetailScreen() {
   const { parkId } = useLocalSearchParams<{ parkId: string }>();
   const { data: park, error, isPending } = useParkDetail(parkId);
   const favorite = useToggleFavorite(parkId);
+  const active = useActiveCheckIn();
+  const endVisit = useEndCheckIn();
+  const visitors = useParkVisitors(parkId);
+  const reviews = useParkReviews(parkId);
+  const hereNow = active.data?.park.id === parkId ? active.data : null;
+  const parkParams = { parkId, parkName: park?.name ?? '' };
 
   const heart = park?.isFavorite ? '♥' : '♡';
 
@@ -83,13 +91,25 @@ export default function ParkDetailScreen() {
               {park.address ? <ThemedText themeColor="muted">{park.address}</ThemedText> : null}
             </View>
 
+            {hereNow ? (
+              <ThemedView type="tint" style={styles.summary}>
+                <ThemedText type="heading">Oled pargis kuni {formatTime(hereNow.expiresAt)}</ThemedText>
+                <ThemedText type="caption">{hereNow.dogs.map((d) => d.name).join(', ')}</ThemedText>
+                <Button
+                  label="Lõpeta külastus"
+                  variant="secondary"
+                  loading={endVisit.isPending}
+                  onPress={() => endVisit.mutate(hereNow.id)}
+                />
+              </ThemedView>
+            ) : null}
+            {endVisit.error ? <FormError message={errorMessage(endVisit.error)} /> : null}
+
             <ThemedView type="soft" style={styles.summary}>
-              <ThemedText type="heading">
-                {park.activeDogs ?? 0} {park.activeDogs === 1 ? 'koer' : 'koera'} praegu pargis
-              </ThemedText>
+              <ThemedText type="heading">{dogsLabel(park.activeDogs ?? 0)} praegu pargis</ThemedText>
               <ThemedText type="caption" themeColor="muted">
                 {park.reviewCount > 0
-                  ? `${park.ratingAverage?.toLocaleString('et-EE')} / 5 · ${park.reviewCount} hinnangut`
+                  ? `${park.ratingAverage?.toLocaleString('et-EE')} / 5 · ${reviewsLabel(park.reviewCount)}`
                   : 'Hinnanguid veel pole'}
               </ThemedText>
             </ThemedView>
@@ -104,8 +124,48 @@ export default function ParkDetailScreen() {
 
             {park.description ? <ThemedText>{park.description}</ThemedText> : null}
 
-            <Button label="Juhata kohale" onPress={() => openDirections(park)} />
-            <Button label="Märgi kohalolek (tuleb peagi)" variant="secondary" disabled />
+            {!hereNow ? (
+              <Button label="Märgi kohalolek" onPress={() => router.push({ pathname: '/check-in', params: parkParams })} />
+            ) : null}
+            <Button label="Planeeri külastus" variant="secondary" onPress={() => router.push({ pathname: '/plan-visit', params: parkParams })} />
+            <Button label="Juhata kohale" variant="secondary" onPress={() => openDirections(park)} />
+
+            {visitors.data && (visitors.data.visitors.length > 0 || visitors.data.hiddenDogs > 0) ? (
+              <>
+                <ThemedText type="heading">Praegu pargis</ThemedText>
+                {visitors.data.visitors.map((v) => (
+                  <View key={v.checkInId} style={[styles.row, { backgroundColor: c.surface, borderColor: c.border }]}>
+                    <ThemedText type="label">
+                      {v.isMe ? 'Sina' : v.ownerFirstName} · {v.dogs.map((d) => d.name).join(', ')}
+                    </ThemedText>
+                    <ThemedText type="caption" themeColor="muted">
+                      {v.dogs.map((d) => d.breed).filter(Boolean).join(', ') || 'koer'} · kuni {formatTime(v.until)}
+                    </ThemedText>
+                  </View>
+                ))}
+                {visitors.data.hiddenDogs > 0 ? (
+                  <ThemedText type="caption" themeColor="muted">
+                    + {dogsLabel(visitors.data.hiddenDogs)}, kelle omanik ei jaga oma kohalolekut
+                  </ThemedText>
+                ) : null}
+              </>
+            ) : null}
+
+            <ThemedText type="heading">Arvustused</ThemedText>
+            {reviews.data?.length === 0 ? <ThemedText themeColor="muted">Ole esimene, kes parki hindab.</ThemedText> : null}
+            {reviews.data?.slice(0, 3).map((r) => (
+              <View key={r.id} style={[styles.row, { backgroundColor: c.surface, borderColor: c.border }]}>
+                <ThemedText type="label">
+                  {r.authorFirstName} · {'★'.repeat(r.rating)}
+                  <ThemedText type="label" style={{ color: c.border }}>
+                    {'★'.repeat(5 - r.rating)}
+                  </ThemedText>
+                </ThemedText>
+                {r.body ? <ThemedText type="caption">{r.body}</ThemedText> : null}
+              </View>
+            ))}
+            <Button label="Lisa oma hinnang" variant="tertiary" onPress={() => router.push({ pathname: '/review', params: parkParams })} />
+            <Button label="Märkasid probleemi?" variant="tertiary" onPress={() => router.push({ pathname: '/report', params: parkParams })} />
           </>
         ) : null}
       </Screen>
@@ -118,6 +178,7 @@ const styles = StyleSheet.create({
   header: { gap: Spacing.one },
   summary: { padding: Spacing.three, borderRadius: Radius[16], gap: 2 },
   features: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
+  row: { padding: Spacing.three, borderRadius: Radius[16], borderWidth: StyleSheet.hairlineWidth, gap: 2 },
   badge: { minHeight: 32, paddingHorizontal: 12, borderRadius: Radius.full, borderWidth: StyleSheet.hairlineWidth, justifyContent: 'center' },
   heart: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
 });

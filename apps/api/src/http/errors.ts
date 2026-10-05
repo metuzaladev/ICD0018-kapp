@@ -45,6 +45,13 @@ export class NotFoundError extends HttpError {
   }
 }
 
+/** The request is valid but clashes with current state (e.g. a concurrent duplicate). */
+export class ConflictError extends HttpError {
+  constructor(message = 'Andmed muutusid vahepeal, proovi uuesti') {
+    super(409, message);
+  }
+}
+
 export class TooManyRequestsError extends HttpError {
   constructor(message = 'Liiga palju päringuid, proovi hetke pärast uuesti') {
     super(429, message);

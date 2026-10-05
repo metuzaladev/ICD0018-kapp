@@ -32,9 +32,12 @@ beforeAll(async () => {
   ids.pending = inserted.find((p) => p.name === 'IT Ootel park')!.id;
 
   const [reviewer] = await db.select({ id: user.id }).from(user).where(like(user.email, `%${EMAIL_DOMAIN}`));
+  // One review per user per park (unique index) — the second rating needs a second user.
+  const secondId = `second-${Date.now()}`;
+  await db.insert(user).values({ id: secondId, name: 'Teine', email: `second-${Date.now()}${EMAIL_DOMAIN}` });
   await db.insert(reviews).values([
     { userId: reviewer!.id, parkId: ids.water, rating: 5 },
-    { userId: reviewer!.id, parkId: ids.water, rating: 4 },
+    { userId: secondId, parkId: ids.water, rating: 4 },
   ]);
 
   // Two dogs checked in now, one in an expired check-in that must not be counted.
@@ -46,7 +49,7 @@ beforeAll(async () => {
     .insert(checkIns)
     .values([
       { userId: reviewer!.id, parkId: ids.water, expiresAt: new Date(Date.now() + 3600_000) },
-      { userId: reviewer!.id, parkId: ids.water, expiresAt: new Date(Date.now() - 60_000) },
+      { userId: reviewer!.id, parkId: ids.water, expiresAt: new Date(Date.now() - 60_000), endedAt: new Date(Date.now() - 60_000) },
     ])
     .returning({ id: checkIns.id });
   await db.insert(checkInDogs).values([

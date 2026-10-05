@@ -11,13 +11,8 @@ import { env } from './config/env';
 import { db, pool } from './db/client';
 import { createAuth } from './modules/auth/auth';
 import { createLogMailer } from './modules/auth/mailer';
-import { createFavoritesRepository } from './modules/favorites/favorites.repository';
-import { createFavoritesService } from './modules/favorites/favorites.service';
 import { createSessionResolver } from './modules/auth/session-resolver';
-import { createParksRepository } from './modules/parks/parks.repository';
-import { createParksService } from './modules/parks/parks.service';
-import { createProfileRepository } from './modules/profile/profile.repository';
-import { createProfileService } from './modules/profile/profile.service';
+import { createServices } from './services';
 
 const isProduction = env.NODE_ENV === 'production';
 const logger = pino({
@@ -46,17 +41,9 @@ const auth = createAuth({
   },
 });
 
-const parksRepository = createParksRepository(db);
-
 const app = await buildApp(
   {
-    parksService: createParksService({ repository: parksRepository, timeoutMs: env.SERVICE_TIMEOUT_MS }),
-    favoritesService: createFavoritesService({
-      favorites: createFavoritesRepository(db),
-      parks: parksRepository,
-      timeoutMs: env.SERVICE_TIMEOUT_MS,
-    }),
-    profileService: createProfileService({ repository: createProfileRepository(db), timeoutMs: env.SERVICE_TIMEOUT_MS }),
+    ...createServices(db, env.SERVICE_TIMEOUT_MS),
     checkDatabase: async () => {
       await db.execute(sql`select 1`);
       return true;

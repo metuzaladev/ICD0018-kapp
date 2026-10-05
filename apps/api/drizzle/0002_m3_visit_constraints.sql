@@ -1,0 +1,2 @@
+CREATE UNIQUE INDEX "check_ins_one_open_per_user_uq" ON "check_ins" USING btree ("user_id") WHERE "check_ins"."ended_at" is null;--> statement-breakpoint
+CREATE UNIQUE INDEX "reviews_user_park_uq" ON "reviews" USING btree ("user_id","park_id");

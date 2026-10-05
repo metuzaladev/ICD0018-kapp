@@ -19,6 +19,7 @@ TalTechi kursuse **ICD0018 Hübriidmobiilirakendused** projekt · autor Kristofe
 | [06 Koodistandard](docs/06-koodistandard.md) | Kaustade ja nimede põhjendused, vigade leping, turvalisus, testid |
 | [07 Autentimine](docs/07-autentimine.md) | Sessioonid, vood, endpoint'id, Apple/Google seadistamine |
 | [08 Pargid ja kaart](docs/08-pargid-ja-kaart.md) | Kaart, filtrid, lemmikud, asukoht, development build |
+| [09 Kohalolek ja külastused](docs/09-kulastused.md) | Check-in, privaatsusreeglid, ajalugu, plaanid, hinnangud, teated |
 
 ## Käivitamine
 

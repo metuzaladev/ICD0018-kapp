@@ -184,7 +184,15 @@ export const checkIns = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     endedAt: timestamp('ended_at', { withTimezone: true }),
   },
-  (t) => [index('check_ins_park_active_idx').on(t.parkId, t.expiresAt), index('check_ins_user_idx').on(t.userId)],
+  (t) => [
+    index('check_ins_park_active_idx').on(t.parkId, t.expiresAt),
+    index('check_ins_user_idx').on(t.userId),
+    // At most one open check-in per user. A new check-in closes the previous one in the same
+    // transaction; this index makes a concurrent double check-in fail instead of duplicating.
+    uniqueIndex('check_ins_one_open_per_user_uq')
+      .on(t.userId)
+      .where(sql`${t.endedAt} is null`),
+  ],
 );
 
 export const checkInDogs = pgTable(
@@ -234,6 +242,8 @@ export const reviews = pgTable(
   },
   (t) => [
     index('reviews_park_idx').on(t.parkId),
+    // One review per user per park; writing again updates it (upsert).
+    uniqueIndex('reviews_user_park_uq').on(t.userId, t.parkId),
     check('reviews_rating_range', sql`${t.rating} between 1 and 5`),
   ],
 );

@@ -43,6 +43,8 @@ export default function ProfileScreen() {
         </ThemedView>
       ) : null}
       <Button label="Muuda profiili" variant="secondary" onPress={() => router.push('/profile-edit')} />
+      <Button label="Minu koerad" variant="secondary" onPress={() => router.push('/dogs')} />
+      <Button label="Minu külastused" variant="secondary" onPress={() => router.push('/visits')} />
       <Button label="Lemmikpargid" variant="secondary" onPress={() => router.push('/favorites')} />
       <Button label="Logi välja" variant="tertiary" loading={signingOut} onPress={signOut} />
     </Screen>

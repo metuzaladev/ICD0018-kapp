@@ -55,9 +55,16 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="parks/[parkId]" options={pushed} />
             <Stack.Screen name="favorites" options={{ ...pushed, headerTitle: '' }} />
+            <Stack.Screen name="visits" options={{ ...pushed, headerTitle: '' }} />
+            <Stack.Screen name="dogs/index" options={{ ...pushed, headerTitle: '' }} />
             {/* Modals: focused edit tasks with an explicit "done" action (HIG). */}
             <Stack.Screen name="profile-edit" options={{ presentation: 'modal', headerShown: true, title: 'Muuda profiili' }} />
             <Stack.Screen name="park-filters" options={{ presentation: 'modal', headerShown: true, title: 'Filtrid' }} />
+            <Stack.Screen name="dogs/edit" options={{ presentation: 'modal', headerShown: true }} />
+            <Stack.Screen name="check-in" options={{ presentation: 'modal', headerShown: true, title: 'Märgi kohalolek' }} />
+            <Stack.Screen name="plan-visit" options={{ presentation: 'modal', headerShown: true, title: 'Planeeri külastus' }} />
+            <Stack.Screen name="review" options={{ presentation: 'modal', headerShown: true, title: 'Hinnang' }} />
+            <Stack.Screen name="report" options={{ presentation: 'modal', headerShown: true, title: 'Teavita' }} />
           </Stack.Protected>
         </Stack>
       </ThemeProvider>

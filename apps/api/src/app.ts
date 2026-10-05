@@ -7,6 +7,8 @@ import { noAuthYet, type ResolveUserId } from './http/auth';
 import { registerErrorHandling } from './http/error-handler';
 import { TooManyRequestsError } from './http/errors';
 import { authRoutes } from './modules/auth/auth.routes';
+import { dogsRoutes } from './modules/dogs/dogs.routes';
+import type { DogsService } from './modules/dogs/dogs.service';
 import { favoritesRoutes } from './modules/favorites/favorites.routes';
 import type { FavoritesService } from './modules/favorites/favorites.service';
 import { healthRoutes } from './modules/health/health.routes';
@@ -14,6 +16,12 @@ import { parksRoutes } from './modules/parks/parks.routes';
 import type { ParksService } from './modules/parks/parks.service';
 import { profileRoutes } from './modules/profile/profile.routes';
 import type { ProfileService } from './modules/profile/profile.service';
+import { reportsRoutes } from './modules/reports/reports.routes';
+import type { ReportsService } from './modules/reports/reports.service';
+import { reviewsRoutes } from './modules/reviews/reviews.routes';
+import type { ReviewsService } from './modules/reviews/reviews.service';
+import { visitsRoutes } from './modules/visits/visits.routes';
+import type { VisitsService } from './modules/visits/visits.service';
 
 /**
  * Builds the HTTP application from its dependencies. It never creates database connections
@@ -23,6 +31,10 @@ export interface AppDeps {
   parksService: ParksService;
   profileService: ProfileService;
   favoritesService: FavoritesService;
+  dogsService: DogsService;
+  visitsService: VisitsService;
+  reviewsService: ReviewsService;
+  reportsService: ReportsService;
   checkDatabase: () => Promise<boolean>;
   /** Reads the user id from the session; defaults to "nobody is signed in". */
   resolveUserId?: ResolveUserId;
@@ -81,6 +93,10 @@ export async function buildApp(deps: AppDeps, config: AppConfig = defaultAppConf
   }
   await app.register(profileRoutes, { prefix: API_PREFIX, service: deps.profileService, resolveUserId });
   await app.register(favoritesRoutes, { prefix: API_PREFIX, service: deps.favoritesService, resolveUserId });
+  await app.register(dogsRoutes, { prefix: API_PREFIX, service: deps.dogsService, resolveUserId });
+  await app.register(visitsRoutes, { prefix: API_PREFIX, service: deps.visitsService, resolveUserId });
+  await app.register(reviewsRoutes, { prefix: API_PREFIX, service: deps.reviewsService, resolveUserId });
+  await app.register(reportsRoutes, { prefix: API_PREFIX, service: deps.reportsService, resolveUserId });
   await app.register(parksRoutes, { prefix: API_PREFIX, service: deps.parksService, resolveUserId });
 
   return app;

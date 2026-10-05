@@ -9,8 +9,14 @@ import type { PushQueue } from './push-queue';
 export interface NotifyEvent {
   type: NotificationType;
   recipientId: string;
-  actorId: string;
+  /** Who caused it; null for the user's own bookings (M6), which have no other person. */
+  actorId: string | null;
   data: NotificationData;
+  /**
+   * false = feed row and realtime event only. Used when the recipient caused it on this very phone
+   * (booking confirmed / cancelled): a push would just repeat what the screen already shows.
+   */
+  push?: boolean;
 }
 
 /**
@@ -51,7 +57,7 @@ export function createNotifier({
   const t = <T>(p: Promise<T>, label: string, ms = timeoutMs) => withTimeout(p, ms, label);
 
   return {
-    async notify({ type, recipientId, actorId, data }) {
+    async notify({ type, recipientId, actorId, data, push = true }) {
       try {
         const input = { userId: recipientId, type, actorId, data };
         const notification =
@@ -61,12 +67,14 @@ export function createNotifier({
         const unreadCount = await t(notifications.unreadCount(recipientId), 'notifications.unreadCount');
         realtime.emitToUsers([recipientId], 'notification:new', { notification, unreadCount });
 
+        if (!push) return;
         const context = await t(notifications.pushContext(recipientId), 'notifications.pushContext');
         if (!context || !context.preferences[PREFERENCE_FOR[type]]) return;
         const { title, body } = composePush(context.language, type, notification.actor?.firstName ?? '', data);
         const pushData: Record<string, string> = { type, notificationId: notification.id };
         if (data.conversationId) pushData.conversationId = data.conversationId;
-        if (type === 'friend_request' || type === 'friend_accepted' || type === 'friend_plan') pushData.userId = actorId;
+        if (actorId && (type === 'friend_request' || type === 'friend_accepted' || type === 'friend_plan')) pushData.userId = actorId;
+        if (data.bookingId) pushData.bookingId = data.bookingId;
         await t(pushQueue.enqueue({ userId: recipientId, language: context.language, title, body, data: pushData }), 'push.enqueue', ENQUEUE_TIMEOUT_MS);
       } catch (error) {
         log.warn({ err: error, type, recipientId }, 'notification not delivered');

@@ -51,7 +51,14 @@ export interface PushTokensRepository {
   removeTokens(tokens: string[]): Promise<void>;
 }
 
-const DEFAULT_PREFERENCES: NotificationPreferences = { messages: true, friendRequests: true, friendPlans: true };
+const DEFAULT_PREFERENCES: NotificationPreferences = { messages: true, friendRequests: true, friendPlans: true, bookings: true };
+
+const preferenceColumns = {
+  messages: notificationPreferences.messages,
+  friendRequests: notificationPreferences.friendRequests,
+  friendPlans: notificationPreferences.friendPlans,
+  bookings: notificationPreferences.bookings,
+};
 
 const actor = sql.raw('"notifications"."actor_id"');
 const recipient = sql.raw('"notifications"."user_id"');
@@ -149,7 +156,7 @@ export function createNotificationsRepository(db: Db): NotificationsRepository {
 
     async getPreferences(userId) {
       const [row] = await db
-        .select({ messages: notificationPreferences.messages, friendRequests: notificationPreferences.friendRequests, friendPlans: notificationPreferences.friendPlans })
+        .select(preferenceColumns)
         .from(notificationPreferences)
         .where(eq(notificationPreferences.userId, userId));
       return row ?? DEFAULT_PREFERENCES;
@@ -160,7 +167,7 @@ export function createNotificationsRepository(db: Db): NotificationsRepository {
         .insert(notificationPreferences)
         .values({ userId, ...preferences })
         .onConflictDoUpdate({ target: notificationPreferences.userId, set: { ...preferences, updatedAt: new Date() } })
-        .returning({ messages: notificationPreferences.messages, friendRequests: notificationPreferences.friendRequests, friendPlans: notificationPreferences.friendPlans });
+        .returning(preferenceColumns);
       return row!;
     },
 
@@ -168,9 +175,7 @@ export function createNotificationsRepository(db: Db): NotificationsRepository {
       const [row] = await db
         .select({
           language: user.language,
-          messages: notificationPreferences.messages,
-          friendRequests: notificationPreferences.friendRequests,
-          friendPlans: notificationPreferences.friendPlans,
+          ...preferenceColumns,
         })
         .from(user)
         .leftJoin(notificationPreferences, eq(notificationPreferences.userId, user.id))
@@ -182,6 +187,7 @@ export function createNotificationsRepository(db: Db): NotificationsRepository {
           messages: row.messages ?? DEFAULT_PREFERENCES.messages,
           friendRequests: row.friendRequests ?? DEFAULT_PREFERENCES.friendRequests,
           friendPlans: row.friendPlans ?? DEFAULT_PREFERENCES.friendPlans,
+          bookings: row.bookings ?? DEFAULT_PREFERENCES.bookings,
         },
       };
     },

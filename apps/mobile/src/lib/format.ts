@@ -38,6 +38,54 @@ export function formatTime(iso: string | Date): string {
   return currentLanguage() === 'et' ? text.replace(':', '.') : text;
 }
 
+/**
+ * A time in a given IANA zone — booking times are the provider's wall clock (Europe/Tallinn), so a
+ * phone abroad still shows the time the groomer expects the dog. Same "17.00" rule as formatTime.
+ */
+export function formatTimeIn(iso: string, timeZone: string): string {
+  const text = new Date(iso).toLocaleTimeString(currentLocaleTag(), { hour: '2-digit', minute: '2-digit', timeZone });
+  return currentLanguage() === 'et' ? text.replace(':', '.') : text;
+}
+
+/** "teisipäev, 6. oktoober" in the provider's zone — the date on a booking card. */
+export function formatDateIn(iso: string, timeZone: string): string {
+  return new Date(iso).toLocaleDateString(currentLocaleTag(), { weekday: 'long', day: 'numeric', month: 'long', timeZone });
+}
+
+/**
+ * A slot day chip from a calendar date ("2026-10-06"): "Täna", "Homme" or "R 9. okt". A chip is a
+ * standalone label, so it starts with a capital ("täna" stays lowercase mid-sentence elsewhere,
+ * and Russian weekday abbreviations are lowercase by default: "пт" → "Пт").
+ */
+export function formatDayChip(isoDate: string, now = new Date()): string {
+  const day = localDate(isoDate);
+  const diff = Math.round((day.getTime() - startOfDay(now)) / 86_400_000);
+  const label =
+    diff === 0
+      ? i18n.t('dates.today')
+      : diff === 1
+        ? i18n.t('dates.tomorrow')
+        : day.toLocaleDateString(currentLocaleTag(), { weekday: 'short', day: 'numeric', month: 'short' });
+  return label.charAt(0).toLocaleUpperCase(currentLocaleTag()) + label.slice(1);
+}
+
+/** "35 €" / "€35" / "12,50 €": whole euros without decimals as in Figma, cents only when present. */
+export function formatPrice(cents: number): string {
+  const euros = cents / 100;
+  const fraction = Number.isInteger(euros) ? 0 : 2;
+  return new Intl.NumberFormat(currentLocaleTag(), {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: fraction,
+    maximumFractionDigits: fraction,
+  }).format(euros);
+}
+
+/** Figma "alates 35 €" when the final price depends on the dog, otherwise "12 €". */
+export function priceLabel(cents: number, isFrom: boolean): string {
+  return isFrom ? i18n.t('units.priceFrom', { price: formatPrice(cents) }) : formatPrice(cents);
+}
+
 /** An hour of the day as a time chip: 17 → "17.00". */
 export function formatHour(hour: number): string {
   const d = new Date();

@@ -87,6 +87,10 @@ export default function RootLayout() {
             <Stack.Screen name="settings-privacy" options={{ ...pushed, headerTitle: '' }} />
             <Stack.Screen name="settings-notifications" options={{ ...pushed, headerTitle: '' }} />
             <Stack.Screen name="invite-park" options={{ ...pushed, headerTitle: '' }} />
+            {/* M6 services and bookings (docs/13-teenused.md). */}
+            <Stack.Screen name="services/index" options={{ ...pushed, headerTitle: '' }} />
+            <Stack.Screen name="services/[providerId]" options={{ ...pushed, headerTitle: '' }} />
+            <Stack.Screen name="bookings/index" options={{ ...pushed, headerTitle: '' }} />
             {/* Modals: focused edit tasks with an explicit "done" action (HIG). */}
             <Stack.Screen name="profile-edit" options={{ presentation: 'modal', headerShown: true, title: t('nav.profileEdit') }} />
             <Stack.Screen name="park-filters" options={{ presentation: 'modal', headerShown: true, title: t('nav.filters') }} />
@@ -97,6 +101,7 @@ export default function RootLayout() {
             <Stack.Screen name="review" options={{ presentation: 'modal', headerShown: true, title: t('nav.review') }} />
             <Stack.Screen name="report" options={{ presentation: 'modal', headerShown: true, title: t('nav.report') }} />
             <Stack.Screen name="report-user" options={{ presentation: 'modal', headerShown: true, title: t('nav.reportUser') }} />
+            <Stack.Screen name="book" options={{ presentation: 'modal', headerShown: true, title: t('nav.book') }} />
           </Stack.Protected>
         </Stack>
       </ThemeProvider>

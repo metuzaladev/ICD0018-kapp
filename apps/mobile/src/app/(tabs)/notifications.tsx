@@ -20,8 +20,10 @@ import { formatDay, formatMessageTime, formatTime } from '@/lib/format';
 
 type Filter = 'all' | 'friends' | 'messages';
 const FILTERS: Filter[] = ['all', 'friends', 'messages'];
+const FRIEND_TYPES: AppNotification['type'][] = ['friend_request', 'friend_accepted', 'friend_plan'];
+/** Booking rows (M6) only show under "Kõik": they are neither friends nor messages. */
 const matches = (n: AppNotification, filter: Filter) =>
-  filter === 'all' || (filter === 'messages' ? n.type === 'message' : n.type !== 'message');
+  filter === 'all' || (filter === 'messages' ? n.type === 'message' : FRIEND_TYPES.includes(n.type));
 
 /** Figma 06 / Notifications / Activity: the feed, rendered in the app's language from type + data. */
 export default function NotificationsScreen() {
@@ -52,12 +54,32 @@ export default function NotificationsScreen() {
               ? `${n.data.parkName ?? ''} · ${formatDay(n.data.startsAt)} ${formatTime(n.data.startsAt)}–${formatTime(n.data.endsAt)}`
               : (n.data.parkName ?? ''),
         };
+      case 'booking_confirmed':
+      case 'booking_cancelled':
+      case 'booking_reminder': {
+        const titleKey =
+          n.type === 'booking_confirmed'
+            ? 'notifications.bookingConfirmed'
+            : n.type === 'booking_cancelled'
+              ? 'notifications.bookingCancelled'
+              : 'notifications.bookingReminder';
+        return {
+          title: t(titleKey),
+          subtitle: t('notifications.bookingBody', {
+            service: n.data.serviceName ?? '',
+            provider: n.data.providerName ?? '',
+            when: n.data.startsAt ? `${formatDay(n.data.startsAt)} ${formatTime(n.data.startsAt)}` : '',
+          }),
+        };
+      }
     }
   }
 
   function open(n: AppNotification) {
     if (!n.readAt) markRead.mutate(n.id);
-    if (n.type === 'message' && n.data.conversationId) {
+    if (n.data.bookingId) {
+      router.push('/bookings');
+    } else if (n.type === 'message' && n.data.conversationId) {
       router.push({ pathname: '/messages/[conversationId]', params: { conversationId: n.data.conversationId } });
     } else if (n.type === 'friend_request') {
       router.push('/friends');

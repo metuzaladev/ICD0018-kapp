@@ -12,6 +12,9 @@ export const PREFERENCE_FOR: Record<NotificationType, keyof NotificationPreferen
   friend_accepted: 'friendRequests',
   message: 'messages',
   friend_plan: 'friendPlans',
+  booking_confirmed: 'bookings',
+  booking_cancelled: 'bookings',
+  booking_reminder: 'bookings',
 };
 
 /** The app and the parks are in Tallinn; plan times are shown in Estonian time for everyone. */
@@ -33,6 +36,21 @@ export function formatPlanWindow(language: Language, startsAt: string, endsAt: s
   return `${day} ${time(startsAt)}–${time(endsAt)}`;
 }
 
+/** "R 3. okt 10.00" / "Fri 3 Oct 10:00" / "пт, 3 окт. 10:00" — a booking start in Tallinn time. */
+export function formatBookingStart(language: Language, startsAt: string): string {
+  const locale = LOCALE_TAG[language];
+  const instant = new Date(startsAt);
+  const day = new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric', month: 'short', timeZone: TIME_ZONE }).format(instant);
+  const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', timeZone: TIME_ZONE }).format(instant);
+  return `${day} ${language === 'et' ? time.replace(':', '.') : time}`;
+}
+
+const BOOKING_TITLE = {
+  booking_confirmed: 'push.bookingConfirmed.title',
+  booking_cancelled: 'push.bookingCancelled.title',
+  booking_reminder: 'push.bookingReminder.title',
+} as const;
+
 export function composePush(
   language: Language,
   type: NotificationType,
@@ -53,6 +71,17 @@ export function composePush(
         body: translate(language, 'push.friendPlan.body', {
           park: data.parkName ?? '',
           when: data.startsAt && data.endsAt ? formatPlanWindow(language, data.startsAt, data.endsAt) : '',
+        }),
+      };
+    case 'booking_confirmed':
+    case 'booking_cancelled':
+    case 'booking_reminder':
+      return {
+        title: translate(language, BOOKING_TITLE[type]),
+        body: translate(language, 'push.booking.body', {
+          service: data.serviceName ?? '',
+          provider: data.providerName ?? '',
+          when: data.startsAt ? formatBookingStart(language, data.startsAt) : '',
         }),
       };
   }

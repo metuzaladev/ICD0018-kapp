@@ -8,6 +8,7 @@ import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
+import { useBookings } from '@/hooks/use-bookings';
 import { useMyDogs } from '@/hooks/use-dogs';
 import { useFriendRequests } from '@/hooks/use-friends';
 import { useConversations } from '@/hooks/use-messages';
@@ -27,6 +28,7 @@ export default function ProfileScreen() {
   const dogs = useMyDogs().data;
   const visits = useVisitHistory().data;
   const incoming = useFriendRequests().data?.incoming.length ?? 0;
+  const upcomingBookings = useBookings('upcoming').data?.length ?? 0;
   const unreadMessages = (useConversations().data ?? []).reduce((sum, conv) => sum + conv.unreadCount, 0);
   const firstName = profile?.name.split(' ')[0];
   const stats =
@@ -64,6 +66,12 @@ export default function ProfileScreen() {
         onPress={() => router.push('/messages')}
       />
       <ListRow title={t('profile.myVisits')} subtitle={t('profile.myVisitsSub')} onPress={() => router.push('/visits')} />
+      {/* Figma "Minu broneeringud / Hooldus ja kohtumised" (M6). */}
+      <ListRow
+        title={t('profile.bookings')}
+        subtitle={upcomingBookings > 0 ? t('profile.upcomingBookings', { count: upcomingBookings }) : t('profile.bookingsSub')}
+        onPress={() => router.push('/bookings')}
+      />
       <ListRow title={t('profile.favorites')} subtitle={t('profile.favoritesSub')} onPress={() => router.push('/favorites')} />
       <ListRow title={t('profile.settings')} subtitle={t('profile.settingsSub')} onPress={() => router.push('/settings')} />
     </Screen>

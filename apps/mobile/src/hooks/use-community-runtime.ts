@@ -16,7 +16,9 @@ import { notificationKeys } from './use-notifications';
 /** Where a tapped push leads, from the `data` the server put into it. */
 function openFromPush(data: Record<string, unknown> | undefined) {
   if (!data) return;
-  if (typeof data.conversationId === 'string') {
+  if (typeof data.bookingId === 'string') {
+    router.push('/bookings');
+  } else if (typeof data.conversationId === 'string') {
     router.push({ pathname: '/messages/[conversationId]', params: { conversationId: data.conversationId } });
   } else if (data.type === 'friend_request') {
     router.push('/friends');

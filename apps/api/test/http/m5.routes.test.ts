@@ -239,13 +239,20 @@ describe('notifications, preferences and push tokens', () => {
     expect((await req('PUT', '/me/notifications/1/read')).statusCode).toBe(400);
   });
 
-  it('preferences: all three switches required, booleans only', async () => {
+  it('preferences: all four switches required (M6 added bookings), booleans only', async () => {
     await app();
     ctx!.notifications.setPreferences.mockImplementation(async (_u: string, p: object) => p);
-    const ok = await req('PUT', '/me/notification-preferences', { messages: false, friendRequests: true, friendPlans: true });
+    const all = { messages: false, friendRequests: true, friendPlans: true, bookings: true };
+    const ok = await req('PUT', '/me/notification-preferences', all);
     expect(ok.statusCode).toBe(200);
-    expect(ok.json()).toEqual({ messages: false, friendRequests: true, friendPlans: true });
-    for (const bad of [{ messages: false }, { messages: 'false', friendRequests: true, friendPlans: true }, { messages: null, friendRequests: true, friendPlans: true }]) {
+    expect(ok.json()).toEqual(all);
+    for (const bad of [
+      { messages: false },
+      { messages: false, friendRequests: true, friendPlans: true },
+      { ...all, messages: 'false' },
+      { ...all, messages: null },
+      { ...all, bookings: null },
+    ]) {
       expect((await req('PUT', '/me/notification-preferences', bad)).statusCode).toBe(400);
     }
   });

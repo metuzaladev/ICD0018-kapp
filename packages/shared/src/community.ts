@@ -171,7 +171,16 @@ export type Conversation = z.infer<typeof conversationSchema>;
 
 /* ---------- notifications ---------- */
 
-export const notificationTypeSchema = z.enum(['friend_request', 'friend_accepted', 'message', 'friend_plan']);
+export const notificationTypeSchema = z.enum([
+  'friend_request',
+  'friend_accepted',
+  'message',
+  'friend_plan',
+  // M6 bookings (docs/13-teenused.md): the user's own bookings, no actor.
+  'booking_confirmed',
+  'booking_cancelled',
+  'booking_reminder',
+]);
 export type NotificationType = z.infer<typeof notificationTypeSchema>;
 
 /**
@@ -187,6 +196,9 @@ export const notificationDataSchema = z
     parkName: z.string(),
     startsAt: z.string(),
     endsAt: z.string(),
+    bookingId: z.uuid(),
+    providerName: z.string(),
+    serviceName: z.string(),
   })
   .partial();
 export type NotificationData = z.infer<typeof notificationDataSchema>;
@@ -221,6 +233,8 @@ export const notificationPreferencesSchema = z
     messages: z.boolean(),
     friendRequests: z.boolean(),
     friendPlans: z.boolean(),
+    /** "Broneeringute uuendused" (M6): booking reminders. */
+    bookings: z.boolean(),
   })
   .strict();
 export type NotificationPreferences = z.infer<typeof notificationPreferencesSchema>;

@@ -8,6 +8,7 @@ import { db } from '../../src/db/client';
 import { createAuth } from '../../src/modules/auth/auth';
 import type { Mailer } from '../../src/modules/auth/mailer';
 import { createSessionResolver } from '../../src/modules/auth/session-resolver';
+import type { BookingReminders } from '../../src/modules/bookings/booking-reminders';
 import type { PushQueue } from '../../src/modules/notifications/push-queue';
 import { createSocketGateway, type SocketGateway } from '../../src/realtime/socket-gateway';
 import { createServices, createStorageFromEnv } from '../../src/services';
@@ -18,6 +19,7 @@ export const testStorage = createStorageFromEnv(env);
 export interface RealAppOptions {
   realtime?: SocketGateway;
   pushQueue?: Pick<PushQueue, 'enqueue'>;
+  bookingReminders?: BookingReminders;
 }
 
 export async function buildRealApp(mailer: Mailer = { sendPasswordReset: async () => {} }, options: RealAppOptions = {}) {
@@ -34,7 +36,7 @@ export async function buildRealApp(mailer: Mailer = { sendPasswordReset: async (
   });
   return buildApp(
     {
-      ...createServices(db, testStorage, 5000, { realtime: options.realtime, pushQueue: options.pushQueue }),
+      ...createServices(db, testStorage, 5000, { realtime: options.realtime, pushQueue: options.pushQueue, bookingReminders: options.bookingReminders }),
       realtime: options.realtime,
       checkDatabase: async () => true,
       resolveUserId: createSessionResolver(auth),

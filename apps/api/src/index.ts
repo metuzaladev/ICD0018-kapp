@@ -10,6 +10,7 @@ import { buildApp } from './app';
 import { env } from './config/env';
 import { db, pool } from './db/client';
 import { createAuth } from './modules/auth/auth';
+import { createBookingReminderQueue, startBookingReminderWorker } from './modules/bookings/booking-reminders';
 import { createLogMailer } from './modules/auth/mailer';
 import { createSessionResolver } from './modules/auth/session-resolver';
 import { createPushTokensRepository } from './modules/notifications/notifications.repository';
@@ -61,9 +62,17 @@ const pushWorker = env.PUSH_WORKER_ENABLED
     )
   : null;
 
+// M6: booking reminders are delayed jobs in the same Redis; the worker shares PUSH_WORKER_ENABLED
+// because it only ends in a push (docs/13-teenused.md).
+const bookingReminders = createBookingReminderQueue(queueConnection);
+const services = createServices(db, createStorageFromEnv(env), env.SERVICE_TIMEOUT_MS, { realtime, pushQueue, bookingReminders, log: logger });
+const reminderWorker = env.PUSH_WORKER_ENABLED
+  ? startBookingReminderWorker(queueConnection, (bookingId) => services.bookingsService.sendReminder(bookingId), logger)
+  : null;
+
 const app = await buildApp(
   {
-    ...createServices(db, createStorageFromEnv(env), env.SERVICE_TIMEOUT_MS, { realtime, pushQueue, log: logger }),
+    ...services,
     realtime,
     checkDatabase: async () => {
       await db.execute(sql`select 1`);
@@ -85,7 +94,9 @@ async function shutdown(signal: string) {
   app.log.info({ signal }, 'shutting down');
   await app.close(); // stops accepting requests and waits for in-flight ones (and closes sockets)
   await pushWorker?.close(); // lets the running push job finish; unfinished jobs stay in Redis
+  await reminderWorker?.close();
   await pushQueue.close();
+  await bookingReminders.close();
   await pool.end();
   process.exit(0);
 }

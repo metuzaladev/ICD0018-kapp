@@ -20,6 +20,15 @@ export function isUniqueViolation(error: unknown, constraint?: string): boolean 
   return state?.code === '23505' && (constraint === undefined || state.constraint === constraint);
 }
 
+/**
+ * 23P01 exclusion_violation, optionally for one named EXCLUDE constraint — the range equivalent of a
+ * unique violation (e.g. two overlapping bookings for one provider, `bookings_no_overlap`).
+ */
+export function isExclusionViolation(error: unknown, constraint?: string): boolean {
+  const state = sqlState(error);
+  return state?.code === '23P01' && (constraint === undefined || state.constraint === constraint);
+}
+
 /** 23514 check_violation, optionally for one named CHECK constraint. */
 export function isCheckViolation(error: unknown, constraint?: string): boolean {
   const state = sqlState(error);

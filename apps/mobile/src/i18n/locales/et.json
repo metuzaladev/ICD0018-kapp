@@ -15,7 +15,8 @@
     "kg": "{{value}} kg",
     "minutes": "{{value}} min",
     "hours": "{{value}} h",
-    "hoursMinutes": "{{hours}} h {{minutes}} min"
+    "hoursMinutes": "{{hours}} h {{minutes}} min",
+    "priceFrom": "alates {{price}}"
   },
   "counts": {
     "dogs_one": "{{count}} koer",
@@ -69,7 +70,8 @@
     "vaccinationAdd": "Lisa vaktsineerimine",
     "vetVisitAdd": "Loomaarsti külastus",
     "healthRecordEdit": "Muuda kirjet",
-    "reportUser": "Teavita või blokeeri"
+    "reportUser": "Teavita või blokeeri",
+    "book": "Vali aeg"
   },
   "auth": {
     "email": "E-post",
@@ -158,7 +160,9 @@
     "friendsPlansTitle": "Sõbrad lähevad parki",
     "friendsPlansEmpty": "Lähima kahe päeva jooksul pole sõpradel plaane.",
     "friendPlan": "{{name}} · {{day}} {{from}}–{{to}}",
-    "findFriends": "Leia mängusõbrad"
+    "findFriends": "Leia mängusõbrad",
+    "servicesTitle": "Teenused",
+    "servicesSub": "Hooldus, treening ja kliinik"
   },
   "map": {
     "title": "Avastame Tallinna.",
@@ -420,7 +424,11 @@
     "messages": "Sõnumid",
     "messagesSub": "Väikesed tere’d",
     "unreadMessages_one": "{{count}} lugemata sõnum",
-    "unreadMessages_other": "{{count}} lugemata sõnumit"
+    "unreadMessages_other": "{{count}} lugemata sõnumit",
+    "bookings": "Minu broneeringud",
+    "bookingsSub": "Hooldus ja kohtumised",
+    "upcomingBookings_one": "{{count}} tulev kohtumine",
+    "upcomingBookings_other": "{{count}} tulevat kohtumist"
   },
   "settings": {
     "title": "Sinu Käpp.",
@@ -460,7 +468,7 @@
   "notifications": {
     "title": "Mis uut?",
     "subtitle": "Head uudised sinu väikesele kambale.",
-    "body": "Siia jõuavad sõprade plaanid, sõbrakutsed ja sõnumid.",
+    "body": "Siia jõuavad sõprade plaanid, sõbrakutsed, sõnumid ja broneeringud.",
     "someone": "Keegi",
     "friendRequest": "Uus sõbrakutse",
     "friendRequestBody": "{{name}} tahab sõbraks saada",
@@ -474,7 +482,11 @@
     },
     "markAll": "Märgi kõik loetuks",
     "unreadHint": "Lugemata",
-    "more": "Näita vanemaid"
+    "more": "Näita vanemaid",
+    "bookingConfirmed": "Broneering on kirjas",
+    "bookingCancelled": "Broneering tühistatud",
+    "bookingReminder": "Kohtumiseni varsti!",
+    "bookingBody": "{{service}} · {{provider}} · {{when}}"
   },
   "community": {
     "nameWithDogs": "{{name}} ja {{dogs}}"
@@ -571,7 +583,8 @@
     "friendPlans": "Sõbrad lähevad parki",
     "friendRequests": "Sõbrakutsed",
     "feedNote": "Teadete vahekaardil näed alati kõike; need lülitid puudutavad ainult tõuketeavitusi.",
-    "save": "Salvesta eelistused"
+    "save": "Salvesta eelistused",
+    "bookings": "Broneeringute uuendused"
   },
   "invite": {
     "title": "Kutsu parki: {{name}}",
@@ -588,5 +601,98 @@
   },
   "push": {
     "channelName": "Sõbrad ja sõnumid"
+  },
+  "services": {
+    "title": "Natuke hoolt. Palju rõõmu.",
+    "subtitle": "Teenused sinu käpalisele",
+    "categories": {
+      "all": "Kõik",
+      "grooming": "Hooldus",
+      "training": "Treening",
+      "vet": "Kliinik",
+      "other": "Muu"
+    },
+    "kind": {
+      "grooming": "koerte hooldus",
+      "training": "koerte treening",
+      "vet": "loomakliinik",
+      "other": "teenus koertele"
+    },
+    "kindTitle": {
+      "grooming": "Koerte hooldus",
+      "training": "Koerte treening",
+      "vet": "Loomakliinik",
+      "other": "Teenus koertele"
+    },
+    "rowTitle": "{{name}} · {{kind}}",
+    "rating": "★ {{rating}}",
+    "ratingA11y": "hinnang {{rating}} viiest, {{reviews}}",
+    "demoNote": "Teenusepakkujad, hinnad ja ajad on näidisandmed.",
+    "empty": "Selles kategoorias pole veel teenusepakkujaid.",
+    "distanceNote": "Kaugused on arvutatud Tallinna kesklinnast."
+  },
+  "provider": {
+    "serviceMeta": "{{duration}} · {{price}}",
+    "serviceHint": "Valib selle teenuse",
+    "chooseTime": "Vali sobiv aeg",
+    "noServices": "Sellel teenusepakkujal pole praegu broneeritavaid teenuseid."
+  },
+  "booking": {
+    "title": {
+      "grooming": "Aeg iseendale. Ja puhtale karvale.",
+      "training": "Aeg koos õppida.",
+      "vet": "Aeg tervisele.",
+      "other": "Aeg sinu käpalisele."
+    },
+    "serviceLine": "{{service}} · {{duration}}",
+    "date": "Kuupäev",
+    "time": "Kellaaeg",
+    "dayFull": "Sel päeval vabu aegu pole.",
+    "noSlots": "Lähima nädala jooksul vabu aegu pole.",
+    "timeZoneNote": "Kellaajad on teenusepakkuja aja järgi ({{zone}}).",
+    "who": "Kes tuleb?",
+    "noDogs": "Broneerimiseks lisa esmalt oma koer.",
+    "addDog": "Lisa koer",
+    "note": "Märkus teenusepakkujale",
+    "notePlaceholder": "Esimene külastus, alguses veidi arg.",
+    "price": "Hind {{price}}",
+    "priceNote": "Täpne hind kinnitatakse teenusepakkujaga.",
+    "cancelRule_one": "Tühistada saab kuni {{count}} tund enne algust.",
+    "cancelRule_other": "Tühistada saab kuni {{count}} tundi enne algust.",
+    "submit": "Kinnita broneering",
+    "chooseTime": "Vali kellaaeg",
+    "confirmed": {
+      "title": "Kohtumiseni!",
+      "subtitle": "Sinu broneering on kirjas.",
+      "card": "{{dogs}} · {{service}}",
+      "info": "Broneeringu info leiad oma profiilist.",
+      "viewBookings": "Vaata broneeringuid",
+      "home": "Tagasi avalehele"
+    }
+  },
+  "bookings": {
+    "title": "Hoolt on plaanis.",
+    "subtitle_zero": "Sinu järgmised kohtumised.",
+    "subtitle_one": "Sinu koera järgmised kohtumised.",
+    "subtitle_other": "Sinu koerte järgmised kohtumised.",
+    "upcoming": "Tulevased",
+    "past": "Varasemad",
+    "emptyUpcoming": "Plaanis pole veel ühtegi kohtumist.",
+    "emptyPast": "Varasemaid broneeringuid pole.",
+    "findService": "Leia uus teenus",
+    "status": {
+      "confirmed": "Kinnitatud",
+      "cancelled": "Tühistatud",
+      "completed": "Toimunud"
+    },
+    "when": "{{date}}, {{from}}–{{to}}",
+    "note": "Märkus: {{note}}",
+    "cancel": "Tühista broneering",
+    "cancelUntil": "Tühistamise tähtaeg: {{date}}, {{time}}.",
+    "cancelClosed": "Tühistamise aeg on möödas. Kui sa ei saa tulla, anna teenusepakkujale teada.",
+    "cancelTitle": "Tühistada broneering?",
+    "cancelBody": "{{service}}, {{provider}} · {{when}}. Aeg vabaneb teistele.",
+    "cancelConfirm": "Tühista",
+    "keep": "Jäta alles"
   }
 }

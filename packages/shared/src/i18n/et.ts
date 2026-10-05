@@ -58,6 +58,8 @@ export const et = {
   'validation.searchMin': 'sisesta vähemalt {{min}} tähte',
   'validation.messageEmpty': 'kirjuta sõnum',
   'validation.pushToken': 'ei ole Expo push-märk',
+  'validation.bothCoordinates': 'anna nii lat kui ka lng',
+  'validation.maxDogs': 'kuni {{max}} koera',
 
   /* ---------- API errors ---------- */
   'errors.badRequest': 'Vigane päring',
@@ -98,6 +100,12 @@ export const et = {
   'errors.notificationNotFound': 'Teadet ei leitud',
   'errors.cannotBlockSelf': 'Iseennast ei saa blokeerida',
   'errors.cannotReportSelf': 'Iseendast ei saa teavitada',
+  'errors.providerNotFound': 'Teenusepakkujat ei leitud',
+  'errors.serviceNotFound': 'Teenust ei leitud',
+  'errors.bookingNotFound': 'Broneeringut ei leitud',
+  'errors.slotUnavailable': 'See aeg ei ole broneeritav, vali teine aeg',
+  'errors.slotTaken': 'Keegi jõudis selle aja just broneerida, vali teine aeg',
+  'errors.cancelTooLate': 'Tühistada saab kuni {{hours}} tundi enne algust',
 
   /* ---------- push notifications (written in the recipient's language, docs/12-kogukond.md) ---------- */
   'push.friendRequest.title': 'Uus sõbrakutse',
@@ -107,6 +115,10 @@ export const et = {
   'push.message.title': '{{name}} saatis sõnumi',
   'push.friendPlan.title': '{{name}} läheb parki',
   'push.friendPlan.body': '{{park}} · {{when}}',
+  'push.bookingConfirmed.title': 'Broneering on kirjas',
+  'push.bookingCancelled.title': 'Broneering tühistatud',
+  'push.bookingReminder.title': 'Kohtumiseni varsti!',
+  'push.booking.body': '{{service}} · {{provider}} · {{when}}',
 
   /* ---------- Better Auth errors ---------- */
   'auth.userExists': 'Selle e-postiga konto on juba olemas',

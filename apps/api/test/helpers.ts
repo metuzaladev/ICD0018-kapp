@@ -29,6 +29,10 @@ import type { NotificationsService } from '../src/modules/notifications/notifica
 import type { SafetyRepository } from '../src/modules/safety/safety.repository';
 import type { SafetyService } from '../src/modules/safety/safety.service';
 import type { ObjectStorage } from '../src/storage/object-storage';
+import type { BookingsRepository } from '../src/modules/bookings/bookings.repository';
+import type { BookingsService } from '../src/modules/bookings/bookings.service';
+import type { ProvidersRepository } from '../src/modules/providers/providers.repository';
+import type { ProvidersService } from '../src/modules/providers/providers.service';
 
 export const PARK_ID = '4ddabe8d-7306-4724-a125-ace7ae3a87b9';
 export const USER_ID = 'user_test_1';
@@ -224,12 +228,17 @@ export async function buildTestApp(deps: Partial<AppDeps> = {}, config: Partial<
       'unregisterPushToken',
     ]);
   const safety = (deps.safetyService as Mocked<SafetyService> | undefined) ?? mockAll<SafetyService>(['block', 'unblock', 'listBlocked', 'reportUser']);
+  const providers = (deps.providersService as Mocked<ProvidersService> | undefined) ?? mockAll<ProvidersService>(['list', 'getProvider', 'listSlots']);
+  const bookings =
+    (deps.bookingsService as Mocked<BookingsService> | undefined) ?? mockAll<BookingsService>(['create', 'list', 'get', 'cancel', 'sendReminder']);
   const app = await buildApp(
     {
       friendsService: friends,
       messagesService: messages,
       notificationsService: notifications,
       safetyService: safety,
+      providersService: providers,
+      bookingsService: bookings,
       parksService: service,
       profileService: profile,
       favoritesService: favorites,
@@ -245,7 +254,7 @@ export async function buildTestApp(deps: Partial<AppDeps> = {}, config: Partial<
     },
     { ...defaultAppConfig, ...config },
   );
-  return { app, service, profile, favorites, dogs, visits, reviews, reports, photos, health, friends, messages, notifications, safety };
+  return { app, service, profile, favorites, dogs, visits, reviews, reports, photos, health, friends, messages, notifications, safety, providers, bookings };
 }
 
 /** Resolver that treats `Authorization: Bearer test` as USER_ID — stands in for Better Auth. */
@@ -284,3 +293,6 @@ export const mockNotificationsRepository = () =>
 export const mockPushTokensRepository = () => mockAll<PushTokensRepository>(['upsert', 'remove', 'listForUser', 'removeTokens']);
 export const mockSafetyRepository = () =>
   mockAll<SafetyRepository>(['userExists', 'isBlockedEitherWay', 'block', 'unblock', 'listBlocked', 'createReport']);
+export const mockProvidersRepository = () => mockAll<ProvidersRepository>(['list', 'findById', 'findService', 'findFreeSlots']);
+export const mockBookingsRepository = () =>
+  mockAll<BookingsRepository>(['create', 'findOwn', 'findById', 'listUpcoming', 'listPast', 'cancel']);

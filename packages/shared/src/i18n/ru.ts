@@ -50,6 +50,8 @@ export const ru: Messages = {
   'validation.searchMin': 'введите не менее {{min}} букв',
   'validation.messageEmpty': 'напишите сообщение',
   'validation.pushToken': 'не является push-токеном Expo',
+  'validation.bothCoordinates': 'укажите и lat, и lng',
+  'validation.maxDogs': 'максимальное число собак: {{max}}',
 
   'errors.badRequest': 'Неверный запрос',
   'errors.unauthorized': 'Пожалуйста, войдите в аккаунт',
@@ -88,6 +90,12 @@ export const ru: Messages = {
   'errors.notificationNotFound': 'Уведомление не найдено',
   'errors.cannotBlockSelf': 'Нельзя заблокировать самого себя',
   'errors.cannotReportSelf': 'Нельзя пожаловаться на самого себя',
+  'errors.providerNotFound': 'Специалист не найден',
+  'errors.serviceNotFound': 'Услуга не найдена',
+  'errors.bookingNotFound': 'Запись не найдена',
+  'errors.slotUnavailable': 'На это время записаться нельзя, выберите другое',
+  'errors.slotTaken': 'Это время только что заняли, выберите другое',
+  'errors.cancelTooLate': 'Отменить запись можно не позднее чем за {{hours}} ч до начала',
 
   'push.friendRequest.title': 'Новый запрос в друзья',
   'push.friendRequest.body': '{{name}} хочет добавить вас в друзья',
@@ -96,6 +104,10 @@ export const ru: Messages = {
   'push.message.title': 'Сообщение от {{name}}',
   'push.friendPlan.title': '{{name}} собирается в парк',
   'push.friendPlan.body': '{{park}} · {{when}}',
+  'push.bookingConfirmed.title': 'Запись подтверждена',
+  'push.bookingCancelled.title': 'Запись отменена',
+  'push.bookingReminder.title': 'Скоро увидимся!',
+  'push.booking.body': '{{service}} · {{provider}} · {{when}}',
 
   'auth.userExists': 'Аккаунт с этим адресом эл. почты уже существует',
   'auth.invalidCredentials': 'Неверный адрес эл. почты или пароль',

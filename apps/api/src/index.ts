@@ -1,6 +1,6 @@
 /**
- * Composition root: the only place that creates real infrastructure (database pool, auth,
- * mailer, logger) and wires it into the application. Everything else receives its
+ * Composition root: the only place that creates real infrastructure (database pool, object
+ * storage, auth, mailer, logger) and wires it into the application. Everything else receives its
  * dependencies as arguments.
  */
 import { sql } from 'drizzle-orm';
@@ -12,7 +12,7 @@ import { db, pool } from './db/client';
 import { createAuth } from './modules/auth/auth';
 import { createLogMailer } from './modules/auth/mailer';
 import { createSessionResolver } from './modules/auth/session-resolver';
-import { createServices } from './services';
+import { createServices, createStorageFromEnv } from './services';
 
 const isProduction = env.NODE_ENV === 'production';
 const logger = pino({
@@ -43,7 +43,7 @@ const auth = createAuth({
 
 const app = await buildApp(
   {
-    ...createServices(db, env.SERVICE_TIMEOUT_MS),
+    ...createServices(db, createStorageFromEnv(env), env.SERVICE_TIMEOUT_MS),
     checkDatabase: async () => {
       await db.execute(sql`select 1`);
       return true;

@@ -13,7 +13,7 @@
   "scripts": {
     "dev:api": "npm run dev -w @kapp/api",
     "dev:mobile": "npm run start -w mobile",
-    "db:up": "docker compose up -d --wait",
+    "db:up": "docker compose up -d --wait && docker compose run --rm minio-setup",
     "db:down": "docker compose down",
     "db:migrate": "npm run db:migrate -w @kapp/api",
     "db:seed": "npm run db:seed -w @kapp/api",

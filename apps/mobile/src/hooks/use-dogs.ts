@@ -3,6 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { apiGet, apiSend } from '@/lib/api';
 
+import { healthKeys } from './use-health';
+
 export const dogKeys = { all: ['dogs'] as const };
 
 export function useMyDogs() {
@@ -23,6 +25,10 @@ export function useDeleteDog(dogId: string) {
   const client = useQueryClient();
   return useMutation({
     mutationFn: () => apiSend<void>('DELETE', `/me/dogs/${dogId}`),
-    onSuccess: () => client.invalidateQueries({ queryKey: dogKeys.all }),
+    // The dog's photos and health records are deleted with it (reminders change too).
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: dogKeys.all });
+      client.invalidateQueries({ queryKey: healthKeys.all });
+    },
   });
 }

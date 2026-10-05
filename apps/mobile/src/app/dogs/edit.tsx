@@ -92,13 +92,14 @@ function DogForm({ dogId, existing }: { dogId?: string; existing?: Dog }) {
 
   function confirmDelete() {
     // Destructive and irreversible: confirm with the system alert (HIG), destructive style.
-    Alert.alert(`Kustutada ${existing?.name ?? 'koer'}?`, 'Koer eemaldatakse ka külastuste ajaloost.', [
+    Alert.alert(`Kustutada ${existing?.name ?? 'koer'}?`, 'Kustuvad ka koera fotod ja tervisekirjed ning koer eemaldatakse külastuste ajaloost.', [
       { text: 'Loobu', style: 'cancel' },
       {
         text: 'Kustuta',
         style: 'destructive',
         onPress: () =>
-          remove.mutate(undefined, { onSuccess: () => router.back(), onError: (e) => setFormError(errorMessage(e)) }),
+          // Back to the list: the profile underneath belongs to the dog that no longer exists.
+          remove.mutate(undefined, { onSuccess: () => router.dismissTo('/dogs'), onError: (e) => setFormError(errorMessage(e)) }),
       },
     ]);
   }

@@ -1,5 +1,6 @@
 import { relations, sql } from 'drizzle-orm';
 import {
+  type AnyPgColumn,
   boolean,
   check,
   date,
@@ -101,7 +102,13 @@ export const dogs = pgTable(
     birthDate: date('birth_date'),
     weightKg: numeric('weight_kg', { precision: 5, scale: 2 }),
     temperament: text('temperament'),
-    photoKey: text('photo_key'),
+    /**
+     * Profile picture as a reference to one of the dog's photos (replaces the unused photo_key).
+     * Why a foreign key and not a copied object key: deleting the photo clears it in the database
+     * itself (`set null`), so a dog can never point at deleted objects, and the photo's thumbnail
+     * comes for free. That the photo belongs to the same dog is checked in the update statement.
+     */
+    profilePhotoId: uuid('profile_photo_id').references((): AnyPgColumn => dogPhotos.id, { onDelete: 'set null' }),
     ...timestamps,
   },
   (t) => [index('dogs_owner_idx').on(t.ownerId)],
@@ -126,7 +133,11 @@ export const healthRecords = pgTable(
     documentKey: text('document_key'),
     ...timestamps,
   },
-  (t) => [index('health_records_dog_idx').on(t.dogId)],
+  (t) => [
+    index('health_records_dog_idx').on(t.dogId),
+    // The next due date follows the event; also enforced for PATCHes that change only one side.
+    check('health_records_next_due_after_date', sql`${t.nextDue} is null or ${t.nextDue} > ${t.date}`),
+  ],
 );
 
 export const dogPhotos = pgTable(
@@ -136,11 +147,15 @@ export const dogPhotos = pgTable(
     dogId: uuid('dog_id')
       .notNull()
       .references(() => dogs.id, { onDelete: 'cascade' }),
+    /** Re-encoded WebP, longer side ≤ 1600 px: `dogs/<dogId>/<photoId>/full.webp`. */
     imageKey: text('image_key').notNull(),
+    /** ≤ 400 px for grids and avatars: `dogs/<dogId>/<photoId>/thumb.webp`. */
+    thumbnailKey: text('thumbnail_key').notNull(),
     caption: text('caption'),
     createdAt: timestamps.createdAt,
   },
-  (t) => [index('dog_photos_dog_idx').on(t.dogId)],
+  // Listing is always "this dog's photos, newest first".
+  (t) => [index('dog_photos_dog_created_idx').on(t.dogId, t.createdAt)],
 );
 
 /* ------------------------------------------------------------------ */

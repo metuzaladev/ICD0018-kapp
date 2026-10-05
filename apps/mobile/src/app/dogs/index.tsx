@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
+import { DogAvatar } from '@/components/dog-avatar';
 import { FormError } from '@/components/form-error';
 import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
@@ -9,10 +10,9 @@ import { Radius, Spacing } from '@/constants/theme';
 import { useMyDogs } from '@/hooks/use-dogs';
 import { useTheme } from '@/hooks/use-theme';
 import { errorMessage } from '@/lib/api';
+import { DOG_SEX_LABEL } from '@/lib/format';
 
-const SEX = { male: 'isane', female: 'emane' } as const;
-
-/** Figma 04 / Dogs / My Dogs (photos and health come in M4). */
+/** Figma 04 / Dogs / My Dogs: profile thumbnail, basic data; a row opens the dog's profile. */
 export default function MyDogsScreen() {
   const c = useTheme();
   const { data: dogs, error, isPending } = useMyDogs();
@@ -27,13 +27,14 @@ export default function MyDogsScreen() {
         <Pressable
           key={dog.id}
           accessibilityRole="button"
-          accessibilityLabel={`${dog.name}, muuda`}
-          onPress={() => router.push({ pathname: '/dogs/edit', params: { dogId: dog.id } })}
+          accessibilityLabel={`${dog.name}, ava profiil`}
+          onPress={() => router.push({ pathname: '/dogs/[dogId]', params: { dogId: dog.id } })}
           style={({ pressed }) => [styles.row, { backgroundColor: c.surface, borderColor: c.border, opacity: pressed ? 0.8 : 1 }]}>
+          <DogAvatar dog={dog} />
           <View style={styles.text}>
             <ThemedText type="label">{dog.name}</ThemedText>
             <ThemedText type="caption" themeColor="muted">
-              {[dog.breed, dog.sex ? SEX[dog.sex] : null, dog.weightKg ? `${dog.weightKg.toLocaleString('et-EE')} kg` : null]
+              {[dog.breed, dog.sex ? DOG_SEX_LABEL[dog.sex] : null, dog.weightKg ? `${dog.weightKg.toLocaleString('et-EE')} kg` : null]
                 .filter(Boolean)
                 .join(' · ') || 'Lisa tõug ja muud andmed'}
             </ThemedText>

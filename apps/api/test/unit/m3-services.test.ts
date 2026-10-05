@@ -12,6 +12,7 @@ import {
   mockDogsRepository,
   mockRepository,
   mockReviewsRepository,
+  mockStorage,
   mockVisitsRepository,
   PARK_ID,
   USER_ID,
@@ -31,7 +32,7 @@ describe('DogsService', () => {
   let service: ReturnType<typeof createDogsService>;
   beforeEach(() => {
     repo = mockDogsRepository();
-    service = createDogsService({ repository: repo, timeoutMs: TIMEOUT_MS });
+    service = createDogsService({ repository: repo, storage: mockStorage().storage, timeoutMs: TIMEOUT_MS });
   });
 
   it('creates a dog under the limit', async () => {

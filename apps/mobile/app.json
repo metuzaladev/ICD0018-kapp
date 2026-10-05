@@ -43,6 +43,14 @@
         {
           "locationWhenInUsePermission": "Käpp kasutab sinu asukohta, et näidata lähimaid koeraparke ja nende kaugust. Asukohta ei jagata teistega ilma sinu loata."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Käpp vajab ligipääsu sinu piltidele, et saaksid valida fotosid oma koera profiili jaoks. Pildi asukohaandmed eemaldatakse enne salvestamist.",
+          "cameraPermission": "Käpp kasutab kaamerat, et saaksid oma koerast pilti teha. Pildi asukohaandmed eemaldatakse enne salvestamist.",
+          "microphonePermission": false
+        }
       ]
     ],
     "experiments": {

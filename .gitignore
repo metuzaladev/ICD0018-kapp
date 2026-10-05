@@ -6,3 +6,6 @@ node_modules/
 coverage/
 dist/
 *.tsbuildinfo
+
+# Claude Code agent worktrees (local working copies of background sessions)
+.claude/worktrees/

@@ -22,6 +22,20 @@
       "when": 1790893061453,
       "tag": "0002_m3_visit_constraints",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790894795464,
+      "tag": "0003_m4_photos_health",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790894800702,
+      "tag": "0004_m4_drop_dog_photo_key",
+      "breakpoints": true
     }
   ]
 }

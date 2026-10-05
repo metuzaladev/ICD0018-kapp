@@ -34,7 +34,9 @@ sequenceDiagram
 | Vead | Kõik auth-vead tõlgitakse kujule `{ error: true, message }` (eesti keeles) | Äpp näitab sama lepingut kõigil endpoint'idel. |
 | Parooli taastamine | Link kehtib 1 tund, kõik sessioonid tühistatakse; „Vaata oma postkasti" ei ütle, kas konto on olemas | Ei paljasta, millised e-postid on registreeritud. |
 | Kiiruspiirang | Fastify: 30 päringut minutis `/auth/*` kohta IP-lt; Better Auth lisab oma rangemad reeglid sisselogimisele | Paroolide arvamise vastu. |
-| E-posti kinnitus | Praegu välja lülitatud | E-posti teenus puudub (vt docs/15 GDPR-i osa); muidu jääks iga uus kasutaja lukku. |
+| E-posti kinnitus (M10) | Kiri saadetakse registreerimisel (link kehtib 24 h), **sisselogimist ei blokeerita**; äpis „Kinnita e-post" bänner ja „Saada uuesti" (`POST /me/email-verification`, 3 tunnis). Avalik `/send-verification-email` on keelatud. | Lukus konto aeglase kirja tõttu maksaks rohkem kui kinnitamata aadress. Vt docs/17. |
+| Konto kustutamine (M10) | `DELETE /api/v1/me` (oma endpoint; Better Authi `/delete-user` keelatud): parool või sessioon < 10 min (Apple/Google) | Üks transaktsioon koos meie koristusega; vt docs/17. |
+| Registreerimise lisaväljad (M10) | `language`, `termsVersion`, `privacyVersion` (`additionalFields`, `input: true`), kontrollitakse create-konksus | Kiri tuleb äpi keeles; nõusolek salvestub koos kontoga. |
 
 ## Endpoint'id
 
@@ -45,10 +47,15 @@ sequenceDiagram
 | `POST /api/v1/auth/sign-in/social` | kõik | Apple (ID token) või Google (suunamine) |
 | `POST /api/v1/auth/sign-out` | sisselogitud | Tühistab sessiooni |
 | `GET /api/v1/auth/get-session` | kõik | Kasutab äpi auth-klient |
-| `POST /api/v1/auth/request-password-reset` | kõik | Saadab lingi (arenduses logisse) |
+| `POST /api/v1/auth/request-password-reset` | kõik | Saadab lingi (e-posti järjekorda; arenduses `MAIL_PROVIDER=log` → link logisse) |
+| `GET /api/v1/auth/verify-email?token=…` | lingiga | Kinnitab e-posti, suunab `/email-verified` lehele (M10) |
 | `POST /api/v1/auth/reset-password` | lingiga | Uus parool |
 | `GET /api/v1/me` | sisselogitud | Oma profiil |
 | `PATCH /api/v1/me` | sisselogitud | `name`, `area`, `bio`, `presenceSharing` |
+| `DELETE /api/v1/me` | sisselogitud | Konto kustutamine (M10, docs/17) |
+| `POST /api/v1/me/email-verification` | sisselogitud | Kinnituskiri uuesti (M10) |
+| `PUT /api/v1/me/legal-acceptance` | sisselogitud | Nõustumine kehtivate tingimustega (M10) |
+| `GET /api/v1/me/export` | sisselogitud | Kõik oma andmed JSON-ina (M10) |
 
 ## Äpi vood
 
@@ -79,6 +86,7 @@ Kood on valmis, kuid nupud on peidetud, kuni võtmed on olemas. **Ilma võtmetet
 
 ## Teadaolevad piirangud
 
-- E-kirju ei saadeta veel: parooli taastamise link ilmub API logisse (`password reset link (dev mailer — not sent)`). Toodangus on vaja e-postiteenust `Mailer` liidese taha (EL-i valikud docs/15); seni logib toodang ainult vea, aadressi ja linki logisse ei kirjutata.
-- Konto kustutamine (GDPR) puudub — lisatakse enne avalikku väljalaset (App Store nõuab seda samuti).
+- E-kirjad (M10): arenduses vaikimisi `MAIL_PROVIDER=log` — kirja teema ja link ilmuvad API logisse (`email (log transport — not sent)`), aadressi kunagi. Toodangus `smtp` või `resend` (docs/17).
+- Parooli taastamise link avab äpi `kapp://new-password` kaudu samas telefonis; universal links (domeen + `apple-app-site-association`) on hilisem samm.
+- Apple'i tokeni tühistamine konto kustutamisel on TODO, kuni Apple'i võtmed on olemas (docs/17).
 - Onboardingu tutvustusvaated (Figma 02–03) jäid M7 viimistlusse.

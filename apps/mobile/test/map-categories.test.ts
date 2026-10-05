@@ -8,6 +8,7 @@ import {
   MAP_CATEGORIES,
   MAX_PIN_FACES,
   needsProviders,
+  parkKindOf,
   parkPinModel,
   PLACE_ICON,
   providerPlaceKind,
@@ -75,5 +76,18 @@ describe('park pin model', () => {
   it('guards against bad counts', () => {
     expect(parkPinModel(-3)).toEqual({ kind: 'place' });
     expect(parkPinModel(2.7)).toEqual({ kind: 'dogs', faces: 2, showCount: true, count: 2 });
+  });
+});
+
+describe('parkKindOf', () => {
+  it('treats an unfenced park with water as a swimming spot (Rannad)', () => {
+    expect(parkKindOf({ fenced: false, water: true })).toBe('beach');
+  });
+  it.each([
+    [{ fenced: true, water: true }],
+    [{ fenced: true, water: false }],
+    [{ fenced: false, water: false }],
+  ])('keeps %o a park', (p) => {
+    expect(parkKindOf(p)).toBe('park');
   });
 });

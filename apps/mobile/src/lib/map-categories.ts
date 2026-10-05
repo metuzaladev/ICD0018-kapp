@@ -64,6 +64,14 @@ export function categoryOf(kind: PlaceKind): Exclude<MapCategory, 'all'> | 'othe
   }
 }
 
+/**
+ * Pin kind of a park: an unfenced park with water is a dog swimming spot (koertepargid.ee
+ * "ujumiskoht") and belongs under "Rannad"; every other park is a park.
+ */
+export function parkKindOf(park: { fenced: boolean; water: boolean }): 'park' | 'beach' {
+  return park.water && !park.fenced ? 'beach' : 'park';
+}
+
 export function categoryShows(selected: MapCategory, kind: PlaceKind): boolean {
   return selected === 'all' || categoryOf(kind) === selected;
 }

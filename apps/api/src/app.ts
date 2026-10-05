@@ -2,6 +2,7 @@ import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import Fastify, { type FastifyBaseLogger } from 'fastify';
+import type { Redis } from 'ioredis';
 
 import { noAuthYet, type ResolveUserId } from './http/auth';
 import { registerErrorHandling } from './http/error-handler';
@@ -71,8 +72,14 @@ export interface AppDeps {
 
 export interface AppConfig {
   corsOrigins: string[];
-  trustProxy: boolean;
+  /** Fastify trustProxy: boolean, hop count or trusted proxy addresses (env TRUST_PROXY). */
+  trustProxy: boolean | number | string[];
   rateLimitMax: number;
+  /**
+   * Shared rate-limit counters for several instances (RATE_LIMIT_STORE=redis). Absent = in-memory
+   * counters per process, which is right for one instance and for tests.
+   */
+  rateLimitRedis?: Redis;
   bodyLimitBytes: number;
   /** false in tests; the composition root passes a configured pino instance. */
   logger: false | FastifyBaseLogger;
@@ -89,10 +96,14 @@ export const defaultAppConfig: AppConfig = {
 /** Public API version prefix — lets old app builds keep working when v2 ships. */
 export const API_PREFIX = '/api/v1';
 
+const trustFirstHops = (hops: number) => (_address: string, hop: number) => hop < hops;
+
 export async function buildApp(deps: AppDeps, config: AppConfig = defaultAppConfig) {
   const app = Fastify({
     ...(config.logger ? { loggerInstance: config.logger } : { logger: false }),
-    trustProxy: config.trustProxy,
+    // A hop count becomes "trust the first n hops" — what Fastify does for numbers at runtime,
+    // spelled out because its types only list boolean/string/function.
+    trustProxy: typeof config.trustProxy === 'number' ? trustFirstHops(config.trustProxy) : config.trustProxy,
     bodyLimit: config.bodyLimitBytes,
     // Drops connections that send their request too slowly (slowloris protection).
     requestTimeout: 15_000,
@@ -110,6 +121,14 @@ export async function buildApp(deps: AppDeps, config: AppConfig = defaultAppConf
     max: config.rateLimitMax,
     timeWindow: '1 minute',
     errorResponseBuilder: () => new TooManyRequestsError(),
+    ...(config.rateLimitRedis
+      ? {
+          redis: config.rateLimitRedis,
+          nameSpace: 'kapp:rate-limit:',
+          // Fail open: a Redis outage must not make every request fail (lib/redis-clients.ts).
+          skipOnError: true,
+        }
+      : {}),
   });
 
   const resolveUserId = deps.resolveUserId ?? noAuthYet;
@@ -137,7 +156,10 @@ export async function buildApp(deps: AppDeps, config: AppConfig = defaultAppConf
   if (deps.realtime) {
     const realtime = deps.realtime;
     realtime.attach(app.server, { resolveUserId, corsOrigins: config.corsOrigins, log: config.logger || undefined });
-    app.addHook('onClose', async () => realtime.close());
+    // preClose, not onClose: onClose runs only after the HTTP server has closed, and an open
+    // WebSocket keeps it open forever — shutdown hung until the deadline (found in M8 with
+    // `docker stop`). Disconnecting sockets first lets server.close() finish.
+    app.addHook('preClose', async () => realtime.close());
   }
 
   return app;

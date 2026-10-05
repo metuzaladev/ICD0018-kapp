@@ -16,7 +16,9 @@ export function createLogMailer(log: Pick<FastifyBaseLogger, 'info' | 'error'>, 
   return {
     async sendPasswordReset({ to, url }) {
       if (isProduction) {
-        log.error({ to }, 'password reset requested but no email provider is configured');
+        // No address in production logs: an email is personal data and logs are kept and shipped
+        // to third parties (docs/15). The alert only needs to know that resets are not delivered.
+        log.error({}, 'password reset requested but no email provider is configured');
         return;
       }
       log.info({ to, url }, 'password reset link (dev mailer — not sent)');

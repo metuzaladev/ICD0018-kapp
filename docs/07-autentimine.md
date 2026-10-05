@@ -34,7 +34,7 @@ sequenceDiagram
 | Vead | Kõik auth-vead tõlgitakse kujule `{ error: true, message }` (eesti keeles) | Äpp näitab sama lepingut kõigil endpoint'idel. |
 | Parooli taastamine | Link kehtib 1 tund, kõik sessioonid tühistatakse; „Vaata oma postkasti" ei ütle, kas konto on olemas | Ei paljasta, millised e-postid on registreeritud. |
 | Kiiruspiirang | Fastify: 30 päringut minutis `/auth/*` kohta IP-lt; Better Auth lisab oma rangemad reeglid sisselogimisele | Paroolide arvamise vastu. |
-| E-posti kinnitus | Praegu välja lülitatud | E-posti teenus puudub (M8); muidu jääks iga uus kasutaja lukku. |
+| E-posti kinnitus | Praegu välja lülitatud | E-posti teenus puudub (vt docs/15 GDPR-i osa); muidu jääks iga uus kasutaja lukku. |
 
 ## Endpoint'id
 
@@ -79,6 +79,6 @@ Kood on valmis, kuid nupud on peidetud, kuni võtmed on olemas. **Ilma võtmetet
 
 ## Teadaolevad piirangud
 
-- E-kirju ei saadeta veel: parooli taastamise link ilmub API logisse (`password reset link (dev mailer — not sent)`). Toodangus on vaja Resend/Postmark teenust (M8).
+- E-kirju ei saadeta veel: parooli taastamise link ilmub API logisse (`password reset link (dev mailer — not sent)`). Toodangus on vaja e-postiteenust `Mailer` liidese taha (EL-i valikud docs/15); seni logib toodang ainult vea, aadressi ja linki logisse ei kirjutata.
 - Konto kustutamine (GDPR) puudub — lisatakse enne avalikku väljalaset (App Store nõuab seda samuti).
 - Onboardingu tutvustusvaated (Figma 02–03) jäid M7 viimistlusse.

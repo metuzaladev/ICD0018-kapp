@@ -13,7 +13,8 @@ apps/api/src
     error-handler.ts     Iga viga → { error: true, message }
     validate.ts          parseRequest(schema, data, 'body' | 'query' | 'params')
     auth.ts              requireUser() preHandler
-  lib/                   Raamistikust sõltumatud abivahendid (withTimeout)
+  lib/                   Raamistikust sõltumatud abivahendid (withTimeout, graatsiline seiskamine,
+                         logi serialiseerijad ilma isikuandmeteta, Redise kliendid mitme instantsi jaoks)
   storage/               Objektihoidla: ObjectStorage liides ja S3 teostus (MinIO / R2)
   realtime/              Socket.IO värav (M5): ainult server → klient, autentimine sama sessiooniküpsisega
   modules/<valdkond>/    Üks kaust ärivaldkonna kohta
@@ -22,7 +23,9 @@ apps/api/src
     <valdkond>.repository.ts   Ainus koht, kus on SQL / Drizzle / PostGIS
   app.ts                 buildApp(deps, config): rakendus sõltuvustest
   services.ts            createServices(db, storage): sama objektigraaf serverile ja integratsioonitestidele
-  index.ts               Kompositsioonijuur: loob päris andmebaasi, hoidla ja logija
+  index.ts               Kompositsioonijuur: loob päris andmebaasi, hoidla ja logija; SIGTERM-i käsitlus
+  db/migrate.ts          Toodangu migratsioonikäsk (node dist/migrate.js), docs/15
+apps/api/scripts         build.mjs (esbuild → dist/), prune-runtime-deps.mjs (Docker image), docs/15
 apps/api/test
   unit/                  Puhtad funktsioonid ja teenused mock'idega
   http/                  Marsruudid app.inject() kaudu, teenus mock'itud
@@ -95,7 +98,8 @@ Kuidas lisada: lisa teate võti kolme faili `packages/shared/src/i18n/{et,en,ru}
 - **Ajapiirangud:** `statement_timeout` (5 s) Postgres'is, `withTimeout` (8 s) teenuses, `requestTimeout` (15 s) Fastifys, `connectionTimeoutMillis` (3 s) pool'is.
 - **Piirangud:** globaalne rate limit 120 päringut minutis IP kohta, kirjutavatel marsruutidel rangem (pargi lisamine 10 tunnis); body max 64 KB, sest pildid ei käi läbi API.
 - **Päised:** `@fastify/helmet`. CORS keelab brauserid, kui `CORS_ORIGINS` pole seatud (natiivne äpp CORS-i ei kasuta).
-- **Logid** ei sisalda `Authorization` ega cookie päiseid.
+- **Logid** ei sisalda `Authorization` ega cookie päiseid ega isikuandmeid: päringulogis on meetod ja tee ilma query stringi ja IP-ta (`lib/log-serializers.ts`), e-posti aadresse ei logita toodangus (docs/15).
+- **Toodangu konfiguratsioon** kontrollitakse käivitamisel (`productionConfigProblems`): localhosti vaikeväärtused, arenduse saladused, http avalik URL ja `*` CORS lükatakse tagasi, kõik vead korraga.
 - **SQL** ainult Drizzle'i või parameetritega `sql`-mallide kaudu, mitte kunagi stringide liitmisega.
 - **Korrelatsiooniga alampäringus viita välisele reale selgesõnaliselt** (`"parks"."id"`). Drizzle kirjutab ühe tabeli päringus `${parks.id}` kujul `"id"` ja alampäringus seob Postgres selle sisemise tabeliga, mis annab vaikselt vale tulemuse (vt docs/08).
 - **Idempotentsed muutused on `PUT`/`DELETE`** (nt lemmikud, `PUT …/reviews/mine`), et korduspäringud oleksid ohutud.

@@ -12,7 +12,10 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx src/db/seed.ts",
-    "test:integration": "INTEGRATION=1 vitest run"
+    "test:integration": "INTEGRATION=1 vitest run",
+    "build": "node scripts/build.mjs",
+    "start:prod": "node --enable-source-maps dist/index.js",
+    "db:migrate:prod": "node dist/migrate.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1145.0",
@@ -22,6 +25,7 @@
     "@fastify/helmet": "^13.1.1",
     "@fastify/rate-limit": "^11.2.0",
     "@kapp/shared": "*",
+    "@socket.io/redis-adapter": "^8.3.0",
     "better-auth": "^1.7.7",
     "bullmq": "^6.3.11",
     "drizzle-orm": "^0.45.3",
@@ -38,6 +42,7 @@
     "@types/node": "^22.15.0",
     "@types/pg": "^8.15.0",
     "drizzle-kit": "^0.31.11",
+    "esbuild": "^0.28.2",
     "exif-reader": "^2.0.3",
     "socket.io-client": "^4.8.4",
     "tsx": "^4.23.15",

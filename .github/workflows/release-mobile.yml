@@ -1,0 +1,60 @@
+# Manual EAS build template (M8, docs/15-pakendamine-ja-levitamine.md). Runs only when started by
+# hand and only after the one-time setup: `eas init` (projectId in app.json), EAS environment
+# variables (EXPO_PUBLIC_API_URL per environment) and a repository secret EXPO_TOKEN
+# (expo.dev → Account settings → Access tokens). Without EXPO_TOKEN the job stops with a message.
+# Builds run on Expo's servers; this job only queues them and does not wait.
+name: Release mobile (EAS)
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: eas.json build profile
+        type: choice
+        options: [preview, production]
+        default: preview
+      platform:
+        description: Platform
+        type: choice
+        options: [all, ios, android]
+        default: all
+      submit:
+        description: Submit production builds to TestFlight / Play internal testing
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - name: Require EXPO_TOKEN
+        working-directory: .
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "::error::EXPO_TOKEN secret is not set — see docs/15-pakendamine-ja-levitamine.md"
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+        working-directory: .
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Queue EAS build
+        run: >-
+          eas build --profile ${{ inputs.profile }} --platform ${{ inputs.platform }}
+          --non-interactive --no-wait
+          ${{ inputs.submit && inputs.profile == 'production' && '--auto-submit' || '' }}

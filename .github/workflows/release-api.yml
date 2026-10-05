@@ -1,0 +1,70 @@
+# Manual API release template (M8, docs/15-pakendamine-ja-levitamine.md). Runs only when started
+# by hand (Actions → Release API → Run workflow); nothing here runs on push or pull request.
+#
+# 1. Builds the same image as CI and pushes it to GitHub Container Registry (ghcr.io — uses the
+#    built-in GITHUB_TOKEN, no extra account) as :<git sha> and :<environment>.
+# 2. Optionally calls the hosting platform's deploy hook. The hook is a repository/environment
+#    secret DEPLOY_HOOK_URL (Render "Deploy Hook", Coolify webhook, …); without it the step is
+#    skipped and you deploy the pushed tag yourself.
+# Migrations are NOT run from GitHub: the database is not reachable from Actions runners. Configure
+# the platform's pre-deploy/release command as `node dist/migrate.js` (docs/15).
+name: Release API
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        type: choice
+        options: [staging, production]
+        default: staging
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: release-api-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    # GitHub environments can require a reviewer before production (Settings → Environments).
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: image
+        # Registry paths must be lowercase.
+        run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}/api" >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          push: true
+          # Most EU VMs are x86; add linux/arm64 for Hetzner CAX / Graviton-style hosts.
+          platforms: linux/amd64
+          tags: |
+            ${{ steps.image.outputs.name }}:${{ github.sha }}
+            ${{ steps.image.outputs.name }}:${{ inputs.environment }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Trigger deploy (skipped without DEPLOY_HOOK_URL)
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$DEPLOY_HOOK_URL" ]; then
+            echo "DEPLOY_HOOK_URL is not set — image pushed, deploy ${{ github.sha }} manually."
+            exit 0
+          fi
+          curl -fsS -X POST "$DEPLOY_HOOK_URL" > /dev/null
+          echo "Deploy hook called for ${{ github.sha }}."

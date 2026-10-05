@@ -1,0 +1,19 @@
+# Build context for apps/api/Dockerfile (built from the repository root).
+# Allow-list style: ignore everything, then add back only what the API image needs. Keeps secrets
+# (.env), the mobile app, docs and node_modules out of the context and the layer cache stable.
+*
+!package.json
+!package-lock.json
+!tsconfig.base.json
+!packages/shared/
+!apps/api/
+
+# Never send these, even inside the allowed folders.
+**/node_modules
+**/dist
+**/.env
+**/.env.*
+!**/.env.example
+**/coverage
+**/*.log
+apps/api/test

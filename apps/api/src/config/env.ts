@@ -111,11 +111,28 @@ const envSchema = z.object({
    * enabled for the Expo project; without it the Expo push service accepts any valid token.
    */
   EXPO_ACCESS_TOKEN: optional(z.string().min(1)),
-  /** Runs the push worker in the API process. Set false when a separate worker process takes over. */
+  /**
+   * Runs the BullMQ workers (push, booking reminders, and since M10 email and storage cleanup) in the
+   * API process. Set false when a separate worker process takes over.
+   */
   PUSH_WORKER_ENABLED: z
     .enum(['true', 'false'])
     .default('true')
     .transform((v) => v === 'true'),
+
+  /* ---- email (M10, docs/17-konto-privaatsus-e-post.md) ---- */
+
+  /**
+   * Who delivers password-reset, confirmation and deletion emails. `log` (development default)
+   * only logs; production must use `smtp` (any SMTP server) or `resend` (HTTP API).
+   */
+  MAIL_PROVIDER: z.enum(['log', 'smtp', 'resend']).default('log'),
+  /** Sender, e.g. `Käpp <noreply@kapp.example>`. The domain needs SPF and DKIM for the provider (docs/17). */
+  MAIL_FROM: optional(z.string().trim().min(3).max(200)),
+  /** smtp(s)://user:password@host:port — a secret, keep it out of the repository. */
+  SMTP_URL: optional(z.string().regex(/^smtps?:\/\/\S+$/, 'SMTP_URL must start with smtp:// or smtps://')),
+  /** Resend API key (re_…), sending-only permission. */
+  RESEND_API_KEY: optional(z.string().min(1)),
 
   /* ---- running more than one instance (M8, docs/15-pakendamine-ja-levitamine.md) ---- */
 
@@ -180,6 +197,10 @@ export function productionConfigProblems(parsed: ParsedEnv, source: Record<strin
   if (parsed.CORS_ORIGINS.some((o) => o === '*' || !o.startsWith('https://'))) {
     errors.push('CORS_ORIGINS must list https origins only (no "*") in production');
   }
+  if (parsed.MAIL_PROVIDER === 'log') {
+    errors.push('MAIL_PROVIDER must be smtp or resend in production (log delivers no password-reset or confirmation email)');
+  }
+  if (!parsed.MAIL_FROM) errors.push('MAIL_FROM is required in production');
   if (parsed.TRUST_PROXY === true) {
     warnings.push('TRUST_PROXY=true trusts every X-Forwarded-For hop; prefer a hop count or proxy CIDRs');
   }
@@ -196,9 +217,20 @@ const DEV_S3_SECRET_ACCESS_KEY = 'kapp-dev-secret';
  * Parses and checks the configuration. Takes the source as an argument so tests can check the
  * production rules without touching process.env.
  */
+/** Provider settings that are wrong in every environment (a chosen provider without its credentials). */
+export function mailConfigProblems(parsed: Pick<ParsedEnv, 'MAIL_PROVIDER' | 'SMTP_URL' | 'RESEND_API_KEY'>): string[] {
+  if (parsed.MAIL_PROVIDER === 'smtp' && !parsed.SMTP_URL) return ['SMTP_URL is required when MAIL_PROVIDER=smtp'];
+  if (parsed.MAIL_PROVIDER === 'resend' && !parsed.RESEND_API_KEY) return ['RESEND_API_KEY is required when MAIL_PROVIDER=resend'];
+  return [];
+}
+
 export function loadEnv(source: Record<string, string | undefined> = process.env) {
   const parsed = envSchema.parse(source);
-  const { errors, warnings } = productionConfigProblems(parsed, source);
+  const mailProblems = mailConfigProblems(parsed);
+  if (mailProblems.length > 0 && parsed.NODE_ENV !== 'production') throw new Error(`Invalid email configuration:\n- ${mailProblems.join('\n- ')}`);
+  const production = productionConfigProblems(parsed, source);
+  const errors = [...production.errors, ...(parsed.NODE_ENV === 'production' ? mailProblems : [])];
+  const { warnings } = production;
   if (errors.length > 0) {
     throw new Error(`Invalid production configuration:\n- ${errors.join('\n- ')}`);
   }

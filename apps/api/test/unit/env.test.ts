@@ -13,6 +13,9 @@ const production = {
   S3_REGION: 'auto',
   S3_ACCESS_KEY_ID: 'key-id',
   S3_SECRET_ACCESS_KEY: 'key-secret',
+  MAIL_PROVIDER: 'resend',
+  RESEND_API_KEY: 're_test_key',
+  MAIL_FROM: 'Käpp <noreply@kapp.example>',
 };
 
 describe('loadEnv in production', () => {
@@ -47,6 +50,16 @@ describe('loadEnv in production', () => {
     expect(() => loadEnv({ ...production, CORS_ORIGINS: 'http://admin.kapp.example' })).toThrow(/CORS_ORIGINS/);
   });
 
+  it('requires a real email provider, its credentials and a sender (M10)', () => {
+    expect(() => loadEnv({ ...production, MAIL_PROVIDER: 'log' })).toThrow(/MAIL_PROVIDER must be smtp or resend/);
+    expect(() => loadEnv({ ...production, MAIL_PROVIDER: undefined })).toThrow(/MAIL_PROVIDER/);
+    expect(() => loadEnv({ ...production, MAIL_FROM: '' })).toThrow(/MAIL_FROM is required/);
+    expect(() => loadEnv({ ...production, RESEND_API_KEY: '' })).toThrow(/RESEND_API_KEY is required/);
+    expect(() => loadEnv({ ...production, MAIL_PROVIDER: 'smtp' })).toThrow(/SMTP_URL is required/);
+    expect(loadEnv({ ...production, MAIL_PROVIDER: 'smtp', SMTP_URL: 'smtps://user:pass@smtp.example:465' }).MAIL_PROVIDER).toBe('smtp');
+    expect(() => loadEnv({ ...production, MAIL_PROVIDER: 'smtp', SMTP_URL: 'https://smtp.example' })).toThrow(/smtp:\/\//);
+  });
+
   it('warns (does not fail) on TRUST_PROXY=true', () => {
     expect(loadEnv({ ...production, TRUST_PROXY: 'true' }).CONFIG_WARNINGS).toEqual([expect.stringMatching(/TRUST_PROXY/)]);
   });
@@ -67,6 +80,12 @@ describe('loadEnv in development', () => {
     expect(env.DATABASE_URL).toContain('localhost');
     expect(env.CONFIG_WARNINGS).toEqual([]);
     expect(env.LOG_LEVEL).toBeUndefined();
+    expect(env.MAIL_PROVIDER).toBe('log');
+  });
+
+  it('fails fast when a chosen email provider has no credentials', () => {
+    expect(() => loadEnv({ MAIL_PROVIDER: 'smtp' })).toThrow(/SMTP_URL is required/);
+    expect(() => loadEnv({ MAIL_PROVIDER: 'resend' })).toThrow(/RESEND_API_KEY is required/);
   });
 });
 

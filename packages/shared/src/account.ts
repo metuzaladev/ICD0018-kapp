@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { LANGUAGES } from './i18n';
 import { PASSWORD_MAX } from './schemas';
 import { issueMessage } from './validation';
 
@@ -50,3 +51,11 @@ export const accountExportSchema = z.object({
   sections: z.record(z.string(), z.unknown()),
 });
 export type AccountExport = z.infer<typeof accountExportSchema>;
+
+/** GET /legal/privacy, /legal/terms, /email-verified (public HTML pages): `?lang=` beats Accept-Language. */
+export const legalPageQuerySchema = z.object({
+  lang: z.enum(LANGUAGES).optional(),
+  /** Better Auth appends `?error=INVALID_TOKEN` / `TOKEN_EXPIRED` when a confirmation link fails. */
+  error: z.string().max(64).optional(),
+});
+export type LegalPageQuery = z.infer<typeof legalPageQuerySchema>;

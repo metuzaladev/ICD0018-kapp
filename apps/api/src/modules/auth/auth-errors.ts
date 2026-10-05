@@ -18,6 +18,7 @@ const AUTH_ERROR_KEY: Record<string, MessageKey> = {
   EMAIL_NOT_VERIFIED: 'auth.emailNotVerified',
   USER_NOT_FOUND: 'auth.userNotFound',
   FAILED_TO_CREATE_USER: 'auth.createUserFailed',
+  LEGAL_VERSION_OUTDATED: 'errors.legalVersionOutdated',
 };
 
 const STATUS_KEY: Record<number, MessageKey> = {

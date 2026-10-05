@@ -3,15 +3,20 @@
  * storage, auth, mailer, logger) and wires it into the application. Everything else receives its
  * dependencies as arguments.
  */
+import { legalHasPlaceholders } from '@kapp/shared';
 import { sql } from 'drizzle-orm';
 import pino from 'pino';
 
 import { buildApp } from './app';
 import { env } from './config/env';
 import { db, pool } from './db/client';
+import { createStorageCleanupProcessor, createStorageCleanupQueue, startStorageCleanupWorker } from './modules/account/storage-cleanup';
+import { createAccountAuth, createSessionStartResolver } from './modules/auth/account-auth';
 import { createAuth } from './modules/auth/auth';
 import { createBookingReminderQueue, startBookingReminderWorker } from './modules/bookings/booking-reminders';
-import { createLogMailer } from './modules/auth/mailer';
+import { createMailProcessor, createMailQueue, startMailWorker } from './modules/mail/mail-queue';
+import { createMailTransportFromEnv, DEV_MAIL_FROM } from './modules/mail/mail-transport';
+import { createQueuedMailer } from './modules/mail/mailer';
 import { createSessionResolver } from './modules/auth/session-resolver';
 import { createPushTokensRepository } from './modules/notifications/notifications.repository';
 import { createPushQueue, startPushWorker } from './modules/notifications/push-queue';
@@ -31,10 +36,17 @@ const logger = pino({
   redact: ['req.headers.authorization', 'req.headers.cookie', 'res.headers["set-cookie"]'],
 });
 for (const warning of env.CONFIG_WARNINGS) logger.warn(warning);
+// M10: the legal texts must name the real controller before the store release (docs/17).
+if (legalHasPlaceholders()) logger.warn('privacy policy / terms still contain the controller placeholder (packages/shared/src/legal)');
+
+// M10 email (docs/17): requests enqueue, a BullMQ worker renders and sends through MAIL_PROVIDER.
+const queueConnection = { url: env.REDIS_URL, prefix: env.PUSH_QUEUE_PREFIX };
+const mailQueue = createMailQueue(queueConnection);
+const mailer = createQueuedMailer({ queue: mailQueue, log: logger, privacyUrl: `${env.API_PUBLIC_URL}/legal/privacy` });
 
 const auth = createAuth({
   db,
-  mailer: createLogMailer(logger, isProduction),
+  mailer,
   config: {
     secret: env.BETTER_AUTH_SECRET,
     publicUrl: env.API_PUBLIC_URL,
@@ -57,7 +69,6 @@ const auth = createAuth({
 const realtimeAdapter = env.REALTIME_ADAPTER === 'redis' ? createRealtimeRedisAdapter(env.REDIS_URL, logger, `${env.PUSH_QUEUE_PREFIX}:socket.io`) : null;
 const realtime = createSocketGateway({ adapter: realtimeAdapter?.adapter });
 const rateLimitRedis = env.RATE_LIMIT_STORE === 'redis' ? createRateLimitRedis(env.REDIS_URL, logger) : undefined;
-const queueConnection = { url: env.REDIS_URL, prefix: env.PUSH_QUEUE_PREFIX };
 const pushQueue = createPushQueue(queueConnection);
 const pushWorker = env.PUSH_WORKER_ENABLED
   ? startPushWorker(
@@ -74,10 +85,26 @@ const pushWorker = env.PUSH_WORKER_ENABLED
 // M6: booking reminders are delayed jobs in the same Redis; the worker shares PUSH_WORKER_ENABLED
 // because it only ends in a push (docs/13-teenused.md).
 const bookingReminders = createBookingReminderQueue(queueConnection);
-const services = createServices(db, createStorageFromEnv(env), env.SERVICE_TIMEOUT_MS, { realtime, pushQueue, bookingReminders, log: logger });
+const storage = createStorageFromEnv(env);
+// M10: a deleted account's files are removed after the commit by a retried job (docs/17).
+const storageCleanup = createStorageCleanupQueue(queueConnection);
+const services = createServices(db, storage, env.SERVICE_TIMEOUT_MS, {
+  realtime,
+  pushQueue,
+  bookingReminders,
+  log: logger,
+  mailer,
+  storageCleanup,
+  accountAuth: createAccountAuth(auth),
+  accountLog: logger,
+});
 const reminderWorker = env.PUSH_WORKER_ENABLED
   ? startBookingReminderWorker(queueConnection, (bookingId) => services.bookingsService.sendReminder(bookingId), logger)
   : null;
+const mailWorker = env.PUSH_WORKER_ENABLED
+  ? startMailWorker(queueConnection, createMailProcessor({ transport: createMailTransportFromEnv(env, logger), from: env.MAIL_FROM ?? DEV_MAIL_FROM }), logger)
+  : null;
+const storageCleanupWorker = env.PUSH_WORKER_ENABLED ? startStorageCleanupWorker(queueConnection, createStorageCleanupProcessor(storage), logger) : null;
 
 const app = await buildApp(
   {
@@ -88,6 +115,7 @@ const app = await buildApp(
       return true;
     },
     resolveUserId: createSessionResolver(auth),
+    resolveSessionStart: createSessionStartResolver(auth),
     authHandler: auth.handler,
   },
   {
@@ -106,8 +134,12 @@ const steps: (ShutdownStep | null)[] = [
   { name: 'http', close: () => app.close() }, // stops accepting, waits for in-flight requests, closes sockets
   pushWorker && { name: 'push worker', close: () => pushWorker.close() }, // unfinished jobs stay in Redis
   reminderWorker && { name: 'reminder worker', close: () => reminderWorker.close() },
+  mailWorker && { name: 'mail worker', close: () => mailWorker.close() },
+  storageCleanupWorker && { name: 'storage cleanup worker', close: () => storageCleanupWorker.close() },
   { name: 'push queue', close: () => pushQueue.close() },
   { name: 'reminder queue', close: () => bookingReminders.close() },
+  { name: 'mail queue', close: () => mailQueue.close() },
+  { name: 'storage cleanup queue', close: () => storageCleanup.close() },
   realtimeAdapter && { name: 'realtime redis', close: () => realtimeAdapter.close() },
   rateLimitRedis ? { name: 'rate limit redis', close: () => rateLimitRedis.quit() } : null,
   { name: 'database', close: () => pool.end() },

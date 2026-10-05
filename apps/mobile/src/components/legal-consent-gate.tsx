@@ -2,7 +2,7 @@ import { legalBlocks, type LegalDocument } from '@kapp/shared';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { FormError } from '@/components/form-error';
@@ -30,6 +30,9 @@ export function LegalConsentGate() {
   const accept = useAcceptLegal();
   const [reading, setReading] = useState<LegalDocument | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Insets from the app's provider: a SafeAreaView inside a Modal measures the modal's own window and
+  // got zero, so the title sat under the status bar and the notch.
+  const insets = useSafeAreaInsets();
   const profile = me.data;
   if (!profile || !needsLegalAcceptance(profile)) return null;
   const kind = legalConsentKind(profile);
@@ -48,7 +51,7 @@ export function LegalConsentGate() {
   return (
     <Modal visible animationType="slide" presentationStyle="fullScreen" onRequestClose={() => setReading(null)}>
       <ThemedView style={styles.root}>
-        <SafeAreaView style={styles.root}>
+        <View style={[styles.root, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
           <ScrollView contentContainerStyle={styles.content}>
             {reading ? (
               <>
@@ -72,7 +75,7 @@ export function LegalConsentGate() {
               </>
             )}
           </ScrollView>
-        </SafeAreaView>
+        </View>
       </ThemedView>
     </Modal>
   );

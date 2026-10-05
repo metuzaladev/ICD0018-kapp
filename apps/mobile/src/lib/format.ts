@@ -155,6 +155,20 @@ export function visitsLabel(count: number): string {
   return i18n.t('counts.visits', { count });
 }
 
+/** "1 plaanitud külastus", "4 plaanitud külastust" (M11 Home activity). */
+export function plannedVisitsLabel(count: number): string {
+  return i18n.t('counts.plannedVisits', { count });
+}
+
+/**
+ * "Mari", "Mari ja Jaan", "Mari, Jaan ja Luna". A translated "and" instead of Intl.ListFormat,
+ * which Hermes does not provide on every platform.
+ */
+export function formatList(items: readonly string[]): string {
+  if (items.length <= 1) return items[0] ?? '';
+  return i18n.t('common.listAnd', { rest: items.slice(0, -1).join(', '), last: items[items.length - 1] });
+}
+
 /** "isane" / "emane" */
 export function dogSexLabel(sex: DogSex): string {
   return i18n.t(sex === 'male' ? 'dogs.sex.male' : 'dogs.sex.female');

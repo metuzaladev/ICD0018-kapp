@@ -9,7 +9,8 @@
     "you": "Вы",
     "dog": "собака",
     "until": "до {{time}}",
-    "retry": "Повторить"
+    "retry": "Повторить",
+    "listAnd": "{{rest}} и {{last}}"
   },
   "units": {
     "km": "{{value}} км",
@@ -39,7 +40,11 @@
     "friendsInPark_one": "{{count}} друг в парке",
     "friendsInPark_few": "{{count}} друга в парке",
     "friendsInPark_many": "{{count}} друзей в парке",
-    "friendsInPark_other": "{{count}} друга в парке"
+    "friendsInPark_other": "{{count}} друга в парке",
+    "plannedVisits_one": "{{count}} запланированный визит",
+    "plannedVisits_few": "{{count}} запланированных визита",
+    "plannedVisits_many": "{{count}} запланированных визитов",
+    "plannedVisits_other": "{{count}} запланированного визита"
   },
   "dates": {
     "today": "сегодня",
@@ -238,7 +243,35 @@
     "findFriends": "Найти друзей для игр",
     "servicesTitle": "Услуги",
     "servicesSub": "Груминг, дрессировка и ветклиники",
-    "allParks": "Все парки"
+    "allParks": "Все парки",
+    "activity": {
+      "title": "Любимые парки сегодня",
+      "titleNearby": "Ближайшие парки сегодня",
+      "now": "Сейчас в парке: {{dogs}}",
+      "nowQuiet": "Сейчас в парке тихо",
+      "planned": "{{part}}: {{visits}}",
+      "parts": {
+        "morning": "Утром",
+        "day": "Днём",
+        "evening": "Вечером"
+      },
+      "friends": "Друзья: {{names}}",
+      "noPlans": "На сегодня ещё никто не запланировал визит.",
+      "noFavorites": "Любимых парков пока нет",
+      "noFavoritesBody": "Добавьте любимый парк — и здесь будет видно, сколько собак придёт туда сегодня.",
+      "addFavorite": "Добавить любимый парк",
+      "addFavoriteHint": "Открывает список парков; на странице парка нажмите на сердечко",
+      "manageFavorites": "Мои любимые парки"
+    },
+    "picks": {
+      "title": "Советы сообщества",
+      "by": "советует {{name}}",
+      "openHint": "Открывает рекомендацию",
+      "seeAll": "Смотреть все",
+      "empty": "Рядом пока нет рекомендаций",
+      "emptyBody": "Знаете хорошее кафе или тропу, где рады собакам? Поделитесь с другими.",
+      "suggest": "Предложить место"
+    }
   },
   "map": {
     "title": "Откроем Таллинн.",
@@ -897,7 +930,9 @@
   "nearestPark": {
     "label": "Ближайший парк",
     "hereNow": "Вы здесь",
-    "checkInHint": "Отмечает ваше присутствие: {{name}}"
+    "checkInHint": "Отмечает ваше присутствие: {{name}}",
+    "open": "Открыть парк",
+    "directionsHint": "Открывает карты с пешим маршрутом"
   },
   "mapSheet": {
     "freeTimes": "Свободное время",

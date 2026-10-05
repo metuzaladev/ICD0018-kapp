@@ -9,7 +9,8 @@
     "you": "Sina",
     "dog": "koer",
     "until": "kuni {{time}}",
-    "retry": "Proovi uuesti"
+    "retry": "Proovi uuesti",
+    "listAnd": "{{rest}} ja {{last}}"
   },
   "units": {
     "km": "{{value}} km",
@@ -29,7 +30,9 @@
     "visits_one": "{{count}} külastus",
     "visits_other": "{{count}} külastust",
     "friendsInPark_one": "{{count}} sõber pargis",
-    "friendsInPark_other": "{{count}} sõpra pargis"
+    "friendsInPark_other": "{{count}} sõpra pargis",
+    "plannedVisits_one": "{{count}} plaanitud külastus",
+    "plannedVisits_other": "{{count}} plaanitud külastust"
   },
   "dates": {
     "today": "täna",
@@ -214,7 +217,35 @@
     "findFriends": "Leia mängusõbrad",
     "servicesTitle": "Teenused",
     "servicesSub": "Hooldus, treening ja kliinik",
-    "allParks": "Vaata kõiki parke"
+    "allParks": "Vaata kõiki parke",
+    "activity": {
+      "title": "Lemmikparkides täna",
+      "titleNearby": "Lähimates parkides täna",
+      "now": "Praegu pargis {{dogs}}",
+      "nowQuiet": "Praegu on pargis vaikne",
+      "planned": "{{part}}: {{visits}}",
+      "parts": {
+        "morning": "Hommikul",
+        "day": "Päeval",
+        "evening": "Õhtul"
+      },
+      "friends": "Sõbrad: {{names}}",
+      "noPlans": "Tänaseks pole keegi plaani teinud.",
+      "noFavorites": "Lemmikparke veel pole",
+      "noFavoritesBody": "Lisa lemmikpark ja näed siin, mitu koera sinna täna tuleb.",
+      "addFavorite": "Lisa lemmikpark",
+      "addFavoriteHint": "Avab parkide nimekirja, pargi lehel saad selle südamega lemmikuks märkida",
+      "manageFavorites": "Minu lemmikpargid"
+    },
+    "picks": {
+      "title": "Kogukonna soovitused",
+      "by": "soovitas {{name}}",
+      "openHint": "Avab soovituse",
+      "seeAll": "Vaata kõiki",
+      "empty": "Lähedal pole veel soovitusi",
+      "emptyBody": "Tead head koerasõbralikku kohvikut või rada? Jaga seda teistega.",
+      "suggest": "Soovita kohta"
+    }
   },
   "map": {
     "title": "Avastame Tallinna.",
@@ -841,7 +872,9 @@
   "nearestPark": {
     "label": "Lähim park",
     "hereNow": "Oled siin",
-    "checkInHint": "Märgib kohaloleku: {{name}}"
+    "checkInHint": "Märgib kohaloleku: {{name}}",
+    "open": "Vaata parki",
+    "directionsHint": "Avab kaardirakenduse jalgsi teejuhistega"
   },
   "mapSheet": {
     "freeTimes": "Vabad ajad",

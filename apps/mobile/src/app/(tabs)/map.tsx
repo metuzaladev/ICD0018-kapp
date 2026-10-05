@@ -234,7 +234,7 @@ function MapScreen() {
               <EmptyState title={query ? t('map.noMatches') : t('map.emptyPlaces')} />
             </View>
           ) : null}
-          {nearest ? <NearestParkCard park={nearest} floating /> : null}
+          {nearest ? <NearestParkCard park={nearest} usingFallback={location.usingFallback} floating /> : null}
         </View>
       )}
     </View>

@@ -9,7 +9,8 @@
     "you": "You",
     "dog": "dog",
     "until": "until {{time}}",
-    "retry": "Try again"
+    "retry": "Try again",
+    "listAnd": "{{rest}} and {{last}}"
   },
   "units": {
     "km": "{{value}} km",
@@ -29,7 +30,9 @@
     "visits_one": "{{count}} visit",
     "visits_other": "{{count}} visits",
     "friendsInPark_one": "{{count}} friend in the park",
-    "friendsInPark_other": "{{count}} friends in the park"
+    "friendsInPark_other": "{{count}} friends in the park",
+    "plannedVisits_one": "{{count}} planned visit",
+    "plannedVisits_other": "{{count}} planned visits"
   },
   "dates": {
     "today": "today",
@@ -214,7 +217,35 @@
     "findFriends": "Find playmates",
     "servicesTitle": "Services",
     "servicesSub": "Grooming, training and vets",
-    "allParks": "See all parks"
+    "allParks": "See all parks",
+    "activity": {
+      "title": "Your favourite parks today",
+      "titleNearby": "Nearest parks today",
+      "now": "In the park now: {{dogs}}",
+      "nowQuiet": "Quiet in the park right now",
+      "planned": "{{part}}: {{visits}}",
+      "parts": {
+        "morning": "Morning",
+        "day": "Afternoon",
+        "evening": "Evening"
+      },
+      "friends": "Friends: {{names}}",
+      "noPlans": "Nobody has made plans for today yet.",
+      "noFavorites": "No favourite parks yet",
+      "noFavoritesBody": "Add a favourite park and see here how many dogs are heading there today.",
+      "addFavorite": "Add a favourite park",
+      "addFavoriteHint": "Opens the park list; tap the heart on a park page to save it",
+      "manageFavorites": "My favourite parks"
+    },
+    "picks": {
+      "title": "Community picks",
+      "by": "suggested by {{name}}",
+      "openHint": "Opens the suggestion",
+      "seeAll": "See all",
+      "empty": "No suggestions nearby yet",
+      "emptyBody": "Know a great dog-friendly café or trail? Share it with others.",
+      "suggest": "Suggest a place"
+    }
   },
   "map": {
     "title": "Let’s explore Tallinn.",
@@ -841,7 +872,9 @@
   "nearestPark": {
     "label": "Nearest park",
     "hereNow": "You're here",
-    "checkInHint": "Checks you in: {{name}}"
+    "checkInHint": "Checks you in: {{name}}",
+    "open": "View park",
+    "directionsHint": "Opens your maps app with walking directions"
   },
   "mapSheet": {
     "freeTimes": "Free times",

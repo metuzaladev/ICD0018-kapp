@@ -229,7 +229,8 @@
         "day": "Päeval",
         "evening": "Õhtul"
       },
-      "friends": "Sõbrad: {{names}}",
+      "friends_one": "Sõber: {{names}}",
+      "friends_other": "Sõbrad: {{names}}",
       "noPlans": "Tänaseks pole keegi plaani teinud.",
       "noFavorites": "Lemmikparke veel pole",
       "noFavoritesBody": "Lisa lemmikpark ja näed siin, mitu koera sinna täna tuleb.",

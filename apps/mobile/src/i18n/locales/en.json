@@ -229,7 +229,8 @@
         "day": "Afternoon",
         "evening": "Evening"
       },
-      "friends": "Friends: {{names}}",
+      "friends_one": "Friend: {{names}}",
+      "friends_other": "Friends: {{names}}",
       "noPlans": "Nobody has made plans for today yet.",
       "noFavorites": "No favourite parks yet",
       "noFavoritesBody": "Add a favourite park and see here how many dogs are heading there today.",

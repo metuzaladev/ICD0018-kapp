@@ -41,7 +41,7 @@ export function ParkActivitySection({ query, source, loading }: { query: Query; 
     for (const { part, count } of plannedParts(park.planned)) {
       out.push(t('home.activity.planned', { part: t(`home.activity.parts.${part}`), visits: plannedVisitsLabel(count) }));
     }
-    if (park.friends.length > 0) out.push(t('home.activity.friends', { names: formatList(park.friends.map((f) => f.firstName)) }));
+    if (park.friends.length > 0) out.push(t('home.activity.friends', { count: park.friends.length, names: formatList(park.friends.map((f) => f.firstName)) }));
     else if (isQuiet(park)) out.push(t('home.activity.noPlans'));
     return out.join('\n');
   };

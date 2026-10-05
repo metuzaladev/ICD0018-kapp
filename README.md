@@ -22,6 +22,7 @@ TalTechi kursuse **ICD0018 Hübriidmobiilirakendused** projekt · autor Kristofe
 | [09 Kohalolek ja külastused](docs/09-kulastused.md) | Check-in, privaatsusreeglid, ajalugu, plaanid, hinnangud, teated |
 | [10 Koerad ja tervis](docs/10-koerad-ja-tervis.md) | Fotod (privaatne hoidla, EXIF/GPS eemaldamine), profiilipilt, tervisekirjed, meeldetuletused |
 | [11 Tõlked ja Figma tekstid](docs/11-tolked-ja-figma.md) | Eesti, inglise ja vene keel, keelevalik, API veateadete tõlkimine, CI kontrollid, erinevused Figmast |
+| [12 Kogukond](docs/12-kogukond.md) | Sõbrad, sõnumid (Socket.IO), teavitused ja push (BullMQ + Expo), blokeerimine ja teavitamine |
 
 ## Käivitamine
 
@@ -30,7 +31,7 @@ Eeldused: Node.js ≥ 22.12 (soovitatav 24 LTS), Docker, iOS-i jaoks Xcode + Coc
 ```bash
 npm install                 # kõik workspace'id
 cp apps/api/.env.example apps/api/.env
-npm run db:up               # Postgres + PostGIS, Redis ja MinIO (fotod, loob bucket'i) Dockeris
+npm run db:up               # Postgres + PostGIS, Redis (push'i järjekord) ja MinIO (fotod, loob bucket'i) Dockeris
 npm run db:migrate          # tabelid
 npm run db:seed             # näidispargid Tallinnas
 npm run dev:api             # API → http://localhost:3000
@@ -40,6 +41,8 @@ npm run dev:mobile          # Metro development build'i jaoks
 
 Äpi seaded: `cp apps/mobile/.env.example apps/mobile/.env.local`. Päris telefonis määra seal `EXPO_PUBLIC_API_URL=http://<arvuti-IP>:3000` ja API `.env`-is `S3_PUBLIC_ENDPOINT=http://<arvuti-IP>:9000` (fotode allkirjastatud URL-id tehakse selle aadressi järgi). MinIO konsool: http://localhost:9001 (`kapp` / `kapp-dev-secret`).
 
+Push-teavitused vajavad füüsilist seadet ja EAS projekti ID-d (`npx eas-cli@latest init`), vt [docs/12](docs/12-kogukond.md).
+
 Arenduses saadetud parooli taastamise lingid ilmuvad API logisse (e-posti teenust veel pole).
 
 ## Kontrollid
@@ -47,7 +50,7 @@ Arenduses saadetud parooli taastamise lingid ilmuvad API logisse (e-posti teenus
 ```bash
 npm run typecheck                          # kõik paketid
 npm test                                   # API unit- ja HTTP-testid (ilma andmebaasita)
-npm run test:integration -w @kapp/api      # PostGIS-i päringud ja MinIO (vajab db:up)
+npm run test:integration -w @kapp/api      # PostGIS, MinIO, Redis ja Socket.IO (vajab db:up)
 npm run lint -w mobile
 npm run i18n:check                         # tõlgete võtmed/parameetrid/mitmused, kõvakodeeritud UI-tekst
 ```

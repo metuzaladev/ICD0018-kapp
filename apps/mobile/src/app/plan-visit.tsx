@@ -11,9 +11,10 @@ import { Screen } from '@/components/screen';
 import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
+import { useSendInvitation } from '@/hooks/use-messages';
 import { usePlanVisit } from '@/hooks/use-visits';
 import { errorMessage } from '@/lib/api';
-import { formatDay, formatDurationShort, formatHour } from '@/lib/format';
+import { formatDay, formatDurationShort, formatHour, formatTime } from '@/lib/format';
 import { validateForm } from '@/lib/form';
 
 const DAYS_SHOWN = 7;
@@ -29,8 +30,10 @@ function upcomingDays(now = new Date()) {
 /** Figma 03 / Visit / Plan — modal. Chips instead of a date picker: plans are "today 17:00", not exact. */
 export default function PlanVisitScreen() {
   const { t } = useTranslation();
-  const { parkId, parkName } = useLocalSearchParams<{ parkId: string; parkName?: string }>();
+  // inviteUserId: opened from "Kutsu parki" on a friend's profile (M5).
+  const { parkId, parkName, inviteUserId } = useLocalSearchParams<{ parkId: string; parkName?: string; inviteUserId?: string }>();
   const plan = usePlanVisit();
+  const invite = useSendInvitation();
   const days = useMemo(() => upcomingDays(), []);
   const [day, setDay] = useState(0);
   const [hour, setHour] = useState<number | null>(null);
@@ -58,7 +61,17 @@ export default function PlanVisitScreen() {
     if (!data) return setError(Object.values(errors)[0] ?? t('errors.checkChoices'));
     setError(null);
     try {
-      await plan.mutateAsync(data);
+      const saved = await plan.mutateAsync(data);
+      if (inviteUserId) {
+        // The invitation is an ordinary message in the sender's language, so the friend can reply.
+        const { conversation } = await invite.mutateAsync({
+          userId: inviteUserId,
+          body: t('invite.message', { park: saved.park.name, day: formatDay(saved.startsAt), from: formatTime(saved.startsAt) }),
+        });
+        router.dismissAll();
+        router.push({ pathname: '/messages/[conversationId]', params: { conversationId: conversation.id } });
+        return;
+      }
       router.back();
     } catch (e) {
       setError(errorMessage(e));

@@ -8,12 +8,19 @@ import { db } from '../../src/db/client';
 import { createAuth } from '../../src/modules/auth/auth';
 import type { Mailer } from '../../src/modules/auth/mailer';
 import { createSessionResolver } from '../../src/modules/auth/session-resolver';
+import type { PushQueue } from '../../src/modules/notifications/push-queue';
+import { createSocketGateway, type SocketGateway } from '../../src/realtime/socket-gateway';
 import { createServices, createStorageFromEnv } from '../../src/services';
 
 /** The MinIO from docker-compose.yml (or CI), configured through the same env vars as the server. */
 export const testStorage = createStorageFromEnv(env);
 
-export async function buildRealApp(mailer: Mailer = { sendPasswordReset: async () => {} }) {
+export interface RealAppOptions {
+  realtime?: SocketGateway;
+  pushQueue?: Pick<PushQueue, 'enqueue'>;
+}
+
+export async function buildRealApp(mailer: Mailer = { sendPasswordReset: async () => {} }, options: RealAppOptions = {}) {
   const auth = createAuth({
     db,
     mailer,
@@ -27,7 +34,8 @@ export async function buildRealApp(mailer: Mailer = { sendPasswordReset: async (
   });
   return buildApp(
     {
-      ...createServices(db, testStorage, 5000),
+      ...createServices(db, testStorage, 5000, { realtime: options.realtime, pushQueue: options.pushQueue }),
+      realtime: options.realtime,
       checkDatabase: async () => true,
       resolveUserId: createSessionResolver(auth),
       authHandler: auth.handler,
@@ -35,6 +43,8 @@ export async function buildRealApp(mailer: Mailer = { sendPasswordReset: async (
     defaultAppConfig,
   );
 }
+
+export { createSocketGateway };
 
 /** Signs up a fresh user through the real auth endpoint and returns the Cookie header value. */
 export async function signUpAndGetCookie(app: Awaited<ReturnType<typeof buildRealApp>>, email: string) {

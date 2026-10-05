@@ -1,14 +1,108 @@
+import type { AppNotification } from '@kapp/shared';
+import { router } from 'expo-router';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { StyleSheet, View } from 'react-native';
 
+import { Button } from '@/components/button';
+import { Chip } from '@/components/chip';
+import { FormError } from '@/components/form-error';
+import { ListRow } from '@/components/list-row';
+import { OfflineBanner } from '@/components/offline-banner';
+import { PushPrompt } from '@/components/push-prompt';
 import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
+import { Radius, Spacing } from '@/constants/theme';
+import { useMarkAllNotificationsRead, useMarkNotificationRead, useNotificationFeed, useUnreadCount } from '@/hooks/use-notifications';
+import { useTheme } from '@/hooks/use-theme';
+import { errorMessage } from '@/lib/api';
+import { formatDay, formatMessageTime, formatTime } from '@/lib/format';
 
-/** Figma 06 / Notifications / Activity — the feed itself arrives with friends (M5). */
+type Filter = 'all' | 'friends' | 'messages';
+const FILTERS: Filter[] = ['all', 'friends', 'messages'];
+const matches = (n: AppNotification, filter: Filter) =>
+  filter === 'all' || (filter === 'messages' ? n.type === 'message' : n.type !== 'message');
+
+/** Figma 06 / Notifications / Activity: the feed, rendered in the app's language from type + data. */
 export default function NotificationsScreen() {
   const { t } = useTranslation();
+  const c = useTheme();
+  const feed = useNotificationFeed();
+  const unread = useUnreadCount();
+  const markRead = useMarkNotificationRead();
+  const markAll = useMarkAllNotificationsRead();
+  const [filter, setFilter] = useState<Filter>('all');
+  const items = (feed.data?.pages.flatMap((p) => p.items) ?? []).filter((n) => matches(n, filter));
+
+  function text(n: AppNotification): { title: string; subtitle: string } {
+    const name = n.actor?.firstName ?? t('notifications.someone');
+    const when = formatMessageTime(n.createdAt);
+    switch (n.type) {
+      case 'friend_request':
+        return { title: t('notifications.friendRequest'), subtitle: `${t('notifications.friendRequestBody', { name })} · ${when}` };
+      case 'friend_accepted':
+        return { title: t('notifications.friendAccepted', { name }), subtitle: when };
+      case 'message':
+        return { title: t('notifications.message', { name }), subtitle: `${n.data.preview ?? ''} · ${when}` };
+      case 'friend_plan':
+        return {
+          title: t('notifications.friendPlan', { name }),
+          subtitle:
+            n.data.startsAt && n.data.endsAt
+              ? `${n.data.parkName ?? ''} · ${formatDay(n.data.startsAt)} ${formatTime(n.data.startsAt)}–${formatTime(n.data.endsAt)}`
+              : (n.data.parkName ?? ''),
+        };
+    }
+  }
+
+  function open(n: AppNotification) {
+    if (!n.readAt) markRead.mutate(n.id);
+    if (n.type === 'message' && n.data.conversationId) {
+      router.push({ pathname: '/messages/[conversationId]', params: { conversationId: n.data.conversationId } });
+    } else if (n.type === 'friend_request') {
+      router.push('/friends');
+    } else if (n.type === 'friend_plan' && n.data.parkId) {
+      router.push({ pathname: '/parks/[parkId]', params: { parkId: n.data.parkId } });
+    } else if (n.actor) {
+      router.push({ pathname: '/users/[userId]', params: { userId: n.actor.id } });
+    }
+  }
+
   return (
     <Screen title={t('notifications.title')} subtitle={t('notifications.subtitle')}>
-      <ThemedText themeColor="muted">{t('notifications.body')}</ThemedText>
+      <OfflineBanner />
+      <PushPrompt />
+      <View style={styles.chips}>
+        {FILTERS.map((f) => (
+          <Chip key={f} label={t(`notifications.filters.${f}`)} selected={filter === f} onPress={() => setFilter(f)} />
+        ))}
+      </View>
+      {(unread.data?.count ?? 0) > 0 ? (
+        <Button label={t('notifications.markAll')} variant="tertiary" loading={markAll.isPending} onPress={() => markAll.mutate()} />
+      ) : null}
+      {feed.error && !feed.data ? <FormError message={errorMessage(feed.error)} /> : null}
+      {feed.data && items.length === 0 ? <ThemedText themeColor="muted">{t('notifications.body')}</ThemedText> : null}
+      {items.map((n) => {
+        const { title, subtitle } = text(n);
+        return (
+          <ListRow
+            key={n.id}
+            title={title}
+            subtitle={subtitle}
+            accessibilityHint={n.readAt ? undefined : t('notifications.unreadHint')}
+            leading={<View style={[styles.dot, { backgroundColor: n.readAt ? 'transparent' : c.brand }]} accessibilityElementsHidden />}
+            onPress={() => open(n)}
+          />
+        );
+      })}
+      {feed.hasNextPage ? (
+        <Button label={t('notifications.more')} variant="secondary" loading={feed.isFetchingNextPage} onPress={() => feed.fetchNextPage()} />
+      ) : null}
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  chips: { flexDirection: 'row', gap: Spacing.two },
+  dot: { width: 10, height: 10, borderRadius: Radius.full },
+});

@@ -46,6 +46,6 @@ Koerte põhiandmed toodi M4-st ettepoole, sest kohalolek eeldab koera valimist. 
 ## Teadaolevad piirangud
 
 - Vajutusi (check-in nupp, tärnid, „Lõpeta külastus") ei saanud simulaatoris automaatselt proovida. API on testitud, UI tuleb läbi klõpsata.
-- Sõprade plaane avalehel veel ei näidata (sõbrad tulevad M5-s).
+- ~~Sõprade plaane avalehel veel ei näidata.~~ M5: avalehel on sõprade plaanid 48 h ette, külastajate realt avaneb profiil (vt [12-kogukond.md](12-kogukond.md)).
 - Teadete modereerimiseks pole veel adminivaadet.
 - Arendusandmebaasis on demo-kasutaja `demo@kapp.test.invalid` (parool `pikk-parool-123`) koos koera, külastuse ja plaaniga.

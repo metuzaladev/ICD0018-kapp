@@ -15,8 +15,9 @@ declare module 'fastify' {
  * Why injectable: Better Auth is wired in milestone M1. Until then the default resolver
  * returns null, so every protected route answers 401 — secure by default — while tests can
  * inject a fake resolver and exercise the protected logic.
+ * Only the headers are needed, so the Socket.IO handshake (M5) can use the same resolver.
  */
-export type ResolveUserId = (request: FastifyRequest) => Promise<string | null>;
+export type ResolveUserId = (request: Pick<FastifyRequest, 'headers'>) => Promise<string | null>;
 
 export const noAuthYet: ResolveUserId = async () => null;
 

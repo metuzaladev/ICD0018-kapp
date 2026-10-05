@@ -83,6 +83,23 @@ const envSchema = z.object({
     .enum(['true', 'false'])
     .default('true')
     .transform((v) => v === 'true'),
+
+  /* ---- realtime and push notifications (M5, docs/12-kogukond.md) ---- */
+
+  /** Redis for the BullMQ push queue (docker-compose.yml locally). */
+  REDIS_URL: z.url().default('redis://localhost:6379'),
+  /** Namespaces the queue's Redis keys, so several environments (or tests) can share one Redis. */
+  PUSH_QUEUE_PREFIX: z.string().regex(/^[a-z0-9:_-]+$/).default('kapp'),
+  /**
+   * Optional Expo access token. Needed only when "Enhanced security for push notifications" is
+   * enabled for the Expo project; without it the Expo push service accepts any valid token.
+   */
+  EXPO_ACCESS_TOKEN: optional(z.string().min(1)),
+  /** Runs the push worker in the API process. Set false when a separate worker process takes over. */
+  PUSH_WORKER_ENABLED: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((v) => v === 'true'),
 });
 
 /** Fixed dev/test secret so sessions survive restarts locally. Rejected in production below. */

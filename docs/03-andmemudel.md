@@ -25,10 +25,14 @@ Tabelid on tuletatud Figma vaadetest (leht *03 · Screens*, sektsioonid 01–08)
 - **Broneeringud:** ühele teenusele ühele ajale saab olla üks aktiivne broneering (osaline unikaalne indeks, tühistatud vabastavad aja).
 - **Hinnang:** `reviews.rating` vahemikus 1–5 (CHECK-piirang); üks hinnang kasutaja ja pargi kohta (`reviews_user_park_uq`); hinnata saab ainult külastatud parki; pargi lehel keskmine ühe komakohaga.
 - **Lemmikud:** `favorite_parks` (user_id + park_id liitvõti); nimekirjas ainult `approved` pargid, tagasi lükatud park kaob nimekirjast, aga rida jääb alles.
+- **Sõprus (M5):** vastastikune, kinnitatav; üks rida paari kohta mõlemas suunas (`friendships_pair_uq` avaldistel `least/greatest`), iseendaga mitte (`CHECK`). Vt [12-kogukond.md](12-kogukond.md).
+- **Vestlused (M5):** 1:1 vestlus on unikaalse `conversations.direct_key`-ga; sõnum 1–2000 märki (`CHECK`); lugemata = teise sõnumid pärast `conversation_members.last_read_at`-i.
+- **Teavitused (M5):** `type` + `actor_id` + `data jsonb`, tekste ei salvestata (äpp ja push tõlgivad); push'i eelistused tabelis `notification_preferences`, keel `user.language`.
+- **Blokeerimine (M5):** mõlemas suunas peitev; blokeerimine kustutab sõpruse samas transaktsioonis.
 - **Pildid:** tabelites ainult objektivõtmed (`photo_key`, `image_key`, `thumbnail_key`, `document_key`), failid privaatses S3-hoidlas (R2 / arenduses MinIO). Koera profiilipilt on viide `dogs.profile_photo_id → dog_photos.id` (`on delete set null`), vt [10-koerad-ja-tervis.md](10-koerad-ja-tervis.md).
 
 ## Avatud küsimused
 
-- Kas sõbrad on ühesuunalised (jälgimine) või kahesuunalised (praegu: kinnitatav sõbrakutse)?
+- ~~Kas sõbrad on ühesuunalised või kahesuunalised?~~ Otsustatud M5-s: kahesuunalised, kinnitatava kutsega.
 - Kas teenusepakkujad on äpi kasutajad (oma vaade) või haldab neid admin?
 - Kui kaua hoitakse lõpetatud kohalolekut ajaloo jaoks (GDPR: säilitusaeg)?

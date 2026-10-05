@@ -1,11 +1,13 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { useTranslation } from 'react-i18next';
 
+import { useUnreadCount } from '@/hooks/use-notifications';
 import { useTheme } from '@/hooks/use-theme';
 
 export default function AppTabs() {
   const colors = useTheme();
   const { t } = useTranslation();
+  const unread = useUnreadCount().data?.count ?? 0;
 
   return (
     <NativeTabs tintColor={colors.brand} labelStyle={{ selected: { color: colors.brand } }}>
@@ -22,6 +24,9 @@ export default function AppTabs() {
       <NativeTabs.Trigger name="notifications">
         <NativeTabs.Trigger.Label>{t('tabs.notifications')}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf={{ default: 'bell', selected: 'bell.fill' }} md="notifications" />
+        {/* Unread activity; live over the socket, polled while it is down. Not rendered at zero:
+            the native badge ignores `hidden` and showed a red "0" on iOS 26. */}
+        {unread > 0 ? <NativeTabs.Trigger.Badge>{unread > 99 ? '99+' : String(unread)}</NativeTabs.Trigger.Badge> : null}
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="profile">

@@ -12,6 +12,10 @@ import { db, pool } from './db/client';
 import { createAuth } from './modules/auth/auth';
 import { createLogMailer } from './modules/auth/mailer';
 import { createSessionResolver } from './modules/auth/session-resolver';
+import { createPushTokensRepository } from './modules/notifications/notifications.repository';
+import { createPushQueue, startPushWorker } from './modules/notifications/push-queue';
+import { createExpoPushClient, createPushProcessor } from './modules/notifications/push-worker';
+import { createSocketGateway } from './realtime/socket-gateway';
 import { createServices, createStorageFromEnv } from './services';
 
 const isProduction = env.NODE_ENV === 'production';
@@ -41,9 +45,26 @@ const auth = createAuth({
   },
 });
 
+// M5: realtime (Socket.IO on the same server) and the push pipeline (BullMQ + Expo), docs/12.
+const realtime = createSocketGateway();
+const queueConnection = { url: env.REDIS_URL, prefix: env.PUSH_QUEUE_PREFIX };
+const pushQueue = createPushQueue(queueConnection);
+const pushWorker = env.PUSH_WORKER_ENABLED
+  ? startPushWorker(
+      queueConnection,
+      createPushProcessor({
+        tokens: createPushTokensRepository(db),
+        client: createExpoPushClient({ accessToken: env.EXPO_ACCESS_TOKEN }),
+        scheduleReceipts: (job) => pushQueue.scheduleReceipts(job),
+      }),
+      logger,
+    )
+  : null;
+
 const app = await buildApp(
   {
-    ...createServices(db, createStorageFromEnv(env), env.SERVICE_TIMEOUT_MS),
+    ...createServices(db, createStorageFromEnv(env), env.SERVICE_TIMEOUT_MS, { realtime, pushQueue, log: logger }),
+    realtime,
     checkDatabase: async () => {
       await db.execute(sql`select 1`);
       return true;
@@ -62,7 +83,9 @@ const app = await buildApp(
 
 async function shutdown(signal: string) {
   app.log.info({ signal }, 'shutting down');
-  await app.close(); // stops accepting requests and waits for in-flight ones
+  await app.close(); // stops accepting requests and waits for in-flight ones (and closes sockets)
+  await pushWorker?.close(); // lets the running push job finish; unfinished jobs stay in Redis
+  await pushQueue.close();
   await pool.end();
   process.exit(0);
 }

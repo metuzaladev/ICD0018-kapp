@@ -68,7 +68,8 @@
     "dogEdit": "Edit dog",
     "vaccinationAdd": "Add vaccination",
     "vetVisitAdd": "Vet visit",
-    "healthRecordEdit": "Edit record"
+    "healthRecordEdit": "Edit record",
+    "reportUser": "Report or block"
   },
   "auth": {
     "email": "Email",
@@ -153,7 +154,11 @@
     "remindersTitle": "Health reminders",
     "reminderDue": "Due {{date}} · {{due}}",
     "findPark": "Find the nearest park",
-    "nearby": "Near you"
+    "nearby": "Near you",
+    "friendsPlansTitle": "Friends heading to the park",
+    "friendsPlansEmpty": "No plans from friends in the next two days.",
+    "friendPlan": "{{name}} · {{day}} {{from}}–{{to}}",
+    "findFriends": "Find playmates"
   },
   "map": {
     "title": "Let’s explore Tallinn.",
@@ -216,7 +221,8 @@
     "reviewA11y": "{{name}}, rated {{rating}} out of 5",
     "reviewsEmpty": "Be the first to review this park.",
     "addReview": "Share your experience",
-    "report": "Noticed a problem?"
+    "report": "Noticed a problem?",
+    "visitorHint": "Opens their profile to send a friend request"
   },
   "checkIn": {
     "title": "We’re here!",
@@ -406,7 +412,15 @@
     "favorites": "Favourite parks",
     "favoritesSub": "Always good to come back to",
     "settings": "Settings",
-    "settingsSub": "Make Käpp your own"
+    "settingsSub": "Make Käpp your own",
+    "friends": "Your pack",
+    "friendsSub": "Friends and friend requests",
+    "friendRequests_one": "{{count}} new friend request",
+    "friendRequests_other": "{{count}} new friend requests",
+    "messages": "Messages",
+    "messagesSub": "Little hellos",
+    "unreadMessages_one": "{{count}} unread message",
+    "unreadMessages_other": "{{count}} unread messages"
   },
   "settings": {
     "title": "Your Käpp.",
@@ -421,7 +435,11 @@
       "en": "English",
       "ru": "русский"
     },
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "notifications": "Notifications",
+    "notificationsSub": "Friends, messages and plans",
+    "privacy": "Privacy",
+    "privacySub": "Visibility and safety"
   },
   "profileEdit": {
     "title": "Just your style.",
@@ -442,6 +460,133 @@
   "notifications": {
     "title": "What’s new?",
     "subtitle": "Good news for your little pack.",
-    "body": "Friends’ plans, friend requests and park alerts will show up here."
+    "body": "Friends’ plans, friend requests and messages will show up here.",
+    "someone": "Someone",
+    "friendRequest": "New friend request",
+    "friendRequestBody": "{{name}} would like to be friends",
+    "friendAccepted": "{{name}} is now your friend",
+    "message": "Message from {{name}}",
+    "friendPlan": "{{name}} is heading to the park",
+    "filters": {
+      "all": "All",
+      "friends": "Friends",
+      "messages": "Messages"
+    },
+    "markAll": "Mark all as read",
+    "unreadHint": "Unread",
+    "more": "Show older"
+  },
+  "community": {
+    "nameWithDogs": "{{name}} and {{dogs}}"
+  },
+  "friends": {
+    "title": "Your pack",
+    "subtitle": "The next walk could be a shared one.",
+    "search": "Find friends",
+    "searchPlaceholder": "Name or dog’s name",
+    "searchHint": "Type at least {{min}} letters.",
+    "noResults": "Nobody found. Try another name or dog’s name.",
+    "requestSent": "Request sent",
+    "accept": "Accept",
+    "decline": "Decline",
+    "requestsOff": "Not accepting friend requests",
+    "add": "Send friend request",
+    "incoming": "Friend requests",
+    "outgoing": "Sent requests",
+    "cancelRequest": "Cancel request",
+    "myFriends": "Friends",
+    "emptyTitle": "New friendships start at the park",
+    "emptyBody": "Open a dog’s profile and send its human a friend request."
+  },
+  "userProfile": {
+    "friendsSince": "Friends since {{date}}",
+    "message": "Send a message",
+    "invite": "Invite to the park",
+    "addFriend": "Send friend request",
+    "acceptRequest": "Accept friend request",
+    "dogProfile": "{{name}}",
+    "friendsOnlyDetails": "Only friends see the bio and the dogs’ personalities.",
+    "reportOrBlock": "Report or block",
+    "reportOrBlockSub": "Set your boundaries",
+    "unfriend": "Remove friend",
+    "unfriendTitle": "Remove {{name}} from your friends?",
+    "unfriendBody": "The conversation stays, but no new messages can be sent."
+  },
+  "safety": {
+    "title": "Keeping the pack friendly.",
+    "subtitle": "Report a user or limit contact.",
+    "selectedUser": "Selected user",
+    "reasons": {
+      "spam": "Spam",
+      "harassment": "Harassment",
+      "other": "Other"
+    },
+    "what": "What happened?",
+    "whatPlaceholder": "Describe the situation as precisely as you can",
+    "privateTitle": "Your report is private",
+    "privateBody": "We will look into it. Once blocked, this user can no longer send you messages.",
+    "send": "Send report",
+    "block": "Block user",
+    "blockTitle": "Block this user?",
+    "blockBody": "You will no longer see each other in search, at the park or in messages, and your friendship ends. You can unblock in privacy settings.",
+    "thanksTitle": "Thank you!",
+    "thanksBody": "We will review the report. The user will not find out who reported them."
+  },
+  "inbox": {
+    "title": "Little hellos",
+    "subtitle": "Chat with your park friends.",
+    "search": "Search conversations",
+    "searchPlaceholder": "Friend’s name",
+    "empty": "No conversations yet. Open a friend’s profile and tap “Send a message”.",
+    "noMessages": "No messages yet",
+    "unread_one": "{{count}} unread message",
+    "unread_other": "{{count}} unread messages"
+  },
+  "conversation": {
+    "empty": "Say hello!",
+    "a11y": "{{who}}, {{time}}: {{text}}",
+    "message": "Message",
+    "placeholder": "Write a message…",
+    "send": "Send",
+    "notFriends": "You are no longer friends, so new messages cannot be sent."
+  },
+  "privacy": {
+    "title": "Your boundaries matter.",
+    "subtitle": "Choose what you share with others.",
+    "healthTitle": "Your dog’s health info is private",
+    "healthBody": "Only you can see vaccinations and vet visits.",
+    "allowRequests": "Allow friend requests",
+    "allowRequestsHint": "When off, nobody can send you a new friend request.",
+    "presence": "Presence sharing",
+    "presenceHint": "Who sees when you are at the park. Friends also see your plans.",
+    "blocked": "Blocked users",
+    "blockedHint": "Set your boundaries",
+    "blockedEmpty": "You have not blocked anyone.",
+    "unblock": "Unblock"
+  },
+  "notificationSettings": {
+    "title": "Only the good nudges.",
+    "subtitle": "Choose what you want to hear about.",
+    "messages": "Messages from friends",
+    "friendPlans": "Friends heading to the park",
+    "friendRequests": "Friend requests",
+    "feedNote": "The Activity tab always shows everything; these switches only affect push notifications.",
+    "save": "Save preferences"
+  },
+  "invite": {
+    "title": "Invite {{name}} to the park",
+    "subtitle": "Pick a park, then a time. The invitation goes to your friend as a message.",
+    "favorite": "Favourite park",
+    "message": "I’m going to {{park}} {{day}} at {{from}}. Come along!"
+  },
+  "pushPrompt": {
+    "title": "Shall we give you a nudge?",
+    "body": "We’ll let you know when a friend writes, sends a friend request or heads to the park. Your phone will ask for permission next.",
+    "deniedBody": "Notifications are turned off in your phone’s settings. Turn them on there if you want updates from friends.",
+    "allow": "Allow notifications",
+    "notNow": "Not now"
+  },
+  "push": {
+    "channelName": "Friends and messages"
   }
 }

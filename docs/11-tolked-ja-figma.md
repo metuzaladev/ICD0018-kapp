@@ -116,7 +116,6 @@ Figma tekstid on kasutusel kõigil olemasolevatel ekraanidel. Näidisandmed (nim
 | — (pole Figmas) | — | „Uus parool" ekraan | Taastamislingi sihtkoht. |
 | Permissions / Location | täisekraan, „Valin piirkonna ise" | kaart kaardiekraanil, „Mitte praegu"; keelatud oleku tekstid „Asukoht on välja lülitatud" | Piirkonna valikut pole veel; kaart ei blokeeri ekraani. |
 | Home / Today | „Õue, Freddy?" | koera nimi, kui koer on üks; muidu omaniku eesnimi | Mitme koera korral ei saa ühte valida. |
-| Home / Today | „Luna ja 3 sõpra plaanivad…", „Leia mängusõbrad" | „Märgi pargis kohalolek või planeeri käik…", „Leia lähim park" | Sõbrad tulevad M5-s. |
 | Home / Visit / Active | „Freddy on Kadrioru koerapargis.", „Olete nähtavad kuni 18.00" | „Head mängimist!" + pargi nimi + „Freddy · kuni 18.00" / pargi lehel „Oled pargis kuni 18.00" | Pargi nime ei käänata; nähtavus sõltub privaatsusseadest. |
 | Home | vahekaart „Lisa" | puudub | Lisamise voog (park, plaan) pole veel üks ekraan. |
 | Explore / Map + Park List | eraldi nimekirja ekraan, otsing, „Aktiivsed", „Lemmikud" | nimekiri kaardi all („Pargid sinu ümber", „N paika väikesteks seiklusteks."); otsingut ja neid kiipe pole; lisatud „Kaugused on arvutatud Tallinna kesklinnast." | Üks ekraan; otsing hiljem; asukohata kasutaja peab teadma, millest kaugus arvutatakse. |
@@ -142,10 +141,16 @@ Figma tekstid on kasutusel kõigil olemasolevatel ekraanidel. Näidisandmed (nim
 | Dog / Photos | „Lisa foto" | „Pildista" / „Vali galeriist" | Kaks allikat. |
 | Saved / Favorite Parks | „6 koera praegu · järgmine plaan täna" | pargirida „6 koera praegu" | Plaanid on avalehel. |
 | Offline State | täisekraan „Võtame korraks hoo maha.", „Proovi uuesti", „Minu lemmikpargid" | bänner „Internetiühendus puudub." + „Näitame viimati laaditud andmeid ja uuendame, kui ühendus taastub." | Bänner on igal ekraanil, puhverdatud andmed jäävad näha. |
-| Profile / Overview | „1 koer · 18 külastust · 5 sõpra", „Sõbrad ja sõnumid", „Minu broneeringud" | „1 koer · 18 külastust" profiilikaardis; sõbrad ja broneeringud puuduvad | M5 / hiljem. |
-| Settings / Overview | „Teavitused", „Privaatsus", „Asukoht", „Abi ja tugi", „Lisa koerapark" | „Muuda profiili", „Keel", „Logi välja" | Ülejäänud tulevad koos funktsioonidega; kohaloleku nähtavus on „Muuda profiili" all. |
+| Profile / Overview | „1 koer · 18 külastust · 5 sõpra", „Sõbrad ja sõnumid", „Minu broneeringud" | „1 koer · 18 külastust"; read „Oma kamp" ja „Sõnumid" (uute kutsete / lugemata arvuga); broneeringud puuduvad | Broneeringud M6. |
+| Settings / Overview | „Asukoht", „Abi ja tugi", „Lisa koerapark" | „Muuda profiili", „Teavitused", „Privaatsus", „Keel", „Logi välja" | Ülejäänud tulevad koos funktsioonidega. |
 | Profile / Edit | „E-post", „Huvid", vihje „Freddy inimene. Alati valmis jalutama." | puuduvad; vihje „Paar sõna sinust ja su koerast"; lisatud „Kes näeb, kui oled pargis?" | E-post muutub Better Authi vooga; Figma vihje on näidisandmed. |
-| Notifications / Activity | teadete voog | pealkiri ja alapealkiri Figmast + „Siia jõuavad sõprade plaanid, sõbrakutsed ja pargiteated." | Voog tuleb M5-s. |
+| Notifications / Activity | kiibid Kõik / Sõbrad / Pargid, „Sinu lemmikpargis on teade" | kiibid Kõik / Sõbrad / Sõnumid; pargiteateid pole; enne süsteemi dialoogi selgitus „Kas anname märku?" | Pargiteadete teavitusi pole veel; push vajab selgitust enne iOS-i ühekordset küsimust. |
+| Community / Friends | „Mari ja Luna / Täna Kadriorus kell 17.00", „Planeeri ühine külastus" | sõbra rida „{nimi} ja {koerad}" + piirkond; plaanid avalehel; ühine külastus profiilil „Kutsu parki" | Plaan on avalehe kaardil; kutse vajab sõpra. |
+| Community / Friend Profile | iseloomu kiibid „Sõbralik / Rahulik", „Luna profiil", „sõbrad alates septembrist" | koera kaart „Koer {nimi}" (tõug · vanus · iseloom), „sõbrad alates september 2026" | Nimesid ei käänata; iseloom on vabatekst; kuu ja aasta Intl-ist. |
+| Messages / Conversation | „Tavaliselt vastab päeva jooksul.", „Ühine mänguplaan" kaart | puuduvad; pargikutse on tavaline sõnum | Vastamisaja andmeid pole; plaan + sõnum katab sama vajaduse. |
+| Settings / Notifications | „Lemmikpargi ohuteated", „Külastuse meeldetuletused", „Broneeringute uuendused", „Tervise meeldetuletused" | „Sõnumid sõpradelt", „Sõbrad lähevad parki", lisatud „Sõbrakutsed" | Ülejäänud push-tüüpe veel pole. |
+| Settings / Privacy | „Profiil nähtav pargisõpradele" lüliti, „Kogukonna turvalisus / Abi ja teavitamine" | puuduvad; tutvustus ja koerte detailid on alati ainult sõpradele | Reegel on fikseeritud; abi-vaade hiljem. |
+| Home / Today | „Luna ja 3 sõpra plaanivad Kadriorgu minna kell 17.00." | kaart „Sõbrad lähevad parki" ridadega „{park} / {nimi} · täna 17.00–18.00" + „Leia mängusõbrad" | Pargi nime ei käänata. |
 
 **Parandatud grammatika (tekst, mida Figmas pole)**
 

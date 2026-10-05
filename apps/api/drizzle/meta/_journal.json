@@ -36,6 +36,13 @@
       "when": 1790894800702,
       "tag": "0004_m4_drop_dog_photo_key",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790899414473,
+      "tag": "0005_m5_community",
+      "breakpoints": true
     }
   ]
 }

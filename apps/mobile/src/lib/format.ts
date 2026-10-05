@@ -146,3 +146,28 @@ export function ageLabel(birthDate: string, now = new Date()): string {
   if (months === 0) return i18n.t('dates.ageNewborn');
   return i18n.t('dates.ageMonths', { count: months });
 }
+
+/** Figma "Mari ja Luna": the owner's first name with their dogs; just the name without dogs. */
+export function personTitle(firstName: string, dogNames: string[]): string {
+  if (dogNames.length === 0) return firstName;
+  return i18n.t('community.nameWithDogs', { name: firstName, dogs: dogNames.join(', ') });
+}
+
+/**
+ * The date in "Sõbrad alates …" on a friend's profile. A month name after "since" needs a case
+ * ending Intl cannot produce ("alates oktoobrist", "с октября"), so: Russian/English use the long
+ * date, where Intl itself declines the month ("2 октября 2026 г."); Estonian uses the numeric date
+ * ("02.10.2026"), the usual written form after "alates".
+ */
+export function formatFriendsSince(iso: string): string {
+  const date = new Date(iso);
+  return currentLanguage() === 'et'
+    ? date.toLocaleDateString(currentLocaleTag(), { day: '2-digit', month: '2-digit', year: 'numeric' })
+    : date.toLocaleDateString(currentLocaleTag(), { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+/** A chat timestamp: the time today, otherwise the day and the time. */
+export function formatMessageTime(iso: string, now = new Date()): string {
+  const sameDay = startOfDay(new Date(iso)) === startOfDay(now);
+  return sameDay ? formatTime(iso) : `${formatDay(iso, now)} ${formatTime(iso)}`;
+}

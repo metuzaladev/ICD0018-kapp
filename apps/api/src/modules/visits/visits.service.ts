@@ -34,11 +34,14 @@ export function createVisitsService({
   parks,
   dogs,
   timeoutMs,
+  onPlanCreated,
 }: {
   visits: VisitsRepository;
   parks: Pick<ParksRepository, 'findById'>;
   dogs: Pick<DogsRepository, 'ownedIds'>;
   timeoutMs: number;
+  /** M5: tells friends about the plan. Best effort — must not throw (FriendsService.announcePlan). */
+  onPlanCreated?: (userId: string, plan: PlannedVisit) => Promise<void>;
 }): VisitsService {
   const t = <T>(p: Promise<T>, label: string) => withTimeout(p, timeoutMs, label);
 
@@ -80,7 +83,9 @@ export function createVisitsService({
 
     async planVisit(userId, input) {
       await requirePublicPark(input.parkId);
-      return t(visits.createPlan(userId, input), 'visits.createPlan');
+      const plan = await t(visits.createPlan(userId, input), 'visits.createPlan');
+      await onPlanCreated?.(userId, plan);
+      return plan;
     },
 
     listPlans: (userId) => t(visits.listUpcomingPlans(userId), 'visits.listPlans'),

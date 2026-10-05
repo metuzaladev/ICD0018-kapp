@@ -20,6 +20,14 @@ import type { HealthRecordsRepository } from '../src/modules/health-records/heal
 import type { HealthRecordsService } from '../src/modules/health-records/health-records.service';
 import type { PhotosRepository } from '../src/modules/photos/photos.repository';
 import type { PhotosService } from '../src/modules/photos/photos.service';
+import type { FriendsRepository } from '../src/modules/friends/friends.repository';
+import type { FriendsService } from '../src/modules/friends/friends.service';
+import type { MessagesRepository } from '../src/modules/messages/messages.repository';
+import type { MessagesService } from '../src/modules/messages/messages.service';
+import type { NotificationsRepository, PushTokensRepository } from '../src/modules/notifications/notifications.repository';
+import type { NotificationsService } from '../src/modules/notifications/notifications.service';
+import type { SafetyRepository } from '../src/modules/safety/safety.repository';
+import type { SafetyService } from '../src/modules/safety/safety.service';
 import type { ObjectStorage } from '../src/storage/object-storage';
 
 export const PARK_ID = '4ddabe8d-7306-4724-a125-ace7ae3a87b9';
@@ -79,6 +87,8 @@ export function makeProfile(overrides: Partial<Profile> = {}): Profile {
     area: 'Tallinn',
     bio: null,
     presenceSharing: 'friends',
+    allowFriendRequests: true,
+    language: 'et',
     ...overrides,
   };
 }
@@ -184,8 +194,42 @@ export async function buildTestApp(deps: Partial<AppDeps> = {}, config: Partial<
   const health =
     (deps.healthRecordsService as Mocked<HealthRecordsService> | undefined) ??
     mockAll<HealthRecordsService>(['list', 'create', 'update', 'remove', 'reminders']);
+  const friends =
+    (deps.friendsService as Mocked<FriendsService> | undefined) ??
+    mockAll<FriendsService>([
+      'sendRequest',
+      'acceptRequest',
+      'deleteRequest',
+      'removeFriend',
+      'listFriends',
+      'listRequests',
+      'search',
+      'getProfile',
+      'friendPlans',
+      'announcePlan',
+    ]);
+  const messages =
+    (deps.messagesService as Mocked<MessagesService> | undefined) ??
+    mockAll<MessagesService>(['startConversation', 'listConversations', 'getConversation', 'listMessages', 'sendMessage', 'markRead']);
+  const notifications =
+    (deps.notificationsService as Mocked<NotificationsService> | undefined) ??
+    mockAll<NotificationsService>([
+      'list',
+      'unreadCount',
+      'markRead',
+      'markAllRead',
+      'getPreferences',
+      'setPreferences',
+      'registerPushToken',
+      'unregisterPushToken',
+    ]);
+  const safety = (deps.safetyService as Mocked<SafetyService> | undefined) ?? mockAll<SafetyService>(['block', 'unblock', 'listBlocked', 'reportUser']);
   const app = await buildApp(
     {
+      friendsService: friends,
+      messagesService: messages,
+      notificationsService: notifications,
+      safetyService: safety,
       parksService: service,
       profileService: profile,
       favoritesService: favorites,
@@ -201,9 +245,42 @@ export async function buildTestApp(deps: Partial<AppDeps> = {}, config: Partial<
     },
     { ...defaultAppConfig, ...config },
   );
-  return { app, service, profile, favorites, dogs, visits, reviews, reports, photos, health };
+  return { app, service, profile, favorites, dogs, visits, reviews, reports, photos, health, friends, messages, notifications, safety };
 }
 
 /** Resolver that treats `Authorization: Bearer test` as USER_ID — stands in for Better Auth. */
 export const fakeAuth: AppDeps['resolveUserId'] = async (request) =>
   request.headers.authorization === 'Bearer test' ? USER_ID : null;
+
+export const mockFriendsRepository = () =>
+  mockAll<FriendsRepository>([
+    'findTarget',
+    'findFriendship',
+    'createRequest',
+    'accept',
+    'remove',
+    'listFriends',
+    'listRequests',
+    'search',
+    'profile',
+    'planAudience',
+    'friendPlans',
+  ]);
+export const mockMessagesRepository = () =>
+  mockAll<MessagesRepository>(['findOrCreateDirect', 'findMembership', 'listConversations', 'listMessages', 'createMessage', 'markRead']);
+export const mockNotificationsRepository = () =>
+  mockAll<NotificationsRepository>([
+    'create',
+    'upsertMessageNotification',
+    'list',
+    'unreadCount',
+    'markRead',
+    'markAllRead',
+    'markConversationRead',
+    'getPreferences',
+    'setPreferences',
+    'pushContext',
+  ]);
+export const mockPushTokensRepository = () => mockAll<PushTokensRepository>(['upsert', 'remove', 'listForUser', 'removeTokens']);
+export const mockSafetyRepository = () =>
+  mockAll<SafetyRepository>(['userExists', 'isBlockedEitherWay', 'block', 'unblock', 'listBlocked', 'createReport']);

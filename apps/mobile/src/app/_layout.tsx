@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useColorScheme } from 'react-native';
 
 import { Colors, FontAssets } from '@/constants/theme';
+import { useCommunityRuntime } from '@/hooks/use-community-runtime';
 // Initialises i18next before any screen renders.
 import '@/i18n';
 import { loadLanguagePreference } from '@/i18n/language-preference';
@@ -14,6 +15,12 @@ import { authClient } from '@/lib/auth-client';
 import { queryClient } from '@/lib/query-client';
 
 SplashScreen.preventAutoHideAsync();
+
+/** Realtime socket, push registration and push taps while signed in (needs the query client). */
+function CommunityRuntime({ signedIn }: { signedIn: boolean }) {
+  useCommunityRuntime(signedIn);
+  return null;
+}
 
 /**
  * Root navigator. Signed-out users can only reach the (auth) group, signed-in users only the
@@ -56,6 +63,7 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <CommunityRuntime signedIn={signedIn} />
       <ThemeProvider value={navigationTheme}>
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.background } }}>
           <Stack.Protected guard={!signedIn}>
@@ -71,6 +79,14 @@ export default function RootLayout() {
             <Stack.Screen name="dogs/[dogId]/index" options={pushed} />
             <Stack.Screen name="dogs/[dogId]/photos" options={{ ...pushed, headerTitle: '' }} />
             <Stack.Screen name="dogs/[dogId]/health" options={{ ...pushed, headerTitle: '' }} />
+            <Stack.Screen name="friends/index" options={{ ...pushed, headerTitle: '' }} />
+            <Stack.Screen name="users/[userId]" options={pushed} />
+            <Stack.Screen name="messages/index" options={{ ...pushed, headerTitle: '' }} />
+            {/* The conversation has its own composer layout, so it gets an opaque header. */}
+            <Stack.Screen name="messages/[conversationId]" options={{ headerShown: true, headerBackButtonDisplayMode: 'minimal' }} />
+            <Stack.Screen name="settings-privacy" options={{ ...pushed, headerTitle: '' }} />
+            <Stack.Screen name="settings-notifications" options={{ ...pushed, headerTitle: '' }} />
+            <Stack.Screen name="invite-park" options={{ ...pushed, headerTitle: '' }} />
             {/* Modals: focused edit tasks with an explicit "done" action (HIG). */}
             <Stack.Screen name="profile-edit" options={{ presentation: 'modal', headerShown: true, title: t('nav.profileEdit') }} />
             <Stack.Screen name="park-filters" options={{ presentation: 'modal', headerShown: true, title: t('nav.filters') }} />
@@ -80,6 +96,7 @@ export default function RootLayout() {
             <Stack.Screen name="plan-visit" options={{ presentation: 'modal', headerShown: true, title: t('nav.planVisit') }} />
             <Stack.Screen name="review" options={{ presentation: 'modal', headerShown: true, title: t('nav.review') }} />
             <Stack.Screen name="report" options={{ presentation: 'modal', headerShown: true, title: t('nav.report') }} />
+            <Stack.Screen name="report-user" options={{ presentation: 'modal', headerShown: true, title: t('nav.reportUser') }} />
           </Stack.Protected>
         </Stack>
       </ThemeProvider>

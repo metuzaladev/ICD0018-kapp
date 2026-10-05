@@ -138,7 +138,14 @@ export default function ParkDetailScreen() {
               <>
                 <ThemedText type="heading">{t('park.visitorsTitle')}</ThemedText>
                 {visitors.data.visitors.map((v) => (
-                  <View key={v.checkInId} style={[styles.row, { backgroundColor: c.surface, borderColor: c.border }]}>
+                  <Pressable
+                    key={v.checkInId}
+                    // Figma: "Ava koera profiil ja saada omanikule sõbrakutse" — a visitor opens their profile.
+                    disabled={v.isMe}
+                    accessibilityRole={v.isMe ? undefined : 'button'}
+                    accessibilityHint={v.isMe ? undefined : t('park.visitorHint')}
+                    onPress={() => router.push({ pathname: '/users/[userId]', params: { userId: v.userId } })}
+                    style={({ pressed }) => [styles.row, { backgroundColor: c.surface, borderColor: c.border, opacity: pressed ? 0.8 : 1 }]}>
                     <ThemedText type="label">
                       {[v.isMe ? t('common.you') : v.ownerFirstName, v.dogs.map((d) => d.name).join(', ')].join(' · ')}
                     </ThemedText>
@@ -148,7 +155,7 @@ export default function ParkDetailScreen() {
                         time: formatTime(v.until),
                       })}
                     </ThemedText>
-                  </View>
+                  </Pressable>
                 ))}
                 {visitors.data.hiddenDogs > 0 ? (
                   <ThemedText type="caption" themeColor="muted">
@@ -195,7 +202,7 @@ const styles = StyleSheet.create({
   header: { gap: Spacing.one },
   summary: { padding: Spacing.three, borderRadius: Radius[16], gap: 2 },
   features: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  row: { padding: Spacing.three, borderRadius: Radius[16], borderWidth: StyleSheet.hairlineWidth, gap: 2 },
+  row: { minHeight: 44, padding: Spacing.three, borderRadius: Radius[16], borderWidth: StyleSheet.hairlineWidth, gap: 2 },
   badge: { minHeight: 32, paddingHorizontal: 12, borderRadius: Radius.full, borderWidth: StyleSheet.hairlineWidth, justifyContent: 'center' },
   heart: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
 });

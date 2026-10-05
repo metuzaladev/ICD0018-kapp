@@ -53,6 +53,14 @@ export const user = pgTable('user', {
    * request, so the recipient's language must be stored; the app sends it with its push token.
    */
   language: text('language').$type<'et' | 'en' | 'ru'>().notNull().default('et'),
+  /**
+   * M10: which versions of the terms and the privacy policy the user accepted, and when
+   * (packages/shared/src/legal). Null = never accepted (social sign-up, accounts older than M10):
+   * the app asks before it can be used. A new version makes the app ask again.
+   */
+  termsVersion: text('terms_version'),
+  privacyVersion: text('privacy_version'),
+  legalAcceptedAt: timestamp('legal_accepted_at', { withTimezone: true }),
   ...timestamps,
 }, (t) => [check('user_language_supported', sql`${t.language} in ('et', 'en', 'ru')`)]);
 
@@ -374,9 +382,12 @@ export const messages = pgTable(
     conversationId: uuid('conversation_id')
       .notNull()
       .references(() => conversations.id, { onDelete: 'cascade' }),
-    senderId: text('sender_id')
-      .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }),
+    /**
+     * Null = the sender deleted their account (M10, docs/17): the message stays readable for the other
+     * member as "Kustutatud kasutaja", without any link to the deleted person. The conversation itself
+     * is removed when its last member is deleted.
+     */
+    senderId: text('sender_id').references(() => user.id, { onDelete: 'set null' }),
     body: text('body').notNull(),
     createdAt: timestamps.createdAt,
   },

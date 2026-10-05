@@ -75,7 +75,8 @@ export function createMessagesService({
 
     async sendMessage(userId, conversationId, body) {
       const { otherId, friends: areFriends } = await requireMember(userId, conversationId);
-      if (!areFriends) throw new ForbiddenError('errors.messagesFriendsOnly');
+      // No other member = they deleted their account (M10): read-only, like an ended friendship.
+      if (!areFriends || !otherId) throw new ForbiddenError('errors.messagesFriendsOnly');
       const message = await t(messages.createMessage(conversationId, userId, body), 'messages.createMessage');
       // Both members: the recipient sees it arrive, the sender's other devices stay in sync.
       realtime.emitToUsers([userId, otherId], 'message:new', message);

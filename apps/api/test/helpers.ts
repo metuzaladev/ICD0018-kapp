@@ -99,6 +99,9 @@ export function makeProfile(overrides: Partial<Profile> = {}): Profile {
     presenceSharing: 'friends',
     allowFriendRequests: true,
     language: 'et',
+    emailVerified: true,
+    hasPassword: true,
+    legal: { termsVersion: '2026-10-05', privacyVersion: '2026-10-05', acceptedAt: '2026-10-05T10:00:00.000Z' },
     ...overrides,
   };
 }

@@ -311,7 +311,11 @@ export function createPlacePostsRepository(db: Db): PlacePostsRepository {
       const tagFilter = tags && tags.length > 0 ? sql`where pins.tag in ${tags}` : sql``;
       const { rows } = await db.execute<{ id: string; kind: MapPlace['kind']; tag: MapTag; category: string; name: string; lat: number; lng: number }>(sql`
         select * from (
-          select k.id, 'park' as kind, 'parks' as tag, 'park' as category, k.name, ST_Y(k.location) as lat, ST_X(k.location) as lng
+          -- An unfenced park with water is a dog swimming spot (koertepargid.ee import): a "Rannad" pin.
+          select k.id, 'park' as kind,
+            case when k.water and not k.fenced then 'beaches' else 'parks' end as tag,
+            case when k.water and not k.fenced then 'beach' else 'park' end as category,
+            k.name, ST_Y(k.location) as lat, ST_X(k.location) as lng
           from parks k where k.status = 'approved' and k.location && ${box}
           union all
           select p.id, 'post' as kind,

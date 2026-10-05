@@ -28,7 +28,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { currentLocaleTag } from '@/i18n';
 import { errorMessage } from '@/lib/api';
 import { bboxAround, bboxFromRegion, mapTagsFor, placeRoute, type Bbox } from '@/lib/explore';
-import { AVAILABLE_CATEGORIES, CATEGORY_ICON, categoryShows, type MapCategory } from '@/lib/map-categories';
+import { AVAILABLE_CATEGORIES, CATEGORY_ICON, categoryShows, parkKindOf, type MapCategory } from '@/lib/map-categories';
 import { clearMapFocus, useExploreState } from '@/state/explore-view';
 import { activeFilterCount, DEFAULT_FILTERS, setParkFilters, useParkFilters } from '@/state/park-filters';
 
@@ -92,14 +92,15 @@ function MapScreen() {
     const q = query.trim().toLocaleLowerCase(currentLocaleTag());
     return (name: string) => q === '' || name.toLocaleLowerCase(currentLocaleTag()).includes(q);
   }, [query]);
-  const visibleParks = useMemo(() => (categoryShows(category, 'park') ? parks.filter((p) => matches(p.name)) : []), [category, parks, matches]);
+  const visibleParks = useMemo(() => parks.filter((p) => categoryShows(category, parkKindOf(p)) && matches(p.name)), [category, parks, matches]);
   const visiblePlaces = useMemo<MapPlace[]>(() => {
     // Parks already drawn from the nearby list (with their dog counts) are not drawn twice.
     const drawn = new Set(parks.map((p) => p.id));
     return (placesQuery.data ?? []).filter((p) => !(p.kind === 'park' && drawn.has(p.id)) && matches(p.name));
   }, [placesQuery.data, parks, matches]);
   // The API sorts by distance, so the first visible park is the nearest one (or the best search match).
-  const nearest: Park | undefined = visibleParks[0];
+  // "Lähim park" means a dog park: a swimming spot is only offered when nothing else is visible.
+  const nearest: Park | undefined = visibleParks.find((p) => parkKindOf(p) === 'park') ?? visibleParks[0];
 
   // Full-screen explanation before the one-time system dialog; only while undecided (a denied
   // permission is explained again only when the user taps "locate").

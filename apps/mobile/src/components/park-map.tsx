@@ -17,7 +17,7 @@ import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { useTheme } from '@/hooks/use-theme';
 import { dogsLabel } from '@/lib/format';
 import { placeKindOf, type LngLatBox } from '@/lib/explore';
-import { parkPinModel } from '@/lib/map-categories';
+import { parkKindOf, parkPinModel } from '@/lib/map-categories';
 import { MAP_STYLE } from '@/lib/map-style';
 
 type Point = { lat: number; lng: number };
@@ -158,7 +158,7 @@ export function ParkMap({
               accessibilityLabel={t('map.marker', { name: park.name, dogs: dogsLabel(park.activeDogs ?? 0) })}
               accessibilityHint={t('parkRow.hint')}>
               {pin.kind === 'place' ? (
-                <PlacePin kind="park" />
+                <PlacePin kind={parkKindOf(park)} />
               ) : (
                 // Visitors' dog photos are not part of the park API: faces are paw placeholders.
                 <DogPin faces={Array.from({ length: pin.faces }, () => null)} countLabel={pin.showCount ? dogsLabel(pin.count) : undefined} />

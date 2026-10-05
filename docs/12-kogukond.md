@@ -48,6 +48,22 @@ Kõik marsruudid nõuavad sessiooni (`401`), sisend käib läbi `parseRequest`-i
 | Sõnum 1–2000 märki (skeem + `CHECK messages_body_length`), lehekülgede kaupa uusimast (`before` = viimase näidatud sõnumi id, võti `(created_at, id)`) | Stabiilne ka siis, kui lehitsemise ajal tuleb uusi sõnumeid. |
 | Kiiruspiirangud: kutse 30/h, otsing 60/min, sõnum 30/min, teavitamine 5/h, blokeerimine 30/h, push-märk 20/h | Rämpspost ja skriptid; teavitused on käsitsi modereerimise töö. |
 
+## M11: avalehe pargitegevus
+
+`GET /parks/activity?ids=` (avaleht → „Lemmikparkides täna", [docs/18](18-avalehe-tegevus.md)) loendab tänaseid plaane parkides. Reeglid on samas vaimus nagu sõprade plaanid ja pargi külastajad, SQL-is (`modules/park-activity/park-activity.repository.ts`, `block-sql.ts`):
+
+| Plaani omaniku seade | Loetakse vaataja arvu sisse | Nimi vaatajale |
+|---|---|---|
+| „Kõik" | jah | ainult sõbrale |
+| „Sõbrad" | ainult sõbrale | jah |
+| „Mitte keegi" | ei kellelegi | — |
+| Blokeering kummaski suunas | ei | — |
+
+- Vaataja oma plaane ei loeta; vastuses pole kunagi kasutaja ID-sid ega võõraste nimesid (nimi loetakse SQL-is ainult sõbra puhul, ainult eesnimi).
+- Erinevalt „Praegu pargis" varjatud koerte arvust (`hiddenDogs`) ei loeta „sõpradele" jagaja plaani võõrastele isegi anonüümselt: praegust kohalolekut näeb kohapeal igaüks, tulevane asukoht on ennustus, mida omanik pole võõrastega jaganud.
+- Väikese arvu reeglit pole: arvu sisse lähevad ainult need, kes on lubanud sellel vaatajal oma kohalolekut näha.
+- Privaatsusseade (Seaded → Privaatsus → „Kohaloleku jagamine") ütleb nüüd, et valik kehtib ka plaanidele.
+
 ## Reaalaeg (Socket.IO)
 
 ```

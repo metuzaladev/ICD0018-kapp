@@ -17,6 +17,7 @@ TalTechi kursuse **ICD0018 Hübriidmobiilirakendused** projekt · autor Kristofe
 | [04 Arendusplaan](docs/04-arendusplaan.md) | Etapid M0–M8, töövõtted |
 | [05 Disainisüsteem](docs/05-disainisusteem.md) | Figma tokenid koodis, Apple HIG reeglid |
 | [06 Koodistandard](docs/06-koodistandard.md) | Kaustade ja nimede põhjendused, vigade leping, turvalisus, testid |
+| [07 Autentimine](docs/07-autentimine.md) | Sessioonid, vood, endpoint'id, Apple/Google seadistamine |
 
 ## Käivitamine
 
@@ -32,7 +33,9 @@ npm run dev:api             # API → http://localhost:3000
 npm run dev:mobile          # Expo; vajuta "i" iOS-i simulaatori jaoks
 ```
 
-Päris telefonis: määra `EXPO_PUBLIC_API_URL=http://<arvuti-IP>:3000` (fail `apps/mobile/.env.local`).
+Äpi seaded: `cp apps/mobile/.env.example apps/mobile/.env.local`. Päris telefonis määra seal `EXPO_PUBLIC_API_URL=http://<arvuti-IP>:3000`.
+
+Arenduses saadetud parooli taastamise lingid ilmuvad API logisse (e-posti teenust veel pole).
 
 ## Kontrollid
 

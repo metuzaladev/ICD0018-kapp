@@ -6,13 +6,30 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 
-/** Screen scaffold matching the Figma "Screen Header": large title, subtitle, scrollable stack. */
-export function Screen({ title, subtitle, children }: { title: string; subtitle?: string; children?: ReactNode }) {
+type ScreenProps = {
+  title?: string;
+  subtitle?: string;
+  children?: ReactNode;
+  /** Set when a native stack header already covers the top safe area. */
+  underHeader?: boolean;
+};
+
+/** Screen scaffold matching the Figma "Screen Header": title, subtitle, scrollable stack. */
+export function Screen({ title, subtitle, children, underHeader = false }: ScreenProps) {
   return (
     <ThemedView style={styles.root}>
-      <SafeAreaView edges={['top']} style={styles.root}>
-        <ScrollView contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic">
-          <ThemedText type="title">{title}</ThemedText>
+      <SafeAreaView edges={underHeader ? [] : ['top']} style={styles.root}>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          contentInsetAdjustmentBehavior="automatic"
+          // Forms: tapping a button while the keyboard is open must press it, not just close the keyboard.
+          keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets>
+          {title ? (
+            <ThemedText type="title" accessibilityRole="header">
+              {title}
+            </ThemedText>
+          ) : null}
           {subtitle ? <ThemedText themeColor="muted">{subtitle}</ThemedText> : null}
           {children}
         </ScrollView>

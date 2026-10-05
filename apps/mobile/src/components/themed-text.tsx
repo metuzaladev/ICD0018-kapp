@@ -1,46 +1,47 @@
-import { Platform, StyleSheet, Text, type TextProps } from 'react-native';
+import { StyleSheet, Text, type TextProps } from 'react-native';
 
-import { Fonts, ThemeColor, Type } from '@/constants/theme';
+import { ThemeColor, Type } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
+/**
+ * Text in the Figma type scale. `type` names match the Figma text styles (Typography/*);
+ * the older template names (title, subtitle, small, smallBold) are kept as aliases.
+ */
 export type ThemedTextProps = TextProps & {
-  type?: 'default' | 'title' | 'small' | 'smallBold' | 'subtitle' | 'link' | 'linkPrimary' | 'code';
+  type?:
+    | 'display'
+    | 'hero'
+    | 'title'
+    | 'heading'
+    | 'default'
+    | 'label'
+    | 'caption'
+    | 'micro'
+    | 'subtitle'
+    | 'small'
+    | 'smallBold'
+    | 'link';
   themeColor?: ThemeColor;
 };
 
 export function ThemedText({ style, type = 'default', themeColor, ...rest }: ThemedTextProps) {
   const theme = useTheme();
-
-  return (
-    <Text
-      style={[
-        { color: theme[themeColor ?? 'text'] },
-        type === 'default' && styles.default,
-        type === 'title' && styles.title,
-        type === 'small' && styles.small,
-        type === 'smallBold' && styles.smallBold,
-        type === 'subtitle' && styles.subtitle,
-        type === 'link' && styles.link,
-        type === 'linkPrimary' && styles.linkPrimary,
-        type === 'code' && styles.code,
-        style,
-      ]}
-      {...rest}
-    />
-  );
+  const color = theme[themeColor ?? (type === 'link' ? 'link' : 'text')];
+  // Respect the user's Dynamic Type setting, but cap it so layouts built for 390 pt stay usable.
+  return <Text maxFontSizeMultiplier={1.6} style={[{ color }, styles[type], style]} {...rest} />;
 }
 
 const styles = StyleSheet.create({
+  display: Type.display,
+  hero: Type.hero,
+  title: Type.title,
+  heading: Type.heading,
+  default: Type.body,
+  label: Type.label,
+  caption: Type.caption,
+  micro: Type.micro,
+  subtitle: Type.heading,
   small: Type.caption,
   smallBold: Type.label,
-  default: Type.body,
-  title: Type.title,
-  subtitle: Type.heading,
-  link: { ...Type.label },
-  linkPrimary: { ...Type.label },
-  code: {
-    fontFamily: Fonts.mono,
-    fontWeight: Platform.select({ android: 700 }) ?? 500,
-    fontSize: 12,
-  },
+  link: Type.label,
 });

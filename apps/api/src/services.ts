@@ -15,6 +15,8 @@ import { createFavoritesRepository } from './modules/favorites/favorites.reposit
 import { createFavoritesService } from './modules/favorites/favorites.service';
 import { createHealthRecordsRepository } from './modules/health-records/health-records.repository';
 import { createHealthRecordsService } from './modules/health-records/health-records.service';
+import { createParkActivityRepository } from './modules/park-activity/park-activity.repository';
+import { createParkActivityService } from './modules/park-activity/park-activity.service';
 import { createParksRepository } from './modules/parks/parks.repository';
 import { createParksService } from './modules/parks/parks.service';
 import { createPhotosRepository } from './modules/photos/photos.repository';
@@ -146,6 +148,7 @@ export function createServices(db: Db, storage: ObjectStorage, timeoutMs: number
     notificationsService: createNotificationsService({ notifications: notificationsRepository, tokens: createPushTokensRepository(db), timeoutMs }),
     safetyService: createSafetyService({ repository: createSafetyRepository(db), timeoutMs }),
     parksService: createParksService({ repository: parks, timeoutMs }),
+    parkActivityService: createParkActivityService({ repository: createParkActivityRepository(db), timeoutMs }),
     profileService: createProfileService({ repository: createProfileRepository(db), timeoutMs }),
     favoritesService: createFavoritesService({ favorites: createFavoritesRepository(db), parks, timeoutMs }),
     dogsService: createDogsService({ repository: dogs, storage, timeoutMs }),

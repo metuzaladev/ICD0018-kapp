@@ -57,6 +57,7 @@ export const en: Messages = {
   'validation.bboxTooLarge': 'the map area can be at most {{max}} degrees',
   'validation.inviteCode': 'an invite code has 8 letters or digits',
   'validation.maxDogs': 'up to {{max}} dogs',
+  'validation.parkIds': 'give 1–{{max}} park ids separated by commas',
 
   'errors.badRequest': 'Invalid request',
   'errors.unauthorized': 'Please sign in',

@@ -70,6 +70,7 @@ export const et = {
   'validation.bboxTooLarge': 'kaardiala võib olla kuni {{max}} kraadi',
   'validation.inviteCode': 'kutsekood on 8 tähte või numbrit',
   'validation.maxDogs': 'kuni {{max}} koera',
+  'validation.parkIds': 'anna 1–{{max}} pargi ID-d komadega eraldatult',
 
   /* ---------- API errors ---------- */
   'errors.badRequest': 'Vigane päring',

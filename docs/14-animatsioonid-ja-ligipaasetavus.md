@@ -25,7 +25,7 @@ Apple HIG „Motion": liikumine on lühike, eesmärgiga ega blokeeri kunagi sise
 | Komponent | Mida teeb |
 |---|---|
 | `components/pressable-scale.tsx` | Iga nupu, kiibi ja rea alus: vajutamisel kahaneb 3 % ja tuhmub. |
-| `components/chip.tsx` | Valik vahetab värvi sujuvalt (`interpolateColor`) ja annab valiku-haptika. |
+| `components/chip.tsx`, `icon-chip.tsx` | Valik vahetab värvi sujuvalt (`interpolateColor`) ja annab valiku-haptika. Segmented Control vahetab kohe (haptikaga). |
 | `components/entering.tsx` | Andmete saabumisel tõuseb sisu 12 pt ja ilmub (`FadeInDown`); ainult paigaldamisel, mitte iga refetch'i peale. |
 | `components/skeleton.tsx` | Laadimise kohatäide („Laen…" teksti asemel) pehme pulsiga; VoiceOver kuuleb ühte elementi „Laen…". |
 | `components/success-mark.tsx` | Check-in'i ja broneeringu õnnestumine: brändivärvi linnuke hüppab sisse. Dekoratiivne (pealkiri ütleb sama). |
@@ -76,7 +76,7 @@ Auditeeritud vaated: avaleht, kaart, pargi leht, check-in, plaan, hinnang, teavi
 5. **Pildid** on sildiga või peidetud (`accessible={false}`): taust, avatarid ja pakkuja foto on dekoratsioon; pargi ja koera foto on sildiga.
 6. **Teated:** õnnestumine kuulutatakse (`announceForAccessibility`: „Kohalolek märgitud…", „Hinnang salvestatud…"), vead on `alert` + `accessibilityLiveRegion`.
 7. **Pealkirjad** (`accessibilityRole="header"`) ekraani pealkirjal ja jaotistel, et rootoriga saaks hüpata.
-8. **Dynamic Type:** `ThemedText` lubab kuni 160 % (`maxFontSizeMultiplier={1.6}`, et 390 pt paigutus jääks kasutatavaks). Tekstiga konteineritel pole fikseeritud kõrgust (`minHeight`), nupud (`Button` ≥ 52 pt) ja kiibid (≥ 44 pt) kasvavad, kiipide read murduvad (`flexWrap`), kiibi laius tuleb sildist (pole `flex: 1` ega fikseeritud laiust — „Отправить", „Фильтры (2)"), kellaaja kiibid on `minWidth`, mitte `width`.
+8. **Dynamic Type:** `ThemedText` lubab kuni 160 % (`maxFontSizeMultiplier={1.6}`, et 390 pt paigutus jääks kasutatavaks). Tekstiga konteineritel pole fikseeritud kõrgust (`minHeight`), nupud (`Button` ≥ 52 pt) ja kiibid (≥ 44 pt) kasvavad, tavaliste kiipide read murduvad (`flexWrap`), ikooniga kiipide read (`ChipRow`, M9) keritakse horisontaalselt nagu Figmas, kiibi laius tuleb sildist (pole `flex: 1` ega fikseeritud laiust — „Отправить", „Фильтры (2)"), kellaaja kiibid on `minWidth`, mitte `width`. Segmented Control'i kaks poolt jagavad laiust võrdselt, aga kõrgus kasvab sildiga (tekst murdub, ei lõigu).
 9. **Puutepind ≥ 44 × 44 pt** (HIG); päise süda 44 pt, tärnid 52 pt.
 10. **Kontrast:** värvid tulevad ainult Figma tokenitest (`semanticColors`), mida on Figmas kontrollitud 4,5 : 1 heledas ja tumedas kõigi aktsentidega (docs/05). Uut värvi koodis ei looda.
 

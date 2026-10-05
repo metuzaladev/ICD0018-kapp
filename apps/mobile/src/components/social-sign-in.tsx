@@ -1,10 +1,11 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, StyleSheet, useColorScheme, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
 import { Radius, Spacing } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { authClient, authErrorMessage } from '@/lib/auth-client';
 import { AUTH_APPLE_ENABLED, AUTH_GOOGLE_ENABLED } from '@/lib/config';
 
@@ -15,8 +16,19 @@ import { AUTH_APPLE_ENABLED, AUTH_GOOGLE_ENABLED } from '@/lib/config';
  * Uses Apple's own button component, as App Store guideline 4.8 and the HIG require.
  * Google: browser redirect flow (works in Expo Go); a native Google SDK needs a dev build (M8).
  * Both are hidden unless the API has credentials configured (EXPO_PUBLIC_AUTH_*).
+ * M9: shown first on the account screens (Figma), with an "or with e-mail" divider as `footer`.
  */
-export function SocialSignIn({ onError }: { onError: (message: string | null) => void }) {
+type SocialSignInProps = {
+  onError: (message: string | null) => void;
+  /** Apple's button text: "Continue with Apple" (welcome, sign-up) or "Sign in with Apple" (log in). */
+  mode?: 'continue' | 'signIn';
+  /** Welcome shows only Apple (Figma); the account screens add Google. */
+  showGoogle?: boolean;
+  /** Drawn under the buttons when at least one is shown (Figma "või e-postiga" divider). */
+  footer?: ReactNode;
+};
+
+export function SocialSignIn({ onError, mode = 'continue', showGoogle = true, footer }: SocialSignInProps) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
   const [appleAvailable, setAppleAvailable] = useState(false);
@@ -52,13 +64,18 @@ export function SocialSignIn({ onError }: { onError: (message: string | null) =>
     onError(authErrorMessage(error));
   }
 
-  if (!appleAvailable && !AUTH_GOOGLE_ENABLED) return null;
+  const google = showGoogle && AUTH_GOOGLE_ENABLED;
+  if (!appleAvailable && !google) return null;
 
   return (
     <View style={styles.stack}>
       {appleAvailable ? (
         <AppleAuthentication.AppleAuthenticationButton
-          buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
+          buttonType={
+            mode === 'signIn'
+              ? AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
+              : AppleAuthentication.AppleAuthenticationButtonType.CONTINUE
+          }
           buttonStyle={
             scheme === 'dark'
               ? AppleAuthentication.AppleAuthenticationButtonStyle.WHITE
@@ -69,7 +86,8 @@ export function SocialSignIn({ onError }: { onError: (message: string | null) =>
           onPress={signInWithApple}
         />
       ) : null}
-      {AUTH_GOOGLE_ENABLED ? <Button variant="secondary" label={t('auth.social.google')} onPress={signInWithGoogle} /> : null}
+      {google ? <Button variant="secondary" label={t('auth.social.google')} onPress={signInWithGoogle} /> : null}
+      {footer}
     </View>
   );
 }

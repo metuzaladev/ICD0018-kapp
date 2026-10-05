@@ -27,7 +27,9 @@
     "photos_one": "{{count}} photo",
     "photos_other": "{{count}} photos",
     "visits_one": "{{count}} visit",
-    "visits_other": "{{count}} visits"
+    "visits_other": "{{count}} visits",
+    "friendsInPark_one": "{{count}} friend in the park",
+    "friendsInPark_other": "{{count}} friends in the park"
   },
   "dates": {
     "today": "today",
@@ -81,12 +83,14 @@
     "passwordHint": "At least {{min}} characters",
     "backToSignIn": "Back to sign in",
     "welcome": {
-      "region": "TALLINN · ESTONIA",
+      "region": "Tallinn · Estonia",
       "tagline": "Dogs bring people together.",
       "photoLabel": "A Cardigan corgi on the grass",
       "intro": "Find a playmate for your dog and a new favourite park for yourself.",
       "start": "Let’s go",
-      "haveAccount": "I already have an account"
+      "haveAccount": "I already have an account",
+      "liveTitle": "{{dogs}} at the park now",
+      "liveA11y": "{{park}}: {{dogs}} now"
     },
     "signUp": {
       "title": "Welcome to the pack.",
@@ -96,7 +100,8 @@
       "emailPlaceholder": "name@example.com",
       "terms": "By creating an account you agree to the terms of use and the privacy policy.",
       "submit": "Create account",
-      "haveAccount": "Already a member? Sign in"
+      "haveAccount": "Already a member? Sign in",
+      "socialProof": "Join Tallinn's dog owners"
     },
     "signIn": {
       "title": "Good to see you again.",
@@ -111,8 +116,13 @@
       "title": "Fresh start?",
       "subtitle": "We’ll send you a link to reset your password.",
       "submit": "Send reset link",
-      "hintTitle": "Check your inbox",
-      "hintBody": "After sending, check your spam folder too. The link is valid for a limited time."
+      "step1Title": "Enter your e-mail",
+      "step1Body": "The one you signed up with.",
+      "step2Title": "Open the link in your inbox",
+      "step2Body": "Check your spam folder too. The link is valid for a limited time.",
+      "step3Title": "Choose a new password",
+      "step3Body": "At least {{min}} characters.",
+      "stepA11y": "Step {{step}}: {{title}}. {{body}}"
     },
     "resetSent": {
       "title": "Check your inbox",
@@ -129,19 +139,28 @@
     "social": {
       "google": "Continue with Google",
       "appleFailed": "Signing in with Apple failed"
-    }
+    },
+    "orEmail": "or with e-mail"
   },
   "onboarding": {
     "discover": {
       "title": "A good park is closer than you think.",
-      "body": "See who’s at the park right now and find company that matches your pace.",
-      "photoLabel": "A dog park in autumn"
+      "body": "The map shows where dogs are playing right now.",
+      "seeTitle": "See who's at the park now",
+      "seeBody": "How many dogs and how lively, before you leave home.",
+      "crewTitle": "Find the right company",
+      "crewBody": "Small, calm or playful: pick what suits your dog."
     },
     "connect": {
       "title": "Less waiting. More playing.",
-      "body": "Plan a walk, bring a friend along and find your own little community.",
-      "sampleTitle": "Freddy is waiting for friends",
-      "sampleSubtitle": "Kadriorg dog park · today 17:00–18:00"
+      "body": "Bring friends along and earn paws.",
+      "sampleTitle": "Mari and Luna invite you",
+      "sampleSubtitle": "Kadriorg dog park · today 17:00",
+      "sampleAction": "Coming",
+      "planTitle": "Plan a walk",
+      "planBody": "Friends see when and where you're going.",
+      "pawsTitle": "Earn paws",
+      "pawsBody": "Every walk and park visit earns discounts from partners."
     },
     "step": "Step {{current}} of {{total}}",
     "next": "Next",
@@ -151,11 +170,16 @@
   "location": {
     "title": "What’s near you?",
     "body": "Your location helps find parks nearby.",
-    "privacy": "We use your location to find parks. Others only see you in a park when you check in.",
-    "allow": "Allow while using the app",
+    "allow": "Allow location",
     "notNow": "Not now",
     "deniedTitle": "Location is turned off",
-    "deniedBody": "We’re showing parks around Tallinn city centre. You can allow location in Settings."
+    "deniedBody": "We’re showing parks around Tallinn city centre. You can allow location in Settings.",
+    "benefitParksTitle": "Nearest parks at a glance",
+    "benefitParksBody": "Distance and how many dogs are around you.",
+    "benefitFriendsTitle": "Friends nearby",
+    "benefitFriendsBody": "Only if they choose to share it.",
+    "benefitPrivacyTitle": "Your location stays yours",
+    "benefitPrivacyBody": "Others only see you in a park when you check in."
   },
   "offline": {
     "title": "No internet connection.",
@@ -180,7 +204,8 @@
     "friendPlan": "{{name}} · {{day}} {{from}}–{{to}}",
     "findFriends": "Find playmates",
     "servicesTitle": "Services",
-    "servicesSub": "Grooming, training and vets"
+    "servicesSub": "Grooming, training and vets",
+    "allParks": "See all parks"
   },
   "map": {
     "title": "Let’s explore Tallinn.",
@@ -196,7 +221,25 @@
     "empty": "No parks found in this radius. Try a larger distance or fewer filters.",
     "marker": "{{name}}, {{dogs}} now",
     "filtersHint": "Opens the filters",
-    "emptyAction": "Clear filters"
+    "emptyAction": "Clear filters",
+    "searchPlaceholder": "Search parks and places",
+    "searchLabel": "Search the map",
+    "searchHint": "Only places whose name matches stay on the map",
+    "categories": {
+      "all": "All",
+      "parks": "Parks",
+      "cafes": "Cafés",
+      "services": "Services",
+      "beaches": "Beaches",
+      "vets": "Vets"
+    },
+    "openList": "Show as a list",
+    "openListHint": "Opens the list of parks",
+    "locate": "Show my location",
+    "noMatches": "No place with that name.",
+    "providerMarker": "{{name}}, service provider",
+    "active": "Active",
+    "favorites": "Favourites"
   },
   "parkRow": {
     "dogsNow": "{{dogs}} now",
@@ -476,7 +519,13 @@
     "notifications": "Notifications",
     "notificationsSub": "Friends, messages and plans",
     "privacy": "Privacy",
-    "privacySub": "Visibility and safety"
+    "privacySub": "Visibility and safety",
+    "appearance": "Appearance",
+    "appearanceOptions": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    }
   },
   "profileEdit": {
     "title": "Just your style.",
@@ -724,5 +773,23 @@
     "cancelBody": "{{service}}, {{provider}} · {{when}}. The time will be freed for others.",
     "cancelConfirm": "Cancel booking",
     "keep": "Keep it"
+  },
+  "points": {
+    "balance_one": "{{count}} paw",
+    "balance_other": "{{count}} paws"
+  },
+  "parkCard": {
+    "tag": {
+      "fenced": "Fenced",
+      "smallDogArea": "Small dog area",
+      "water": "Water",
+      "lighting": "Lighting"
+    },
+    "ratingA11y": "rated {{rating}} out of 5"
+  },
+  "nearestPark": {
+    "label": "Nearest park",
+    "hereNow": "You're here",
+    "checkInHint": "Checks you in: {{name}}"
   }
 }

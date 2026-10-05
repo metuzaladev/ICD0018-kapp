@@ -2,11 +2,11 @@ import type { Booking } from '@kapp/shared';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert } from 'react-native';
 
 import { bookingWhen, BookingCard } from '@/components/booking-card';
 import { Button } from '@/components/button';
-import { Chip } from '@/components/chip';
+import { SegmentedControl } from '@/components/segmented-control';
 import { EmptyState } from '@/components/empty-state';
 import { Entering } from '@/components/entering';
 import { ErrorState } from '@/components/error-state';
@@ -14,7 +14,6 @@ import { FormError } from '@/components/form-error';
 import { OfflineBanner } from '@/components/offline-banner';
 import { Screen } from '@/components/screen';
 import { SkeletonList } from '@/components/skeleton';
-import { Spacing } from '@/constants/theme';
 import { useBookings, useCancelBooking } from '@/hooks/use-bookings';
 import { useMyDogs } from '@/hooks/use-dogs';
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
@@ -22,7 +21,6 @@ import { errorMessage } from '@/lib/api';
 import { haptic } from '@/lib/haptics';
 
 type Scope = 'upcoming' | 'past';
-const SCOPES: Scope[] = ['upcoming', 'past'];
 
 /** Figma 06 / Bookings / My Bookings: "Tulevased" / "Varasemad", cancel with a confirmation. */
 export default function BookingsScreen() {
@@ -49,11 +47,14 @@ export default function BookingsScreen() {
   return (
     <Screen underHeader title={t('bookings.title')} subtitle={t('bookings.subtitle', { count: dogCount })} refresh={refresh}>
       <OfflineBanner />
-      <View style={styles.chips}>
-        {SCOPES.map((s) => (
-          <Chip key={s} label={t(`bookings.${s}`)} selected={scope === s} onPress={() => setScope(s)} />
-        ))}
-      </View>
+      <SegmentedControl
+        options={[
+          { value: 'upcoming', label: t('bookings.upcoming') },
+          { value: 'past', label: t('bookings.past') },
+        ]}
+        value={scope}
+        onChange={(next) => next && setScope(next)}
+      />
       {list.error && !list.data ? <ErrorState message={errorMessage(list.error)} onRetry={() => void list.refetch()} retrying={list.isFetching} /> : null}
       {cancel.error ? <FormError message={errorMessage(cancel.error)} /> : null}
       {list.isPending ? <SkeletonList rows={2} rowHeight={96} /> : null}
@@ -67,7 +68,3 @@ export default function BookingsScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-});

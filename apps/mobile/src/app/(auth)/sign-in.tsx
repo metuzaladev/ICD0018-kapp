@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/button';
+import { OrDivider } from '@/components/feature-row';
 import { FormError } from '@/components/form-error';
 import { Screen } from '@/components/screen';
 import { SocialSignIn } from '@/components/social-sign-in';
@@ -12,7 +13,11 @@ import { ThemedText } from '@/components/themed-text';
 import { authClient, authErrorMessage } from '@/lib/auth-client';
 import { validateForm } from '@/lib/form';
 
-/** Figma 01 / Account / Log In. */
+/**
+ * Figma 01 / Account / Log In (6:168, M9): Apple first (when available), "või e-postiga", the form.
+ * The Figma "Freddy ootab juba" card needs a remembered dog from a previous session; the app does not
+ * keep one on the device after sign-out (privacy), so the card is omitted.
+ */
 export default function SignInScreen() {
   const { t } = useTranslation();
   // Set after a successful password reset (new-password.tsx).
@@ -43,6 +48,7 @@ export default function SignInScreen() {
           {t('auth.signIn.passwordChanged')}
         </ThemedText>
       ) : null}
+      <SocialSignIn mode="signIn" onError={setFormError} footer={<OrDivider label={t('auth.orEmail')} />} />
       <FormError message={formError} />
       <TextField
         label={t('auth.email')}
@@ -69,9 +75,8 @@ export default function SignInScreen() {
         returnKeyType="go"
         onSubmitEditing={submit}
       />
-      <Button label={t('auth.signIn.submit')} loading={loading} onPress={submit} />
+      <Button label={t('auth.signIn.submit')} trailingIcon="arrow-right" loading={loading} onPress={submit} />
       <Button label={t('auth.signIn.forgot')} variant="tertiary" onPress={() => router.push('/reset-password')} />
-      <SocialSignIn onError={setFormError} />
       <Button label={t('auth.signIn.createAccount')} variant="secondary" onPress={() => router.replace('/sign-up')} />
     </Screen>
   );

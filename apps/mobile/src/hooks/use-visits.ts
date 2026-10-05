@@ -33,10 +33,11 @@ export function useActiveCheckIn() {
   return useQuery({ queryKey: visitKeys.active, queryFn: () => apiGet<ActiveCheckIn | null>('/me/check-ins/active') });
 }
 
-export function useParkVisitors(parkId: string) {
+export function useParkVisitors(parkId: string, enabled = true) {
   return useQuery({
     queryKey: visitKeys.visitors(parkId),
     queryFn: () => apiGet<ParkVisitors>(`/parks/${parkId}/visitors`),
+    enabled,
     // People come and go; refresh more often than static park data.
     staleTime: 30_000,
   });

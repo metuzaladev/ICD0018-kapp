@@ -2,16 +2,15 @@ import { dogInputSchema, updateDogInputSchema, type Dog, type DogSex } from '@ka
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert } from 'react-native';
 
 import { Button } from '@/components/button';
-import { Chip } from '@/components/chip';
+import { SegmentedControl } from '@/components/segmented-control';
 import { FormError } from '@/components/form-error';
 import { Screen } from '@/components/screen';
 import { SkeletonList } from '@/components/skeleton';
 import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
 import { useDeleteDog, useMyDogs, useSaveDog } from '@/hooks/use-dogs';
 import { errorMessage } from '@/lib/api';
 import { validateForm } from '@/lib/form';
@@ -116,10 +115,17 @@ function DogForm({ dogId, existing }: { dogId?: string; existing?: Dog }) {
       <TextField label={t('dogs.edit.name')} value={values.name} onChangeText={set('name')} error={errors.name} autoCapitalize="words" />
       <TextField label={t('dogs.edit.breed')} placeholder={t('dogs.edit.breedPlaceholder')} value={values.breed} onChangeText={set('breed')} error={errors.breed} />
       <ThemedText type="label">{t('dogs.edit.sex')}</ThemedText>
-      <View style={styles.chips}>
-        <Chip label={t('dogs.edit.male')} selected={values.sex === 'male'} onPress={() => setValues((v) => ({ ...v, sex: v.sex === 'male' ? null : 'male' }))} />
-        <Chip label={t('dogs.edit.female')} selected={values.sex === 'female'} onPress={() => setValues((v) => ({ ...v, sex: v.sex === 'female' ? null : 'female' }))} />
-      </View>
+      {/* Optional field: tapping the chosen side again clears it (as the chips did before M9). */}
+      <SegmentedControl
+        accessibilityLabel={t('dogs.edit.sex')}
+        allowDeselect
+        options={[
+          { value: 'male', label: t('dogs.edit.male') },
+          { value: 'female', label: t('dogs.edit.female') },
+        ]}
+        value={values.sex}
+        onChange={(sex) => setValues((v) => ({ ...v, sex }))}
+      />
       <TextField
         label={t('dogs.edit.birthDate')}
         placeholder={t('dogs.edit.datePlaceholder')}
@@ -143,7 +149,3 @@ function DogForm({ dogId, existing }: { dogId?: string; existing?: Dog }) {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-});

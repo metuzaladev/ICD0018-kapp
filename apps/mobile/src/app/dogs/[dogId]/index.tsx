@@ -5,12 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
-import { DogAvatar } from '@/components/dog-avatar';
 import { Entering } from '@/components/entering';
 import { ErrorState } from '@/components/error-state';
 import { FormError } from '@/components/form-error';
 import { ListRow } from '@/components/list-row';
 import { OfflineBanner } from '@/components/offline-banner';
+import { PhotoTile } from '@/components/photo-tile';
 import { Screen } from '@/components/screen';
 import { SkeletonList } from '@/components/skeleton';
 import { ThemedText } from '@/components/themed-text';
@@ -75,7 +75,7 @@ function DogProfile({ dog }: { dog: Dog }) {
           />
         ) : (
           <View style={styles.center}>
-            <DogAvatar dog={dog} size={120} />
+            <PhotoTile name={dog.name} size={120} radius={36} />
           </View>
         )}
       </Entering>
@@ -99,6 +99,7 @@ function DogProfile({ dog }: { dog: Dog }) {
       ) : null}
 
       <ListRow
+        icon="camera"
         title={t('dogs.profile.photos')}
         subtitle={
           photoCount === undefined
@@ -110,6 +111,7 @@ function DogProfile({ dog }: { dog: Dog }) {
         onPress={() => router.push({ pathname: '/dogs/[dogId]/photos', params: { dogId: dog.id } })}
       />
       <ListRow
+        icon="stethoscope"
         title={t('dogs.profile.health')}
         subtitle={nextDue ? t('dogs.profile.nextDue', { due: dueLabel(nextDue) }) : t('dogs.profile.healthPrivate')}
         alert={nextDue ? isOverdue(nextDue) : false}

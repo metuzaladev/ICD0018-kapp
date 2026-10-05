@@ -24,6 +24,11 @@ export function formatKg(kg: number): string {
   return i18n.t('units.kg', { value: number(kg) });
 }
 
+/** A whole number with the locale's grouping ("1 200" / "1,200" / "1 200"). */
+export function formatNumber(value: number): string {
+  return number(value, 0);
+}
+
 /** A rating average such as "4,8". */
 export function formatRating(value: number): string {
   return number(value);
@@ -133,6 +138,11 @@ export function reviewsLabel(count: number): string {
 /** "1 koer", "3 koera" — Estonian partitive after numbers other than 1; Russian one/few/many. */
 export function dogsLabel(count: number): string {
   return i18n.t('counts.dogs', { count });
+}
+
+/** "1 sõber pargis", "3 sõpra pargis" (Figma Park Card friends row). */
+export function friendsInParkLabel(count: number): string {
+  return i18n.t('counts.friendsInPark', { count });
 }
 
 /** "1 foto", "12 fotot" */

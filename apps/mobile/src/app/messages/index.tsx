@@ -51,6 +51,7 @@ export default function InboxScreen() {
         return (
           <Entering key={conv.id} index={i}>
             <ListRow
+              photo={{ name: conv.other.dogNames[0] ?? conv.other.firstName }}
               title={personTitle(conv.other.firstName, conv.other.dogNames)}
               subtitle={subtitle}
               accessibilityHint={conv.unreadCount > 0 ? t('inbox.unread', { count: conv.unreadCount }) : undefined}

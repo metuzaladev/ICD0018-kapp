@@ -108,6 +108,7 @@ export default function UserProfileScreen() {
             ) : null}
 
             <ListRow
+              icon="shield"
               title={t('userProfile.reportOrBlock')}
               subtitle={t('userProfile.reportOrBlockSub')}
               onPress={() => router.push({ pathname: '/report-user', params: { userId, name } })}

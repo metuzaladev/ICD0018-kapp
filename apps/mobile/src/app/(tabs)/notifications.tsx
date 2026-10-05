@@ -5,7 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
-import { Chip } from '@/components/chip';
+import { ChipRow, IconChip } from '@/components/icon-chip';
+import type { IconName } from '@/components/icon';
 import { EmptyState } from '@/components/empty-state';
 import { Entering } from '@/components/entering';
 import { ErrorState } from '@/components/error-state';
@@ -14,7 +15,7 @@ import { OfflineBanner } from '@/components/offline-banner';
 import { PushPrompt } from '@/components/push-prompt';
 import { Screen } from '@/components/screen';
 import { SkeletonList } from '@/components/skeleton';
-import { Radius, Spacing } from '@/constants/theme';
+import { Radius } from '@/constants/theme';
 import { useMarkAllNotificationsRead, useMarkNotificationRead, useNotificationFeed, useUnreadCount } from '@/hooks/use-notifications';
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { useTheme } from '@/hooks/use-theme';
@@ -23,6 +24,7 @@ import { formatDay, formatMessageTime, formatTime } from '@/lib/format';
 
 type Filter = 'all' | 'friends' | 'messages';
 const FILTERS: Filter[] = ['all', 'friends', 'messages'];
+const FILTER_ICON: Record<Filter, IconName> = { all: 'layers', friends: 'users', messages: 'message-circle' };
 const FRIEND_TYPES: AppNotification['type'][] = ['friend_request', 'friend_accepted', 'friend_plan'];
 /** Booking rows (M6) only show under "Kõik": they are neither friends nor messages. */
 const matches = (n: AppNotification, filter: Filter) =>
@@ -98,11 +100,11 @@ export default function NotificationsScreen() {
     <Screen title={t('notifications.title')} subtitle={t('notifications.subtitle')} refresh={refresh}>
       <OfflineBanner />
       <PushPrompt />
-      <View style={styles.chips}>
+      <ChipRow radiogroup>
         {FILTERS.map((f) => (
-          <Chip key={f} label={t(`notifications.filters.${f}`)} selected={filter === f} onPress={() => setFilter(f)} />
+          <IconChip key={f} role="radio" icon={FILTER_ICON[f]} label={t(`notifications.filters.${f}`)} selected={filter === f} onPress={() => setFilter(f)} />
         ))}
-      </View>
+      </ChipRow>
       {(unread.data?.count ?? 0) > 0 ? (
         <Button label={t('notifications.markAll')} variant="tertiary" loading={markAll.isPending} onPress={() => markAll.mutate()} />
       ) : null}
@@ -116,6 +118,9 @@ export default function NotificationsScreen() {
             <ListRow
               title={title}
               subtitle={subtitle}
+              // People get their initial in a rounded square; bookings (no person) the scissors icon.
+              photo={n.actor ? { name: n.actor.firstName } : undefined}
+              icon={n.actor ? undefined : 'scissors'}
               accessibilityHint={n.readAt ? undefined : t('notifications.unreadHint')}
               leading={<View style={[styles.dot, { backgroundColor: n.readAt ? 'transparent' : c.brand }]} accessibilityElementsHidden />}
               onPress={() => open(n)}
@@ -131,6 +136,5 @@ export default function NotificationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   dot: { width: 10, height: 10, borderRadius: Radius.full },
 });

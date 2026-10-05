@@ -91,7 +91,7 @@ export default function FriendsScreen() {
       ) : null}
       {search.data?.map((r) => (
         <View key={r.id} style={card}>
-          <ListRow title={personTitle(r.firstName, r.dogNames)} subtitle={r.area} onPress={() => openProfile(r.id)} />
+          <ListRow photo={{ name: r.dogNames[0] ?? r.firstName }} title={personTitle(r.firstName, r.dogNames)} subtitle={r.area} onPress={() => openProfile(r.id)} />
           {searchAction(r)}
         </View>
       ))}
@@ -103,7 +103,7 @@ export default function FriendsScreen() {
           </ThemedText>
           {requests.data.incoming.map(({ user }) => (
             <View key={user.id} style={card}>
-              <ListRow title={personTitle(user.firstName, user.dogNames)} subtitle={subtitleOf(user)} onPress={() => openProfile(user.id)} />
+              <ListRow photo={{ name: user.dogNames[0] ?? user.firstName }} title={personTitle(user.firstName, user.dogNames)} subtitle={subtitleOf(user)} onPress={() => openProfile(user.id)} />
               <View style={styles.actions}>
                 <View style={styles.flex}>
                   <Button label={t('friends.accept')} disabled={accept.isPending} onPress={() => accept.mutate(user.id)} />
@@ -125,6 +125,7 @@ export default function FriendsScreen() {
           {requests.data.outgoing.map(({ user }) => (
             <View key={user.id} style={card}>
               <ListRow
+                photo={{ name: user.dogNames[0] ?? user.firstName }}
                 title={personTitle(user.firstName, user.dogNames)}
                 subtitle={subtitleOf(user, t('friends.requestSent'))}
                 onPress={() => openProfile(user.id)}
@@ -145,7 +146,7 @@ export default function FriendsScreen() {
       {friends.data?.length === 0 ? <EmptyState title={t('friends.emptyTitle')} body={t('friends.emptyBody')} /> : null}
       {friends.data?.map((f, i) => (
         <Entering key={f.id} index={i}>
-          <ListRow title={personTitle(f.firstName, f.dogNames)} subtitle={f.area} onPress={() => openProfile(f.id)} />
+          <ListRow photo={{ name: f.dogNames[0] ?? f.firstName }} title={personTitle(f.firstName, f.dogNames)} subtitle={f.area} onPress={() => openProfile(f.id)} />
         </Entering>
       ))}
     </Screen>

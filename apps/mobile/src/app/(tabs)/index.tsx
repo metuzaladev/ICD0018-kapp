@@ -1,17 +1,21 @@
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
 import { Entering } from '@/components/entering';
 import { ListRow } from '@/components/list-row';
 import { OfflineBanner } from '@/components/offline-banner';
-import { ParkRow } from '@/components/park-row';
+import { NearestParkCard } from '@/components/nearest-park-card';
+import { ParkCard } from '@/components/park-card';
+import { PointsBadge } from '@/components/points-badge';
 import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
 import { useDeviceLocation } from '@/hooks/use-device-location';
+import { photoSource } from '@/hooks/use-photos';
 import { useMyDogs } from '@/hooks/use-dogs';
 import { useFriendPlans } from '@/hooks/use-friends';
 import { useHealthReminders } from '@/hooks/use-health';
@@ -23,8 +27,9 @@ import { dueLabel, formatDate, formatDay, formatTime, formatToday } from '@/lib/
 import { useParkFilters } from '@/state/park-filters';
 
 /**
- * Figma 02 / Home / Today: current visit, own plans, health reminders (due within 30 days or
- * overdue), friends' plans (M5), nearby parks.
+ * Figma 02 / Home / Today (10:69, M9 light redesign): "käpp" + Käpad badge, greeting, a dog photo,
+ * current visit, own plans, friends' plans (M5), health reminders, the "Lähim park" card with
+ * "Oleme siin" (replaces the old "Leia lähim park" button) and nearby parks as Park Cards.
  */
 export default function HomeScreen() {
   const { t } = useTranslation();
@@ -45,14 +50,34 @@ export default function HomeScreen() {
   const refresh = usePullToRefresh(nearby.refetch, activeQuery.refetch, plansQuery.refetch, remindersQuery.refetch, friendPlansQuery.refetch);
   // Figma asks the dog ("Õue, Freddy?"); with several dogs (or none) the owner is greeted instead.
   const greetName = dogs?.length === 1 ? dogs[0]!.name : session?.user.name.split(' ')[0];
+  const heroPhoto = dogs?.find((d) => d.profilePhoto)?.profilePhoto?.url ?? null;
   const openPark = (parkId: string) => router.push({ pathname: '/parks/[parkId]', params: { parkId } });
 
   return (
-    <Screen
-      title={greetName ? t('home.greeting', { name: greetName }) : t('home.greetingNoName')}
-      subtitle={t('home.subtitle', { date: formatToday() })}
-      refresh={refresh}>
+    <Screen refresh={refresh}>
+      <View style={styles.header}>
+        <View style={styles.headerText}>
+          {/* Brand wordmark, not translated (allowed in i18n:check). */}
+          <ThemedText type="label" themeColor="muted" accessibilityElementsHidden importantForAccessibility="no">
+            käpp
+          </ThemedText>
+          <ThemedText type="title" accessibilityRole="header">
+            {greetName ? t('home.greeting', { name: greetName }) : t('home.greetingNoName')}
+          </ThemedText>
+        </View>
+        <PointsBadge />
+      </View>
+      <ThemedText themeColor="muted">{t('home.subtitle', { date: formatToday() })}</ThemedText>
       <OfflineBanner />
+
+      {/* Figma hero photo: the user's dog when it has a profile photo, otherwise the brand corgi (decorative). */}
+      <Image
+        source={heroPhoto ? photoSource(heroPhoto) : require('@/assets/images/welcome-dog.jpg')}
+        style={styles.hero}
+        contentFit="cover"
+        transition={150}
+        accessible={false}
+      />
 
       {active ? (
         <ThemedView type="tint" style={styles.card} accessibilityLiveRegion="polite">
@@ -70,6 +95,9 @@ export default function HomeScreen() {
           <ThemedText themeColor="muted">{t('home.idleBody')}</ThemedText>
         </ThemedView>
       )}
+
+      {/* Figma Home: the nearest park with "Oleme siin" right under today's card — the main action of the app. */}
+      {parks[0] ? <NearestParkCard park={parks[0]} /> : <Button label={t('home.findPark')} onPress={() => router.navigate('/map')} />}
 
       {plans.slice(0, 2).map((p, i) => (
         <Entering key={p.id} index={i}>
@@ -91,6 +119,7 @@ export default function HomeScreen() {
           <ListRow
             key={p.id}
             title={p.park.name}
+            photo={{ name: p.friend.firstName }}
             subtitle={t('home.friendPlan', { name: p.friend.firstName, day: formatDay(p.startsAt), from: formatTime(p.startsAt), to: formatTime(p.endsAt) })}
             onPress={() => openPark(p.park.id)}
           />
@@ -108,6 +137,7 @@ export default function HomeScreen() {
               key={r.recordId}
               title={`${r.dog.name} · ${r.title}`}
               subtitle={t('home.reminderDue', { date: formatDate(r.nextDue), due: dueLabel(r.nextDue) })}
+              photo={{ uri: dogs?.find((d) => d.id === r.dog.id)?.profilePhoto?.thumbnailUrl, name: r.dog.name }}
               alert={r.overdue}
               onPress={() => router.push({ pathname: '/dogs/[dogId]/health', params: { dogId: r.dog.id } })}
             />
@@ -115,10 +145,8 @@ export default function HomeScreen() {
         </>
       ) : null}
 
-      <Button label={t('home.findPark')} onPress={() => router.navigate('/map')} />
-
       {/* Not on the Figma Home: without it the services were reachable only via Profile → bookings (docs/11). */}
-      <ListRow title={t('home.servicesTitle')} subtitle={t('home.servicesSub')} onPress={() => router.push('/services')} />
+      <ListRow icon="scissors" title={t('home.servicesTitle')} subtitle={t('home.servicesSub')} onPress={() => router.push('/services')} />
 
       {parks.length > 0 ? (
         <>
@@ -127,9 +155,10 @@ export default function HomeScreen() {
           </ThemedText>
           {parks.slice(0, 3).map((park, i) => (
             <Entering key={park.id} index={i}>
-              <ParkRow park={park} />
+              <ParkCard park={park} />
             </Entering>
           ))}
+          {parks.length > 3 ? <Button label={t('home.allParks')} variant="tertiary" onPress={() => router.push('/parks')} /> : null}
         </>
       ) : null}
     </Screen>
@@ -137,5 +166,9 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  header: { flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.three },
+  headerText: { flex: 1, gap: 2 },
+  // Figma 342 × 184 at 390 pt; the ratio keeps it right on every width.
+  hero: { width: '100%', aspectRatio: 342 / 184, borderRadius: Radius[24] },
   card: { padding: Spacing.four, borderRadius: Radius[16], gap: Spacing.two },
 });

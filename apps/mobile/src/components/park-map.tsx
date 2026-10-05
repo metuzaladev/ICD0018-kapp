@@ -1,4 +1,4 @@
-import type { Park } from '@kapp/shared';
+import type { Park, ProviderSummary } from '@kapp/shared';
 import {
   Camera,
   Map,
@@ -9,104 +9,123 @@ import {
 } from '@maplibre/maplibre-react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, useColorScheme, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { ThemedText } from '@/components/themed-text';
-import { Radius } from '@/constants/theme';
+import { DogPin, PlacePin } from '@/components/map-pins';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { useTheme } from '@/hooks/use-theme';
 import { dogsLabel } from '@/lib/format';
+import { parkPinModel, providerPlaceKind } from '@/lib/map-categories';
+import { MAP_STYLE } from '@/lib/map-style';
 
-/**
- * OpenFreeMap vector styles: free, no API key, OSM data with attribution built into the style.
- * Kept as constants so switching to MapTiler (paid, SLA) is a one-line change (docs/01-uuring.md).
- */
-const MAP_STYLE = {
-  light: 'https://tiles.openfreemap.org/styles/liberty',
-  dark: 'https://tiles.openfreemap.org/styles/dark',
-} as const;
-
-/** Room around the outermost markers so they are not clipped by the rounded frame. */
-const FIT_PADDING = { top: 48, right: 48, bottom: 48, left: 48 };
+type Point = { lat: number; lng: number };
 
 type ParkMapProps = {
   parks: Park[];
-  center: { lat: number; lng: number };
+  /** Service providers (M6) shown as Teenused / Kliinikud pins. */
+  providers?: ProviderSummary[];
+  center: Point;
   showUserLocation: boolean;
-  selectedId?: string;
-  onSelect: (park: Park) => void;
+  onParkPress: (park: Park) => void;
+  onProviderPress?: (provider: ProviderSummary) => void;
+  /** Space covered by floating UI (search + chips above, nearest-park card and tab bar below). */
+  overlay: { top: number; bottom: number };
+  /** Incremented by the locate button: the camera returns to `center`. */
+  locateSignal?: number;
 };
 
-/** Smallest box containing the user's position and every park — what the user wants to see. */
-function boundsOf(center: { lat: number; lng: number }, parks: Park[]): LngLatBounds {
-  const lngs = [center.lng, ...parks.map((p) => p.lng)];
-  const lats = [center.lat, ...parks.map((p) => p.lat)];
+/** Room around the outermost markers so pins (≈ 60 pt tall) are not clipped by the edges. */
+const EDGE = 48;
+
+/** Smallest box containing the user's position and every place — what the user wants to see. */
+function boundsOf(center: Point, places: Point[]): LngLatBounds {
+  const lngs = [center.lng, ...places.map((p) => p.lng)];
+  const lats = [center.lat, ...places.map((p) => p.lat)];
   return [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
 }
 
-/** Figma "Map / Tallinn schematic", now a real map. Markers show how many dogs are there now. */
-export function ParkMap({ parks, center, showUserLocation, selectedId, onSelect }: ParkMapProps) {
+/**
+ * Figma "Explore / Map" (10:148): a full-screen OpenFreeMap map. Parks with dogs now are dog pins
+ * (faces + "N koera"), quiet parks are green park pins, providers are service / clinic pins.
+ * Tapping a park opens its page (as before M9); a provider opens its service page.
+ *
+ * Each pin is one VoiceOver button ("Kadrioru koerapark, 6 koera praegu"). Markers are drawn on the
+ * map as native views, so VoiceOver reaches them, but the park list (Pargid sinu ümber) remains the
+ * accessible way to browse all parks.
+ */
+export function ParkMap({ parks, providers = [], center, showUserLocation, onParkPress, onProviderPress, overlay, locateSignal = 0 }: ParkMapProps) {
   const c = useTheme();
+  const { t } = useTranslation();
   // Camera moves jump instead of gliding when Reduce Motion is on.
   const cameraDuration = useReduceMotion() ? 0 : 600;
-  const { t } = useTranslation();
-  const scheme = useColorScheme() === 'light' ? 'light' : 'dark';
+  const scheme = useColorScheme();
   const camera = useRef<CameraRef>(null);
   // Camera commands sent before the style has loaded are dropped by the native map.
   const [loaded, setLoaded] = useState(false);
 
-  const bounds = useMemo(() => boundsOf(center, parks), [center, parks]);
+  const places = useMemo<Point[]>(() => [...parks, ...providers], [parks, providers]);
+  const bounds = useMemo(() => boundsOf(center, places), [center, places]);
+  const padding = { top: overlay.top + EDGE, bottom: overlay.bottom + EDGE, left: EDGE, right: EDGE };
   // Re-fit only when the visible set changes, not on every re-render or background refetch.
-  const fitKey = `${center.lat},${center.lng}|${parks.map((p) => p.id).join(',')}`;
+  const fitKey = `${center.lat},${center.lng}|${parks.map((p) => p.id).join(',')}|${providers.map((p) => p.id).join(',')}`;
 
   useEffect(() => {
     if (!loaded) return;
-    if (parks.length === 0) {
+    if (places.length === 0) {
       camera.current?.easeTo({ center: [center.lng, center.lat], zoom: 13, duration: cameraDuration });
     } else {
-      camera.current?.fitBounds(bounds, { padding: FIT_PADDING, duration: cameraDuration, easing: 'ease' });
+      camera.current?.fitBounds(bounds, { padding, duration: cameraDuration, easing: 'ease' });
     }
-    // fitKey captures center + park ids; bounds is derived from the same values.
+    // fitKey captures center + ids; bounds and padding derive from the same values.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loaded, fitKey]);
 
+  useEffect(() => {
+    if (!loaded || locateSignal === 0) return;
+    camera.current?.easeTo({ center: [center.lng, center.lat], zoom: 14, duration: cameraDuration });
+    // Only the button press (signal change) moves the camera.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locateSignal]);
+
   return (
-    <View style={[styles.frame, { borderColor: c.border }]}>
-      <Map
-        style={StyleSheet.absoluteFill}
-        mapStyle={MAP_STYLE[scheme]}
-        logo={false}
-        compass={false}
-        tintColor={c.brand}
-        onDidFinishLoadingMap={() => setLoaded(true)}>
-        <Camera ref={camera} initialViewState={{ center: [center.lng, center.lat], zoom: 12 }} />
-        {showUserLocation ? <NativeUserLocation /> : null}
-        {parks.map((park) => {
-          const selected = park.id === selectedId;
-          return (
-            <Marker key={park.id} id={park.id} lngLat={[park.lng, park.lat]} onPress={() => onSelect(park)}>
-              <View
-                accessible
-                accessibilityRole="button"
-                accessibilityLabel={t('map.marker', { name: park.name, dogs: dogsLabel(park.activeDogs ?? 0) })}
-                style={[
-                  styles.marker,
-                  { backgroundColor: selected ? c.onBrand : c.brand, borderColor: selected ? c.brand : c.onBrand },
-                ]}>
-                <ThemedText type="label" style={{ color: selected ? c.brand : c.onBrand }}>
-                  {park.activeDogs ?? 0}
-                </ThemedText>
-              </View>
-            </Marker>
-          );
-        })}
-      </Map>
-    </View>
+    <Map
+      style={StyleSheet.absoluteFill}
+      mapStyle={MAP_STYLE[scheme]}
+      logo={false}
+      compass={false}
+      tintColor={c.brand}
+      // Keeps the © OpenStreetMap attribution visible above the nearest-park card.
+      attributionPosition={{ bottom: overlay.bottom + 8, right: 8 }}
+      onDidFinishLoadingMap={() => setLoaded(true)}>
+      <Camera ref={camera} initialViewState={{ center: [center.lng, center.lat], zoom: 12 }} />
+      {showUserLocation ? <NativeUserLocation /> : null}
+      {providers.map((provider) => (
+        <Marker key={provider.id} id={`provider-${provider.id}`} lngLat={[provider.lng, provider.lat]} onPress={() => onProviderPress?.(provider)}>
+          <View accessible accessibilityRole="button" accessibilityLabel={t('map.providerMarker', { name: provider.name })}>
+            <PlacePin kind={providerPlaceKind(provider.category)} />
+          </View>
+        </Marker>
+      ))}
+      {parks.map((park) => {
+        const pin = parkPinModel(park.activeDogs);
+        return (
+          <Marker key={park.id} id={park.id} lngLat={[park.lng, park.lat]} onPress={() => onParkPress(park)}>
+            <View
+              accessible
+              accessibilityRole="button"
+              accessibilityLabel={t('map.marker', { name: park.name, dogs: dogsLabel(park.activeDogs ?? 0) })}
+              accessibilityHint={t('parkRow.hint')}>
+              {pin.kind === 'place' ? (
+                <PlacePin kind="park" />
+              ) : (
+                // Visitors' dog photos are not part of the park API: faces are paw placeholders.
+                <DogPin faces={Array.from({ length: pin.faces }, () => null)} countLabel={pin.showCount ? dogsLabel(pin.count) : undefined} />
+              )}
+            </View>
+          </Marker>
+        );
+      })}
+    </Map>
   );
 }
-
-const styles = StyleSheet.create({
-  frame: { height: 320, borderRadius: Radius[24], overflow: 'hidden', borderWidth: StyleSheet.hairlineWidth },
-  // 44 pt: HIG minimum touch target.
-  marker: { width: 44, height: 44, borderRadius: 22, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
-});

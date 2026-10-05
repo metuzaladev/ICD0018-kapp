@@ -27,7 +27,9 @@
     "photos_one": "{{count}} foto",
     "photos_other": "{{count}} fotot",
     "visits_one": "{{count}} külastus",
-    "visits_other": "{{count}} külastust"
+    "visits_other": "{{count}} külastust",
+    "friendsInPark_one": "{{count}} sõber pargis",
+    "friendsInPark_other": "{{count}} sõpra pargis"
   },
   "dates": {
     "today": "täna",
@@ -81,12 +83,14 @@
     "passwordHint": "Vähemalt {{min}} tähemärki",
     "backToSignIn": "Tagasi sisselogimisse",
     "welcome": {
-      "region": "TALLINN · EESTI",
+      "region": "Tallinn · Eesti",
       "tagline": "Koerad ühendavad inimesi.",
       "photoLabel": "Cardigan corgi murul",
       "intro": "Leia oma koerale mängusõber ja endale uus lemmikpark.",
       "start": "Alustame",
-      "haveAccount": "Mul on juba konto"
+      "haveAccount": "Mul on juba konto",
+      "liveTitle": "{{dogs}} pargis praegu",
+      "liveA11y": "{{park}}: {{dogs}} praegu"
     },
     "signUp": {
       "title": "Tere tulemast meie kampa.",
@@ -96,7 +100,8 @@
       "emailPlaceholder": "nimi@näide.ee",
       "terms": "Konto loomisel nõustud kasutustingimuste ja privaatsuspoliitikaga.",
       "submit": "Loo konto",
-      "haveAccount": "Juba liige? Logi sisse"
+      "haveAccount": "Juba liige? Logi sisse",
+      "socialProof": "Liitu Tallinna koeraomanike kampa"
     },
     "signIn": {
       "title": "Tore sind jälle näha.",
@@ -111,8 +116,13 @@
       "title": "Uus algus?",
       "subtitle": "Saadame sulle lingi parooli taastamiseks.",
       "submit": "Saada taastamislink",
-      "hintTitle": "Vaata oma postkasti",
-      "hintBody": "Pärast saatmist kontrolli ka rämpsposti. Link kehtib piiratud aja."
+      "step1Title": "Sisesta e-post",
+      "step1Body": "Sama, millega konto lõid.",
+      "step2Title": "Ava link postkastis",
+      "step2Body": "Kontrolli ka rämpsposti. Link kehtib piiratud aja.",
+      "step3Title": "Vali uus parool",
+      "step3Body": "Vähemalt {{min}} tähemärki.",
+      "stepA11y": "Samm {{step}}: {{title}}. {{body}}"
     },
     "resetSent": {
       "title": "Vaata oma postkasti",
@@ -129,19 +139,28 @@
     "social": {
       "google": "Jätka Google’iga",
       "appleFailed": "Apple’iga sisselogimine ebaõnnestus"
-    }
+    },
+    "orEmail": "või e-postiga"
   },
   "onboarding": {
     "discover": {
       "title": "Hea park on lähemal, kui arvad.",
-      "body": "Vaata, kes on pargis praegu, ja leia just teie tempoga sobiv seltskond.",
-      "photoLabel": "Koerapark sügisel"
+      "body": "Kaardil on näha, kus koerad praegu mängivad.",
+      "seeTitle": "Näe, kes on pargis praegu",
+      "seeBody": "Koerte arv ja nende tempo enne, kui kodust välja astud.",
+      "crewTitle": "Leia sobiv seltskond",
+      "crewBody": "Väikesed, rahulikud või mängulised: vali, mis teie koerale sobib."
     },
     "connect": {
       "title": "Vähem ootamist. Rohkem mängu.",
-      "body": "Planeeri jalutuskäik, kutsu sõber kaasa ja leia oma väike kogukond.",
-      "sampleTitle": "Freddy ootab sõpru",
-      "sampleSubtitle": "Kadrioru koerapark · täna 17.00–18.00"
+      "body": "Kutsu sõbrad kaasa ja teeni käppi.",
+      "sampleTitle": "Mari ja Luna kutsuvad",
+      "sampleSubtitle": "Kadrioru koerapark · täna 17.00",
+      "sampleAction": "Tulen",
+      "planTitle": "Planeeri jalutuskäik",
+      "planBody": "Sõbrad näevad, millal ja kuhu lähed.",
+      "pawsTitle": "Teeni käppi",
+      "pawsBody": "Iga jalutuskäik ja pargikülastus toob soodustusi partneritelt."
     },
     "step": "Samm {{current}}, kokku {{total}}",
     "next": "Edasi",
@@ -151,11 +170,16 @@
   "location": {
     "title": "Mis on teie lähedal?",
     "body": "Asukoht aitab leida lähedal olevaid parke.",
-    "privacy": "Asukohta kasutame pargi leidmiseks. Teised näevad sind pargis ainult siis, kui märgid enda kohaloleku.",
-    "allow": "Luba rakenduse kasutamisel",
+    "allow": "Luba asukoht",
     "notNow": "Mitte praegu",
     "deniedTitle": "Asukoht on välja lülitatud",
-    "deniedBody": "Näitame parke Tallinna kesklinna ümbruses. Asukoha saad lubada seadetes."
+    "deniedBody": "Näitame parke Tallinna kesklinna ümbruses. Asukoha saad lubada seadetes.",
+    "benefitParksTitle": "Lähimad pargid kohe näha",
+    "benefitParksBody": "Kaugus ja koerte arv sinu ümber.",
+    "benefitFriendsTitle": "Sõbrad sinu lähedal",
+    "benefitFriendsBody": "Ainult siis, kui nemad seda jagavad.",
+    "benefitPrivacyTitle": "Sinu asukoht jääb sinu kätte",
+    "benefitPrivacyBody": "Teised näevad sind pargis ainult siis, kui märgid end kohale."
   },
   "offline": {
     "title": "Internetiühendus puudub.",
@@ -180,7 +204,8 @@
     "friendPlan": "{{name}} · {{day}} {{from}}–{{to}}",
     "findFriends": "Leia mängusõbrad",
     "servicesTitle": "Teenused",
-    "servicesSub": "Hooldus, treening ja kliinik"
+    "servicesSub": "Hooldus, treening ja kliinik",
+    "allParks": "Vaata kõiki parke"
   },
   "map": {
     "title": "Avastame Tallinna.",
@@ -196,7 +221,25 @@
     "empty": "Selles raadiuses parke ei leitud. Proovi suuremat kaugust või vähem filtreid.",
     "marker": "{{name}}, {{dogs}} praegu",
     "filtersHint": "Avab filtrid",
-    "emptyAction": "Tühjenda filtrid"
+    "emptyAction": "Tühjenda filtrid",
+    "searchPlaceholder": "Otsi parke ja kohti",
+    "searchLabel": "Otsi kaardilt",
+    "searchHint": "Kaardile jäävad ainult nime järgi sobivad kohad",
+    "categories": {
+      "all": "Kõik",
+      "parks": "Pargid",
+      "cafes": "Kohvikud",
+      "services": "Teenused",
+      "beaches": "Rannad",
+      "vets": "Kliinikud"
+    },
+    "openList": "Näita nimekirjana",
+    "openListHint": "Avab parkide nimekirja",
+    "locate": "Näita minu asukohta",
+    "noMatches": "Selle nimega kohta ei leitud.",
+    "providerMarker": "{{name}}, teenusepakkuja",
+    "active": "Aktiivsed",
+    "favorites": "Lemmikud"
   },
   "parkRow": {
     "dogsNow": "{{dogs}} praegu",
@@ -476,7 +519,13 @@
     "notifications": "Teavitused",
     "notificationsSub": "Sõbrad, sõnumid ja plaanid",
     "privacy": "Privaatsus",
-    "privacySub": "Nähtavus ja turvalisus"
+    "privacySub": "Nähtavus ja turvalisus",
+    "appearance": "Välimus",
+    "appearanceOptions": {
+      "system": "Süsteem",
+      "light": "Hele",
+      "dark": "Tume"
+    }
   },
   "profileEdit": {
     "title": "Täpselt sinu moodi.",
@@ -724,5 +773,23 @@
     "cancelBody": "{{service}}, {{provider}} · {{when}}. Aeg vabaneb teistele.",
     "cancelConfirm": "Tühista",
     "keep": "Jäta alles"
+  },
+  "points": {
+    "balance_one": "{{count}} käpp",
+    "balance_other": "{{count}} käppa"
+  },
+  "parkCard": {
+    "tag": {
+      "fenced": "Aiaga",
+      "smallDogArea": "Väikeste ala",
+      "water": "Vesi",
+      "lighting": "Valgustus"
+    },
+    "ratingA11y": "hinne {{rating}} viiest"
+  },
+  "nearestPark": {
+    "label": "Lähim park",
+    "hereNow": "Oled siin",
+    "checkInHint": "Märgib kohaloleku: {{name}}"
   }
 }

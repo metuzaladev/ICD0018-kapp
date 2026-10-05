@@ -8,16 +8,15 @@ import {
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert } from 'react-native';
 
 import { Button } from '@/components/button';
-import { Chip } from '@/components/chip';
+import { SegmentedControl } from '@/components/segmented-control';
 import { FormError } from '@/components/form-error';
 import { Screen } from '@/components/screen';
 import { SkeletonList } from '@/components/skeleton';
 import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
 import { useMyDogs } from '@/hooks/use-dogs';
 import { useDeleteHealthRecord, useHealthRecords, useSaveHealthRecord } from '@/hooks/use-health';
 import { errorMessage } from '@/lib/api';
@@ -132,20 +131,15 @@ function HealthForm({ dogId, existing, kind }: { dogId: string; existing?: Healt
     <Screen underHeader subtitle={dog ? t('health.edit.subtitle', { name: dog.name }) : undefined}>
       <FormError message={formError} />
       <ThemedText type="label">{t('health.edit.kind')}</ThemedText>
-      <View style={styles.chips} accessibilityRole="radiogroup">
-        <Chip
-          role="radio"
-          label={t('health.edit.vaccination')}
-          selected={values.kind === 'vaccination'}
-          onPress={() => setValues((v) => ({ ...v, kind: 'vaccination' }))}
-        />
-        <Chip
-          role="radio"
-          label={t('health.edit.vetVisit')}
-          selected={values.kind === 'vet_visit'}
-          onPress={() => setValues((v) => ({ ...v, kind: 'vet_visit' }))}
-        />
-      </View>
+      <SegmentedControl
+        accessibilityLabel={t('health.edit.kind')}
+        options={[
+          { value: 'vaccination', label: t('health.edit.vaccination') },
+          { value: 'vet_visit', label: t('health.edit.vetVisit') },
+        ]}
+        value={values.kind}
+        onChange={(kind) => kind && setValues((v) => ({ ...v, kind }))}
+      />
       <TextField label={t(text.title)} placeholder={t(text.placeholder)} value={values.title} onChangeText={set('title')} error={errors.title} />
       <TextField
         label={t('health.edit.date')}
@@ -187,7 +181,3 @@ function HealthForm({ dogId, existing, kind }: { dogId: string; existing?: Healt
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-});

@@ -3,13 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
-import { Chip } from '@/components/chip';
+import { ChipRow, IconChip } from '@/components/icon-chip';
 import { FormError } from '@/components/form-error';
 import { Screen } from '@/components/screen';
 import { SwitchRow } from '@/components/switch-row';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
+import { PRESENCE_ICON } from '@/constants/icons';
 import { useBlockedUsers, useOwnProfile, useUnblockUser, useUpdateOwnProfile } from '@/hooks/use-safety';
 import { useTheme } from '@/hooks/use-theme';
 import { errorMessage } from '@/lib/api';
@@ -45,17 +46,18 @@ export default function PrivacySettingsScreen() {
       <ThemedText type="caption" themeColor="muted">
         {t('privacy.presenceHint')}
       </ThemedText>
-      <View style={styles.chips} accessibilityRole="radiogroup">
+      <ChipRow radiogroup>
         {presenceSharingSchema.options.map((option) => (
-          <Chip
+          <IconChip
             key={option}
             role="radio"
+            icon={PRESENCE_ICON[option]}
             label={t(`profileEdit.presence.${option}`)}
             selected={profile.data?.presenceSharing === option}
             onPress={() => update.mutate({ presenceSharing: option })}
           />
         ))}
-      </View>
+      </ChipRow>
 
       <ThemedText type="heading">{t('privacy.blocked')}</ThemedText>
       <ThemedText type="caption" themeColor="muted">
@@ -78,7 +80,6 @@ export default function PrivacySettingsScreen() {
 
 const styles = StyleSheet.create({
   card: { padding: Spacing.three, borderRadius: Radius[16], gap: Spacing.one },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   // Wraps at large text sizes: the name and "Разблокировать" do not fit side by side.
   row: {
     flexDirection: 'row',

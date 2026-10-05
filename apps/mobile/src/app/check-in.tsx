@@ -6,6 +6,7 @@ import { AccessibilityInfo, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/button';
 import { Chip } from '@/components/chip';
+import { ChipRow, IconChip } from '@/components/icon-chip';
 import { FormError } from '@/components/form-error';
 import { Screen } from '@/components/screen';
 import { SkeletonList } from '@/components/skeleton';
@@ -87,13 +88,11 @@ export default function CheckInScreen() {
       {dogs && dogs.length > 0 ? (
         <>
           <ThemedText type="heading">{t('checkIn.who')}</ThemedText>
-          <View style={styles.wrap}>
+          <ChipRow>
             {dogs.map((dog) => (
-              <View key={dog.id} style={styles.half}>
-                <Chip label={dog.name} selected={selected.includes(dog.id)} onPress={() => toggle(dog.id)} />
-              </View>
+              <IconChip key={dog.id} icon="paw-print" label={dog.name} selected={selected.includes(dog.id)} onPress={() => toggle(dog.id)} />
             ))}
-          </View>
+          </ChipRow>
 
           <ThemedText type="heading">{t('checkIn.duration')}</ThemedText>
           <View style={styles.wrap} accessibilityRole="radiogroup">
@@ -114,5 +113,4 @@ export default function CheckInScreen() {
 
 const styles = StyleSheet.create({
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  half: { minWidth: '30%', flexGrow: 1 },
 });

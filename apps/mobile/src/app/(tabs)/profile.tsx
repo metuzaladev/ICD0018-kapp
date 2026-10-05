@@ -54,26 +54,35 @@ export default function ProfileScreen() {
           {stats ? <ThemedText type="label">{stats}</ThemedText> : null}
         </ThemedView>
       ) : null}
-      <ListRow title={t('profile.myDogs')} subtitle={dogs ? dogsLabel(dogs.length) : null} onPress={() => router.push('/dogs')} />
       <ListRow
+        title={t('profile.myDogs')}
+        subtitle={dogs && dogs.length > 0 ? dogs.map((d) => d.name).join(', ') : dogs ? dogsLabel(0) : null}
+        photo={dogs?.[0] ? { uri: dogs[0].profilePhoto?.thumbnailUrl, name: dogs[0].name } : undefined}
+        icon={dogs?.[0] ? undefined : 'dog'}
+        onPress={() => router.push('/dogs')}
+      />
+      <ListRow
+        icon="users"
         title={t('profile.friends')}
         subtitle={incoming > 0 ? t('profile.friendRequests', { count: incoming }) : t('profile.friendsSub')}
         onPress={() => router.push('/friends')}
       />
       <ListRow
+        icon="message-circle"
         title={t('profile.messages')}
         subtitle={unreadMessages > 0 ? t('profile.unreadMessages', { count: unreadMessages }) : t('profile.messagesSub')}
         onPress={() => router.push('/messages')}
       />
-      <ListRow title={t('profile.myVisits')} subtitle={t('profile.myVisitsSub')} onPress={() => router.push('/visits')} />
+      <ListRow icon="calendar" title={t('profile.myVisits')} subtitle={t('profile.myVisitsSub')} onPress={() => router.push('/visits')} />
       {/* Figma "Minu broneeringud / Hooldus ja kohtumised" (M6). */}
       <ListRow
+        icon="scissors"
         title={t('profile.bookings')}
         subtitle={upcomingBookings > 0 ? t('profile.upcomingBookings', { count: upcomingBookings }) : t('profile.bookingsSub')}
         onPress={() => router.push('/bookings')}
       />
-      <ListRow title={t('profile.favorites')} subtitle={t('profile.favoritesSub')} onPress={() => router.push('/favorites')} />
-      <ListRow title={t('profile.settings')} subtitle={t('profile.settingsSub')} onPress={() => router.push('/settings')} />
+      <ListRow icon="heart" title={t('profile.favorites')} subtitle={t('profile.favoritesSub')} onPress={() => router.push('/favorites')} />
+      <ListRow icon="sliders-horizontal" title={t('profile.settings')} subtitle={t('profile.settingsSub')} onPress={() => router.push('/settings')} />
     </Screen>
   );
 }

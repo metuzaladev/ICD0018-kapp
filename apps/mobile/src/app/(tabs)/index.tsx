@@ -117,12 +117,9 @@ export default function HomeScreen() {
           </ThemedText>
           <Button label={t('home.openPark')} variant="secondary" onPress={() => openPark(active.park.id)} />
         </ThemedView>
-      ) : (
-        <ThemedView type="soft" style={styles.card}>
-          <ThemedText type="heading">{t('home.idleTitle')}</ThemedText>
-          <ThemedText themeColor="muted">{t('home.idleBody')}</ThemedText>
-        </ThemedView>
-      )}
+      ) : null}
+      {/* No idle "how to use" card: when not in a park, the nearest park and the activity in the
+          user's parks below answer "what now?" with real data, and they move up the screen (M11). */}
 
       {/* Figma Home: the nearest dog park right under today's card — the main action of the app
           ("Oleme siin" nearby, directions from further away; same choice as on the map). */}
@@ -218,6 +215,8 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.three },
   headerText: { flex: 1, gap: 2 },
   // Figma 342 × 184 at 390 pt; the ratio keeps it right on every width.
-  hero: { width: '100%', aspectRatio: 342 / 184, borderRadius: Radius[24] },
+  // Lower than the Figma 342×184: Home now carries park activity and community picks, which should
+  // start above the fold on a 6.1" phone.
+  hero: { width: '100%', aspectRatio: 342 / 120, borderRadius: Radius[24] },
   card: { padding: Spacing.four, borderRadius: Radius[16], gap: Spacing.two },
 });

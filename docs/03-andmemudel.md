@@ -22,7 +22,8 @@ Tabelid on tuletatud Figma vaadetest (leht *03 · Screens*, sektsioonid 01–08)
 - **Kohalolek aegub:** `check_ins.expires_at` on kohustuslik (vaikimisi 60 min). Aktiivne = `ended_at is null and expires_at > now()`.
 - **Pargi lisamine:** uued pargid on `status = 'pending'` kuni modereerimiseni; `/parks/nearby` tagastab ainult `approved`.
 - **Broneeringud:** ühele teenusele ühele ajale saab olla üks aktiivne broneering (osaline unikaalne indeks, tühistatud vabastavad aja).
-- **Hinnang:** `reviews.rating` vahemikus 1–5 (CHECK-piirang).
+- **Hinnang:** `reviews.rating` vahemikus 1–5 (CHECK-piirang); pargi lehel keskmine ühe komakohaga.
+- **Lemmikud:** `favorite_parks` (user_id + park_id liitvõti); nimekirjas ainult `approved` pargid, tagasi lükatud park kaob nimekirjast, aga rida jääb alles.
 - **Pildid:** tabelites ainult objektivõtmed (`photo_key`, `image_key`, `document_key`), failid R2-s.
 
 ## Avatud küsimused

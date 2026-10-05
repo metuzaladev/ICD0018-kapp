@@ -18,10 +18,11 @@ TalTechi kursuse **ICD0018 Hübriidmobiilirakendused** projekt · autor Kristofe
 | [05 Disainisüsteem](docs/05-disainisusteem.md) | Figma tokenid koodis, Apple HIG reeglid |
 | [06 Koodistandard](docs/06-koodistandard.md) | Kaustade ja nimede põhjendused, vigade leping, turvalisus, testid |
 | [07 Autentimine](docs/07-autentimine.md) | Sessioonid, vood, endpoint'id, Apple/Google seadistamine |
+| [08 Pargid ja kaart](docs/08-pargid-ja-kaart.md) | Kaart, filtrid, lemmikud, asukoht, development build |
 
 ## Käivitamine
 
-Eeldused: Node.js ≥ 22.12 (soovitatav 24 LTS), Docker, iOS-i jaoks Xcode, Androidi jaoks Android Studio.
+Eeldused: Node.js ≥ 22.12 (soovitatav 24 LTS), Docker, iOS-i jaoks Xcode + CocoaPods, Androidi jaoks Android Studio.
 
 ```bash
 npm install                 # kõik workspace'id
@@ -30,7 +31,8 @@ npm run db:up               # Postgres + PostGIS ja Redis Dockeris
 npm run db:migrate          # tabelid
 npm run db:seed             # näidispargid Tallinnas
 npm run dev:api             # API → http://localhost:3000
-npm run dev:mobile          # Expo; vajuta "i" iOS-i simulaatori jaoks
+(cd apps/mobile && npx expo run:ios)   # esimene kord: development build (MapLibre ei tööta Expo Go's)
+npm run dev:mobile          # Metro development build'i jaoks
 ```
 
 Äpi seaded: `cp apps/mobile/.env.example apps/mobile/.env.local`. Päris telefonis määra seal `EXPO_PUBLIC_API_URL=http://<arvuti-IP>:3000`.

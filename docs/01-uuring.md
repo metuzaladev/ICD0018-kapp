@@ -48,13 +48,13 @@ Versioonid kontrollitud npm-ist 01.10.2026.
 | Valideerimine | Zod | 4.6.5 | Sama skeem äpis ja serveris (`packages/shared`) | ✅ päringu valideerimine + testid |
 | Testid | Vitest | 5.0.3 | Jestiga sama API, ESM/TypeScript ilma seadistuseta; Fastify `inject()` ilma võrguta | ✅ 59 unit/HTTP testi + 4 integratsioonitesti |
 | Autentimine | Better Auth + `@better-auth/expo` | 1.7.7 | Ametlik Expo integratsioon; Apple (ID token), Google, e-post; Drizzle adapter | ⏳ M1 |
-| Kaart | MapLibre React Native | 11.4.1 | v11 toetab ainult New Architecture'it, vajab RN ≥ 0.80 ja Expo ≥ 54 → sobib SDK 57-ga. **Ei tööta Expo Go's**, vajab development build'i | ⏳ M2 |
-| Kaardiplaadid | OpenFreeMap (alternatiiv MapTiler) | – | Tasuta, ilma API võtmeta, kommertskasutus lubatud; teenus „as-is", seega tootmises varuplaan (MapTiler või oma server). OpenStreetMapi enda plaadiserverid äppides keelatud | ⏳ M2 |
+| Kaart | MapLibre React Native | 11.4.1 | v11 toetab ainult New Architecture'it, vajab RN ≥ 0.80 ja Expo ≥ 54 → sobib SDK 57-ga. **Ei tööta Expo Go's**, vajab development build'i | ✅ iOS-i simulaatoris (development build) |
+| Kaardiplaadid | OpenFreeMap (alternatiiv MapTiler) | – | Tasuta, ilma API võtmeta, kommertskasutus lubatud; teenus „as-is", seega tootmises varuplaan (MapTiler või oma server). OpenStreetMapi enda plaadiserverid äppides keelatud. Heledas režiimis `liberty`, tumedas `dark` | ✅ |
 | Pildid | sharp + Cloudflare R2 (S3 API) | 0.35.5 | Pisipildid serveris, R2-l andmeliiklus tasuta | ⏳ M4 |
 | Taustatööd | BullMQ + Redis | 6.3.11 | Pilditöötlus, teavitused, kohaloleku aegumine | ⏳ M3 |
 | Reaalaja | Socket.IO | 4.8.4 | Sõnumid ja kohalolek | ⏳ M5 |
 | Push-teavitused | expo-server-sdk | 7.2.0 | Üks API iOS-ile ja Androidile | ⏳ M5 |
-| Andmepäringud äpis | TanStack Query | 5.104.0 | Vahemälu, uuesti laadimine, offline-olek (disainis „Offline State") | ⏳ M2 |
+| Andmepäringud äpis | TanStack Query | 5.104.0 | Vahemälu, uuesti laadimine, offline-olek (disainis „Offline State") | ✅ |
 
 ## 1.4 Keskkond
 

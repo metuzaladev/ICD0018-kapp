@@ -7,6 +7,8 @@ import { noAuthYet, type ResolveUserId } from './http/auth';
 import { registerErrorHandling } from './http/error-handler';
 import { TooManyRequestsError } from './http/errors';
 import { authRoutes } from './modules/auth/auth.routes';
+import { favoritesRoutes } from './modules/favorites/favorites.routes';
+import type { FavoritesService } from './modules/favorites/favorites.service';
 import { healthRoutes } from './modules/health/health.routes';
 import { parksRoutes } from './modules/parks/parks.routes';
 import type { ParksService } from './modules/parks/parks.service';
@@ -20,6 +22,7 @@ import type { ProfileService } from './modules/profile/profile.service';
 export interface AppDeps {
   parksService: ParksService;
   profileService: ProfileService;
+  favoritesService: FavoritesService;
   checkDatabase: () => Promise<boolean>;
   /** Reads the user id from the session; defaults to "nobody is signed in". */
   resolveUserId?: ResolveUserId;
@@ -77,6 +80,7 @@ export async function buildApp(deps: AppDeps, config: AppConfig = defaultAppConf
     await app.register(authRoutes, { prefix: API_PREFIX, handler: deps.authHandler });
   }
   await app.register(profileRoutes, { prefix: API_PREFIX, service: deps.profileService, resolveUserId });
+  await app.register(favoritesRoutes, { prefix: API_PREFIX, service: deps.favoritesService, resolveUserId });
   await app.register(parksRoutes, { prefix: API_PREFIX, service: deps.parksService, resolveUserId });
 
   return app;

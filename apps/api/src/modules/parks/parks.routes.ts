@@ -1,7 +1,7 @@
 import { createParkInputSchema, nearbyParksQuerySchema, parkIdParamsSchema } from '@kapp/shared';
 import type { FastifyPluginAsync } from 'fastify';
 
-import { requireUser, type ResolveUserId } from '../../http/auth';
+import { optionalUser, requireUser, type ResolveUserId } from '../../http/auth';
 import { parseRequest } from '../../http/validate';
 import type { ParksService } from './parks.service';
 
@@ -15,16 +15,16 @@ export interface ParksRoutesOptions {
  * Mounted under /api/v1 (see app.ts), so paths here are relative.
  */
 export const parksRoutes: FastifyPluginAsync<ParksRoutesOptions> = async (app, { service, resolveUserId }) => {
-  // GET /api/v1/parks/nearby?lat=59.44&lng=24.79&radiusKm=5
+  // GET /api/v1/parks/nearby?lat=59.44&lng=24.79&radiusKm=5&water=true
   app.get('/parks/nearby', async (request) => {
     const query = parseRequest(nearbyParksQuerySchema, request.query, 'query');
     return service.listNearby(query);
   });
 
-  // GET /api/v1/parks/:parkId
-  app.get('/parks/:parkId', async (request) => {
+  // GET /api/v1/parks/:parkId — public; signed-in users additionally get `isFavorite`.
+  app.get('/parks/:parkId', { preHandler: optionalUser(resolveUserId) }, async (request) => {
     const { parkId } = parseRequest(parkIdParamsSchema, request.params, 'params');
-    return service.getPublicPark(parkId);
+    return service.getPublicPark(parkId, request.userId);
   });
 
   // POST /api/v1/parks — "Lisa koerapark"; signed-in users only, created as pending.

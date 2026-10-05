@@ -22,14 +22,19 @@ export class ApiRequestError extends Error {
   }
 }
 
-type Method = 'GET' | 'POST' | 'PATCH' | 'DELETE';
+type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 async function request<T>(method: Method, path: string, body?: unknown): Promise<T> {
   const headers: Record<string, string> = { accept: 'application/json' };
   // The Expo auth client keeps the session cookie in SecureStore; attach it manually because
-  // React Native's fetch has no shared cookie jar with Better Auth.
-  const cookie = await authClient.getCookie();
-  if (cookie) headers.cookie = cookie;
+  // React Native's fetch has no shared cookie jar with Better Auth. A Keychain failure must not
+  // break public endpoints: continue anonymously and let protected ones answer 401.
+  try {
+    const cookie = await authClient.getCookie();
+    if (cookie) headers.cookie = cookie;
+  } catch (e) {
+    if (__DEV__) console.warn('Could not read the session cookie', e);
+  }
   if (body !== undefined) headers['content-type'] = 'application/json';
 
   let res: Response;
@@ -64,5 +69,7 @@ export function apiSend<T>(method: Exclude<Method, 'GET'>, path: string, body?: 
 }
 
 export function errorMessage(error: unknown): string {
-  return error instanceof ApiRequestError ? error.message : 'Midagi läks valesti, proovi uuesti';
+  if (error instanceof ApiRequestError) return error.message;
+  // Unexpected (programming) errors: show the cause in development builds only.
+  return __DEV__ ? `Midagi läks valesti: ${String(error)}` : 'Midagi läks valesti, proovi uuesti';
 }

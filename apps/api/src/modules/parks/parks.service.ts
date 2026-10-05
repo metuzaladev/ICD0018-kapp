@@ -1,8 +1,8 @@
-import type { CreateParkInput, NearbyParksQuery, Park } from '@kapp/shared';
+import type { CreateParkInput, NearbyParksQuery, Park, ParkDetail } from '@kapp/shared';
 
 import { NotFoundError } from '../../http/errors';
 import { withTimeout } from '../../lib/timeout';
-import type { ParkRecord, ParksRepository } from './parks.repository';
+import type { ParkDetailRecord, ParkRecord, ParksRepository } from './parks.repository';
 
 /**
  * Business rules for parks. Knows nothing about HTTP (no request/reply) or SQL (no Drizzle),
@@ -10,7 +10,8 @@ import type { ParkRecord, ParksRepository } from './parks.repository';
  */
 export interface ParksService {
   listNearby(query: NearbyParksQuery): Promise<Park[]>;
-  getPublicPark(parkId: string): Promise<Park>;
+  /** `viewerId` is set for signed-in users and adds `isFavorite`. */
+  getPublicPark(parkId: string, viewerId?: string): Promise<ParkDetail>;
   suggestPark(userId: string, input: CreateParkInput): Promise<Park>;
 }
 
@@ -23,38 +24,44 @@ export interface ParksServiceDeps {
 /** Hard cap so a client can never request an unbounded result set. */
 export const NEARBY_LIMIT = 50;
 
-function toPark(record: ParkRecord): Park {
+function roundDistance<T extends ParkRecord>(record: T): T {
+  // One decimal is what the UI shows ("1,2 km") and avoids leaking exact user position math.
   return {
     ...record,
-    // One decimal is what the UI shows ("1,2 km") and avoids leaking exact user position math.
     distanceKm: record.distanceKm === undefined ? undefined : Math.round(record.distanceKm * 10) / 10,
   };
 }
 
+/** Pending and rejected parks are not public. */
+export function isPublic(record: ParkRecord | null): record is ParkRecord {
+  return record !== null && record.status === 'approved';
+}
+
 export function createParksService({ repository, timeoutMs }: ParksServiceDeps): ParksService {
   return {
-    async listNearby({ lat, lng, radiusKm }) {
+    async listNearby({ lat, lng, radiusKm, ...filters }) {
       const records = await withTimeout(
-        repository.findApprovedNearby({ lat, lng }, radiusKm, NEARBY_LIMIT),
+        repository.findApprovedNearby({ lat, lng }, radiusKm, NEARBY_LIMIT, filters),
         timeoutMs,
         'parks.findApprovedNearby',
       );
-      return records.map(toPark);
+      return records.map(roundDistance);
     },
 
-    async getPublicPark(parkId) {
-      const record = await withTimeout(repository.findById(parkId), timeoutMs, 'parks.findById');
-      // Pending and rejected parks are not public. Answer 404, not 403, so the API does not
-      // reveal that an unmoderated park with this id exists.
-      if (!record || record.status !== 'approved') {
-        throw new NotFoundError('Parki ei leitud');
-      }
-      return toPark(record);
+    async getPublicPark(parkId, viewerId) {
+      const record: ParkDetailRecord | null = await withTimeout(
+        repository.findById(parkId, viewerId),
+        timeoutMs,
+        'parks.findById',
+      );
+      // Answer 404, not 403, so the API does not reveal that an unmoderated park with this id exists.
+      if (!isPublic(record)) throw new NotFoundError('Parki ei leitud');
+      return roundDistance(record as ParkDetailRecord);
     },
 
     async suggestPark(userId, input) {
       const record = await withTimeout(repository.create({ ...input, createdBy: userId }), timeoutMs, 'parks.create');
-      return toPark(record);
+      return roundDistance(record);
     },
   };
 }

@@ -145,8 +145,9 @@ function MapScreen() {
         overlay={{ top: insets.top + TOP_UI, bottom: tabBarSpace + bottomBlock }}
         locateSignal={locateSignal}
       />
-      {/* Status bar legibility over the tiles (Figma top fade). */}
-      <Fade direction="up" style={{ top: 0, height: insets.top + 40 }} />
+      {/* Figma top fade, down to the chips row: status bar stays legible and pins sliding under the
+          search and chips fade out instead of being cut by the floating controls (M11). */}
+      <Fade direction="up" style={{ top: 0, height: insets.top + TOP_UI + Spacing.three }} />
 
       <View style={[styles.top, { paddingTop: insets.top + Spacing.two }]} pointerEvents="box-none">
         <View style={styles.searchRow}>

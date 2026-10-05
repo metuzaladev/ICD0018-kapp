@@ -5,6 +5,8 @@ import { PhotoTile } from '@/components/photo-tile';
 import { ThemedText } from '@/components/themed-text';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { formatNumber } from '@/lib/format';
+import { clusterSize } from '@/lib/map-clusters';
 import { PLACE_ICON, type PlaceKind } from '@/lib/map-categories';
 
 /**
@@ -103,8 +105,62 @@ export function DogPin({ faces, countLabel, selected = false }: DogPinProps) {
   );
 }
 
+/**
+ * M11 cluster bubble (no Figma node): brand circle with the white pin ring, a small paw and the
+ * count in the on-brand ink. Not in Figma because Figma's map shows a handful of pins; with 71 real
+ * parks neighbours must merge. At least 44 pt (touch target) and growing with the count; the label
+ * sets the width for long numbers (minWidth, no fixed width).
+ */
+export function ClusterPin({ count }: { count: number }) {
+  const c = useTheme();
+  const size = clusterSize(count);
+  return (
+    <View
+      style={[
+        styles.cluster,
+        { minWidth: size, minHeight: size, borderRadius: size / 2, backgroundColor: c.brand, borderColor: c.mapPinRing },
+      ]}>
+      <Icon name="paw-print" size={12} color={c.onBrand} />
+      <ThemedText type="label" style={{ color: c.onBrand }} maxFontSizeMultiplier={1.2}>
+        {formatNumber(count)}
+      </ThemedText>
+    </View>
+  );
+}
+
+/**
+ * "You are here" drawn as a marker on top of every pin (the native puck is a map layer under all
+ * markers, so a park pin right next to the user used to hide it). Same brand colour as the puck.
+ */
+export function UserDot() {
+  const c = useTheme();
+  return <View style={[styles.userDot, { backgroundColor: c.brand, borderColor: c.mapPinRing }]} />;
+}
+
 const styles = StyleSheet.create({
   pin: { alignItems: 'center' },
+  cluster: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.two,
+    borderWidth: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.16,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+  },
+  userDot: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 4,
+  },
   bubble: {
     width: 40,
     height: 40,

@@ -259,7 +259,10 @@
       "shop": "shop or other place"
     },
     "providerHint": "Shows free times and booking",
-    "emptyPlaces": "Nothing here on this part of the map yet. Move the map or see community tips."
+    "emptyPlaces": "Nothing here on this part of the map yet. Move the map or see community tips.",
+    "cluster_one": "{{count}} place, zoom in",
+    "cluster_other": "{{count}} places, zoom in",
+    "myLocation": "Your location"
   },
   "parkRow": {
     "dogsNow": "{{dogs}} now",

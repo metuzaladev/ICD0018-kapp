@@ -259,7 +259,10 @@
       "shop": "pood või muu koht"
     },
     "providerHint": "Avab vabad ajad ja broneerimise",
-    "emptyPlaces": "Selles kaardi osas siin veel midagi pole. Liiguta kaarti või vaata kogukonna soovitusi."
+    "emptyPlaces": "Selles kaardi osas siin veel midagi pole. Liiguta kaarti või vaata kogukonna soovitusi.",
+    "cluster_one": "{{count}} koht, suumi lähemale",
+    "cluster_other": "{{count}} kohta, suumi lähemale",
+    "myLocation": "Sinu asukoht"
   },
   "parkRow": {
     "dogsNow": "{{dogs}} praegu",

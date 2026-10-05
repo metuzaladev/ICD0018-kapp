@@ -252,7 +252,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.two,
     paddingLeft: Spacing.three,
-    paddingRight: Spacing.two,
+    // (52 − 32 pt Points Badge) / 2: the pill is inset equally on the right, top and bottom.
+    paddingRight: 10,
     borderRadius: 18,
     borderWidth: 1,
     shadowColor: '#000',

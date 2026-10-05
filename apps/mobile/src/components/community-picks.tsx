@@ -6,6 +6,7 @@ import { StyleSheet, View } from 'react-native';
 import { Button } from '@/components/button';
 import { EmptyState } from '@/components/empty-state';
 import { Entering } from '@/components/entering';
+import { ErrorState } from '@/components/error-state';
 import { Icon } from '@/components/icon';
 import { PhotoTile } from '@/components/photo-tile';
 import { PressableScale } from '@/components/pressable-scale';
@@ -29,7 +30,18 @@ function openFeed() {
  * "Vaata kõiki" to the Avasta feed. Own pending posts are left out here (they show in Avasta with
  * "Ootab kinnitust"). Each row is one VoiceOver button that opens the post.
  */
-export function CommunityPicks({ posts, loading, onSuggest }: { posts: PlacePost[]; loading: boolean; onSuggest: () => void }) {
+export function CommunityPicks({
+  posts,
+  loading,
+  error,
+  onSuggest,
+}: {
+  posts: PlacePost[];
+  loading: boolean;
+  /** Set when the feed failed and nothing is cached: an error with retry instead of a false "nothing here". */
+  error: { message: string; retry: () => void; retrying: boolean } | null;
+  onSuggest: () => void;
+}) {
   const c = useTheme();
   const { t } = useTranslation();
 
@@ -39,7 +51,8 @@ export function CommunityPicks({ posts, loading, onSuggest }: { posts: PlacePost
         {t('home.picks.title')}
       </ThemedText>
       {loading ? <SkeletonList rows={3} rowHeight={72} /> : null}
-      {!loading && posts.length === 0 ? (
+      {error ? <ErrorState message={error.message} onRetry={error.retry} retrying={error.retrying} /> : null}
+      {!loading && !error && posts.length === 0 ? (
         <EmptyState title={t('home.picks.empty')} body={t('home.picks.emptyBody')} actionLabel={t('home.picks.suggest')} onAction={onSuggest} />
       ) : null}
       {posts.map((post, i) => {

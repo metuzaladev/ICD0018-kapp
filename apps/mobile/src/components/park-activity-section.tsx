@@ -31,7 +31,7 @@ type Query = {
  *
  * Each park is one VoiceOver button that opens the park page.
  */
-export function ParkActivitySection({ query, source, enabled }: { query: Query; source: 'favorites' | 'nearby'; enabled: boolean }) {
+export function ParkActivitySection({ query, source, loading }: { query: Query; source: 'favorites' | 'nearby'; loading: boolean }) {
   const { t } = useTranslation();
   const parks = query.data?.parks ?? [];
   const openPark = (parkId: string) => router.push({ pathname: '/parks/[parkId]', params: { parkId } });
@@ -49,10 +49,10 @@ export function ParkActivitySection({ query, source, enabled }: { query: Query; 
   return (
     <View style={styles.section}>
       <ThemedText type="heading" accessibilityRole="header">
-        {source === 'favorites' ? t('home.activity.title') : t('home.activity.titleNearby')}
+        {source === 'favorites' || loading ? t('home.activity.title') : t('home.activity.titleNearby')}
       </ThemedText>
-      {enabled && query.isPending ? <SkeletonList rows={2} rowHeight={88} /> : null}
-      {query.error && parks.length === 0 ? (
+      {loading ? <SkeletonList rows={2} rowHeight={88} /> : null}
+      {!loading && query.error && parks.length === 0 ? (
         <ErrorState message={errorMessage(query.error)} onRetry={() => void query.refetch()} retrying={query.isFetching} />
       ) : null}
       {parks.map((park, i) => (
@@ -60,7 +60,7 @@ export function ParkActivitySection({ query, source, enabled }: { query: Query; 
           <ListRow icon="trees" title={park.name} subtitle={lines(park)} onPress={() => openPark(park.id)} accessibilityHint={t('parkRow.hint')} />
         </Entering>
       ))}
-      {source === 'nearby' ? (
+      {loading ? null : source === 'nearby' ? (
         // No favourites yet: the numbers above are for the nearest parks; the useful next step is choosing favourites.
         <EmptyState
           title={t('home.activity.noFavorites')}

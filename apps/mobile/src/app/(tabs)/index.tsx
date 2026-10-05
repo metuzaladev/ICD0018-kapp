@@ -26,6 +26,7 @@ import { usePlacePostFeed } from '@/hooks/use-explore';
 import { useFavoriteParks, useNearbyParks, useParkActivity } from '@/hooks/use-parks';
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { useActiveCheckIn, usePlannedVisits } from '@/hooks/use-visits';
+import { errorMessage } from '@/lib/api';
 import { authClient } from '@/lib/auth-client';
 import { DEFAULT_FEED_FILTERS, feedQueryParams } from '@/lib/explore';
 import { dueLabel, formatDate, formatDay, formatTime, formatToday } from '@/lib/format';
@@ -131,7 +132,14 @@ export default function HomeScreen() {
         <Button label={t('home.findPark')} onPress={() => router.navigate('/map')} />
       )}
 
-      <ParkActivitySection query={activityQuery} source={activityTarget.source} enabled={activityEnabled} />
+      {/* Hidden when favourites cannot be loaded: "no favourites yet" would be wrong then. */}
+      {favoritesQuery.isError && !favoritesQuery.data ? null : (
+        <ParkActivitySection
+          query={activityQuery}
+          source={activityTarget.source}
+          loading={favoritesQuery.isPending || (activityEnabled && activityQuery.isPending)}
+        />
+      )}
 
       {plans.slice(0, 2).map((p, i) => (
         <Entering key={p.id} index={i}>
@@ -161,7 +169,12 @@ export default function HomeScreen() {
         <Button label={t('home.findFriends')} variant="secondary" onPress={() => router.push('/friends')} />
       </ThemedView>
 
-      <CommunityPicks posts={picks} loading={feedQuery.isPending} onSuggest={() => router.push('/suggest-place')} />
+      <CommunityPicks
+        posts={picks}
+        loading={feedQuery.isPending}
+        error={feedQuery.error && !feedQuery.data ? { message: errorMessage(feedQuery.error), retry: () => void feedQuery.refetch(), retrying: feedQuery.isFetching } : null}
+        onSuggest={() => router.push('/suggest-place')}
+      />
 
       {reminders.length > 0 ? (
         <>

@@ -182,7 +182,7 @@ export function ParkMap({
               <View
                 accessible
                 accessibilityRole="button"
-                accessibilityLabel={t('map.marker', { name: item.park.name, dogs: dogsLabel(0) })}
+                accessibilityLabel={t('map.markerQuiet', { name: item.park.name })}
                 accessibilityHint={t('parkRow.hint')}>
                 <PlacePin kind={parkKindOf(item.park)} />
               </View>

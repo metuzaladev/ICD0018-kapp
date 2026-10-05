@@ -86,7 +86,7 @@
     "reportUser": "Teavita või blokeeri",
     "book": "Vali aeg",
     "suggestPlace": "Uus soovitus",
-    "reportPost": "Teavita postitusest"
+    "reportPost": "Teavita soovitusest"
   },
   "auth": {
     "email": "E-post",
@@ -159,9 +159,9 @@
       "title": "Hea park on lähemal, kui arvad.",
       "body": "Kaardil on näha, kus koerad praegu mängivad.",
       "seeTitle": "Näe, kes on pargis praegu",
-      "seeBody": "Koerte arv ja nende tempo enne, kui kodust välja astud.",
+      "seeBody": "Näed koerte arvu juba enne, kui kodust välja astud.",
       "crewTitle": "Leia sobiv seltskond",
-      "crewBody": "Väikesed, rahulikud või mängulised: vali, mis teie koerale sobib."
+      "crewBody": "Aiaga park, ujumiskoht või valgustus: vali, mis sinu koerale sobib."
     },
     "connect": {
       "title": "Vähem ootamist. Rohkem mängu.",
@@ -169,10 +169,10 @@
       "sampleTitle": "Mari ja Luna kutsuvad",
       "sampleSubtitle": "Politseiaia koertepark · täna 17.00",
       "sampleAction": "Tulen",
-      "planTitle": "Planeeri jalutuskäik",
+      "planTitle": "Planeeri pargikäik",
       "planBody": "Sõbrad näevad, millal ja kuhu lähed.",
       "pawsTitle": "Teeni käppi",
-      "pawsBody": "Iga jalutuskäik ja pargikülastus toob soodustusi partneritelt."
+      "pawsBody": "Pargikülastused, peetud plaanid ja soovitused toovad käppi, mida saad partnerite juures soodustuseks vahetada."
     },
     "step": "Samm {{current}}, kokku {{total}}",
     "next": "Edasi",
@@ -180,7 +180,7 @@
     "createAccount": "Loo konto"
   },
   "location": {
-    "title": "Mis on teie lähedal?",
+    "title": "Mis on sinu lähedal?",
     "body": "Asukoht aitab leida lähedal olevaid parke.",
     "allow": "Luba asukoht",
     "notNow": "Mitte praegu",
@@ -200,17 +200,17 @@
   "home": {
     "greeting": "Õue, {{name}}?",
     "greetingNoName": "Õue?",
-    "subtitle": "{{date}} · Tallinn",
+    "subtitle": "{{date}}",
     "activeTitle": "Head mängimist!",
     "activeDogs": "{{dogs}} · kuni {{time}}",
     "openPark": "Ava park",
     "idleTitle": "Täna võiks koos mängida",
-    "idleBody": "Märgi pargis kohalolek või planeeri käik, et sõbrad teaksid tulla.",
+    "idleBody": "Planeeri pargikäik, siis saavad sõbrad teate. Pargis olles märgi kohalolek.",
     "planned": "Plaanis {{day}} {{from}}–{{to}}",
     "remindersTitle": "Tervise meeldetuletused",
     "reminderDue": "Tähtaeg {{date}} · {{due}}",
     "findPark": "Leia lähim park",
-    "nearby": "Teie lähedal",
+    "nearby": "Sinu lähedal",
     "friendsPlansTitle": "Sõbrad lähevad parki",
     "friendsPlansEmpty": "Lähima kahe päeva jooksul pole sõpradel plaane.",
     "friendPlan": "{{name}} · {{day}} {{from}}–{{to}}",
@@ -293,19 +293,20 @@
     "emptyPlaces": "Selles kaardi osas siin veel midagi pole. Liiguta kaarti või vaata kogukonna soovitusi.",
     "cluster_one": "{{count}} koht, suumi lähemale",
     "cluster_other": "{{count}} kohta, suumi lähemale",
-    "myLocation": "Sinu asukoht"
+    "myLocation": "Sinu asukoht",
+    "markerQuiet": "{{name}}, praegu vaikne"
   },
   "parkRow": {
     "dogsNow": "{{dogs}} praegu",
-    "quiet": "hetkel vaikne",
+    "quiet": "praegu vaikne",
     "hint": "Avab pargi lehe"
   },
   "filters": {
-    "title": "Just teile sobiv.",
+    "title": "Just sulle sobiv.",
     "subtitle": "Vali, mis teeb ühe pargi heaks.",
     "features": "Pargi võimalused",
     "smallDogArea": "Eraldi ala väikestele koertele",
-    "water": "Joogivesi olemas",
+    "water": "Ujumiskoht koertele",
     "lighting": "Valgustatud",
     "fenced": "Aiaga piiratud",
     "distance": "Kaugus",
@@ -327,7 +328,7 @@
     "feature": {
       "fenced": "Aiaga piiratud",
       "smallDogArea": "Eraldi väike ala",
-      "water": "Vesi",
+      "water": "Ujumiskoht",
       "lighting": "Valgustus"
     },
     "checkIn": "Oleme siin",
@@ -385,7 +386,7 @@
     "emptyAction": "Leia lähim park"
   },
   "review": {
-    "title": "Kuidas teil läks?",
+    "title": "Kuidas läks?",
     "hint": "Sinu hinnang aitab teistel õige pargi valida.",
     "ratingA11y": "Hinne {{rating}} viiest",
     "star_one": "{{count}} tärn",
@@ -423,7 +424,7 @@
       "title": "Minu käpalised",
       "subtitle": "Sinu parimad sõbrad, ühes kohas.",
       "emptyTitle": "Tutvusta oma koera",
-      "emptyBody": "Iseloom ja mängueelistused aitavad leida sobivat seltskonda.",
+      "emptyBody": "Tõug, vanus ja iseloom aitavad pargisõpradel sinu koera tundma õppida.",
       "noDetails": "Lisa tõug ja muud andmed",
       "add": "Lisa koer",
       "openHint": "Avab koera profiili"
@@ -443,7 +444,7 @@
     },
     "edit": {
       "title": "Räägi oma sõbrast.",
-      "subtitle": "Need detailid aitavad leida mängukaaslasi.",
+      "subtitle": "Nime ja tõugu näevad kõik, vanust ja iseloomu ainult sinu sõbrad.",
       "name": "Koera nimi",
       "breed": "Tõug",
       "breedPlaceholder": "Näiteks cardigan corgi",
@@ -578,7 +579,7 @@
     },
     "signOut": "Logi välja",
     "notifications": "Teavitused",
-    "notificationsSub": "Sõbrad, sõnumid ja plaanid",
+    "notificationsSub": "Sõnumid, sõbrad, broneeringud ja käpad",
     "privacy": "Privaatsus",
     "privacySub": "Nähtavus ja turvalisus",
     "appearance": "Välimus",
@@ -656,7 +657,7 @@
     "cancelRequest": "Tühista kutse",
     "myFriends": "Sõbrad",
     "emptyTitle": "Uued tutvused algavad pargist",
-    "emptyBody": "Ava koera profiil ja saada omanikule sõbrakutse."
+    "emptyBody": "Pargi lehel näed, kes on praegu kohal. Ava nende profiil või otsi sõpra nime järgi."
   },
   "userProfile": {
     "friendsSince": "Sõbrad alates {{date}}",
@@ -721,7 +722,7 @@
     "allowRequests": "Luba sõbrakutseid",
     "allowRequestsHint": "Välja lülitatuna ei saa keegi sulle uut sõbrakutset saata.",
     "presence": "Kohaloleku jagamine",
-    "presenceHint": "Kes näeb, kui oled pargis. Sõbrad näevad ka sinu plaane.",
+    "presenceHint": "Kes näeb, kui oled pargis. Sama valik kehtib plaanidele: avalehe pargitegevuses näevad sinu nime ainult sõbrad, teised ainult arvu.",
     "blocked": "Blokeeritud kasutajad",
     "blockedHint": "Halda oma suhtluse piire",
     "blockedEmpty": "Sa pole kedagi blokeerinud.",
@@ -825,7 +826,7 @@
     "usePawsCost": "Kulub {{cost}}",
     "usePawsShort": "Vaja {{cost}}, sul on {{balance}}",
     "usePawsCode": "Kasutame sinu koodi {{code}}",
-    "usePawsNote": "Soodushind (−{{percent}}%) kinnitub broneeringuga. Makse ikka partneri juures.",
+    "usePawsNote": "Soodushind (−{{percent}}%) kinnitub broneeringuga. Maksad ikka partneri juures.",
     "discounted": "Hind käppadega: {{price}} (−{{percent}}%)"
   },
   "bookings": {
@@ -858,13 +859,13 @@
     "balance_other": "{{count}} käppa",
     "paws_one": "{{value}} käpp",
     "paws_other": "{{value}} käppa",
-    "openHint": "Avab Käpad"
+    "openHint": "Avab käppade vaate"
   },
   "parkCard": {
     "tag": {
       "fenced": "Aiaga",
       "smallDogArea": "Väikeste ala",
-      "water": "Vesi",
+      "water": "Ujumine",
       "lighting": "Valgustus"
     },
     "ratingA11y": "hinne {{rating}} viiest"
@@ -955,9 +956,9 @@
       "failed": "Kustutamine ebaõnnestus"
     },
     "report": {
-      "action": "Teavita postitusest",
+      "action": "Teavita soovitusest",
       "author": "Teavita või blokeeri: {{name}}",
-      "title": "Mis selle postitusega lahti on?",
+      "title": "Mis selle soovitusega lahti on?",
       "why": "Põhjus",
       "reasons": {
         "spam": "Rämpspost",
@@ -967,7 +968,7 @@
       },
       "placeholder": "Näiteks: koht on suletud või koerad pole seal lubatud",
       "thanksTitle": "Teavitus on kohal",
-      "thanksBody": "Vaatame postituse üle. Autor ei saa teada, kes teavitas."
+      "thanksBody": "Vaatame soovituse üle. Autor ei saa teada, kes teavitas."
     },
     "mine": {
       "title": "Minu soovitused",
@@ -975,7 +976,7 @@
       "tabMine": "Soovitatud",
       "tabSaved": "Salvestatud",
       "emptyMine": "Sa pole veel ühtegi kohta soovitanud.",
-      "emptySaved": "Salvestatud kohti veel pole. Vajuta kaardil järjehoidjat, et koht siia jätta."
+      "emptySaved": "Salvestatud kohti veel pole. Vajuta soovitusel järjehoidjat, et koht siia jätta."
     }
   },
   "suggest": {
@@ -1008,10 +1009,10 @@
     "bodyPlaceholder": "Freddy sai kohe kausi vett ja küpsise.",
     "earnTitle_one": "Teenid {{count}} käpa",
     "earnTitle_other": "Teenid {{count}} käppa",
-    "earnTitleNoPoints": "Kogukond kinnitab koha",
-    "earnBody": "Kui koht on kinnitatud. Fotodelt eemaldatakse asukohaandmed automaatselt.",
+    "earnTitleNoPoints": "Vaatame soovituse üle",
+    "earnBody": "Kui soovitus avaldatakse. Fotodelt eemaldatakse asukohaandmed automaatselt.",
     "uploading": "Laen fotot {{done}}/{{total}}…",
-    "submit": "Postita",
+    "submit": "Saada soovitus",
     "sent": "Soovitus saadetud. See ootab kinnitust."
   },
   "rewards": {
@@ -1025,8 +1026,8 @@
     "topLevel": "Kõrgeim tase on käes!",
     "balanceA11y": "Saldo {{paws}}. {{level}}, tase {{number}}. {{next}}",
     "useInShop": "Kasuta poes",
-    "streak_one": "{{count}} päev järjest õues",
-    "streak_other": "{{count}} päeva järjest õues",
+    "streak_one": "{{count}} päev järjest pargis",
+    "streak_other": "{{count}} päeva järjest pargis",
     "streakNone": "Alusta seeriat pargis",
     "perDay": "+{{points}} päevas",
     "weekA11y_one": "Viimase 7 päeva jooksul {{count}} päev pargis",
@@ -1067,7 +1068,7 @@
         "body": "3 kinnitatud soovitust"
       },
       "kadriorg_legend": {
-        "name": "Pargi legend",
+        "name": "Püsikülaline",
         "body": "20 külastust samas pargis"
       }
     },
@@ -1090,7 +1091,7 @@
       },
       "place_post": {
         "title": "Uus koht",
-        "body": "Kui kogukond kinnitab"
+        "body": "Kui soovitus avaldatakse"
       },
       "invite": {
         "title": "Sõber liitub",

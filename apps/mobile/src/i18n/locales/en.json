@@ -86,7 +86,7 @@
     "reportUser": "Report or block",
     "book": "Choose a time",
     "suggestPlace": "New suggestion",
-    "reportPost": "Report post"
+    "reportPost": "Report tip"
   },
   "auth": {
     "email": "Email",
@@ -159,9 +159,9 @@
       "title": "A good park is closer than you think.",
       "body": "The map shows where dogs are playing right now.",
       "seeTitle": "See who's at the park now",
-      "seeBody": "How many dogs and how lively, before you leave home.",
+      "seeBody": "See how many dogs are there before you leave home.",
       "crewTitle": "Find the right company",
-      "crewBody": "Small, calm or playful: pick what suits your dog."
+      "crewBody": "Fenced, a swimming spot or lit at night: pick what suits your dog."
     },
     "connect": {
       "title": "Less waiting. More playing.",
@@ -169,10 +169,10 @@
       "sampleTitle": "Mari and Luna invite you",
       "sampleSubtitle": "Politseiaia dog park · today 17:00",
       "sampleAction": "Coming",
-      "planTitle": "Plan a walk",
+      "planTitle": "Plan a park visit",
       "planBody": "Friends see when and where you're going.",
       "pawsTitle": "Earn paws",
-      "pawsBody": "Every walk and park visit earns discounts from partners."
+      "pawsBody": "Park visits, kept plans and tips earn paws you can swap for partner discounts."
     },
     "step": "Step {{current}} of {{total}}",
     "next": "Next",
@@ -200,12 +200,12 @@
   "home": {
     "greeting": "Walkies, {{name}}?",
     "greetingNoName": "Walkies?",
-    "subtitle": "{{date}} · Tallinn",
+    "subtitle": "{{date}}",
     "activeTitle": "Have a great playtime!",
     "activeDogs": "{{dogs}} · until {{time}}",
     "openPark": "Open park",
     "idleTitle": "A good day to play together",
-    "idleBody": "Check in at a park or plan a visit so your friends know to come.",
+    "idleBody": "Plan a park visit and your friends get a heads-up. At the park, check in.",
     "planned": "Planned {{day}} {{from}}–{{to}}",
     "remindersTitle": "Health reminders",
     "reminderDue": "Due {{date}} · {{due}}",
@@ -238,7 +238,7 @@
       "manageFavorites": "My favourite parks"
     },
     "picks": {
-      "title": "Community picks",
+      "title": "Community tips",
       "by": "suggested by {{name}}",
       "openHint": "Opens the suggestion",
       "seeAll": "See all",
@@ -293,7 +293,8 @@
     "emptyPlaces": "Nothing here on this part of the map yet. Move the map or see community tips.",
     "cluster_one": "{{count}} place, zoom in",
     "cluster_other": "{{count}} places, zoom in",
-    "myLocation": "Your location"
+    "myLocation": "Your location",
+    "markerQuiet": "{{name}}, quiet right now"
   },
   "parkRow": {
     "dogsNow": "{{dogs}} now",
@@ -305,7 +306,7 @@
     "subtitle": "Choose what makes a park great.",
     "features": "Park features",
     "smallDogArea": "Separate area for small dogs",
-    "water": "Drinking water",
+    "water": "Swimming spot for dogs",
     "lighting": "Lit at night",
     "fenced": "Fenced",
     "distance": "Distance",
@@ -327,7 +328,7 @@
     "feature": {
       "fenced": "Fenced",
       "smallDogArea": "Small dog area",
-      "water": "Water",
+      "water": "Swimming spot",
       "lighting": "Lighting"
     },
     "checkIn": "We’re here",
@@ -423,7 +424,7 @@
       "title": "My furry friends",
       "subtitle": "Your best friends, all in one place.",
       "emptyTitle": "Introduce your dog",
-      "emptyBody": "Personality and play preferences help find the right company.",
+      "emptyBody": "Breed, age and personality help park friends get to know your dog.",
       "noDetails": "Add breed and other details",
       "add": "Add a dog",
       "openHint": "Opens the dog’s profile"
@@ -443,7 +444,7 @@
     },
     "edit": {
       "title": "Tell us about your friend.",
-      "subtitle": "These details help find playmates.",
+      "subtitle": "Everyone sees the name and breed; only your friends see age and personality.",
       "name": "Dog’s name",
       "breed": "Breed",
       "breedPlaceholder": "For example Cardigan corgi",
@@ -578,7 +579,7 @@
     },
     "signOut": "Sign out",
     "notifications": "Notifications",
-    "notificationsSub": "Friends, messages and plans",
+    "notificationsSub": "Messages, friends, bookings and paws",
     "privacy": "Privacy",
     "privacySub": "Visibility and safety",
     "appearance": "Appearance",
@@ -656,7 +657,7 @@
     "cancelRequest": "Cancel request",
     "myFriends": "Friends",
     "emptyTitle": "New friendships start at the park",
-    "emptyBody": "Open a dog’s profile and send its human a friend request."
+    "emptyBody": "A park’s page shows who is there right now. Open their profile, or search for a friend by name."
   },
   "userProfile": {
     "friendsSince": "Friends since {{date}}",
@@ -721,7 +722,7 @@
     "allowRequests": "Allow friend requests",
     "allowRequestsHint": "When off, nobody can send you a new friend request.",
     "presence": "Presence sharing",
-    "presenceHint": "Who sees when you are at the park. Friends also see your plans.",
+    "presenceHint": "Who sees when you are at the park. The same choice applies to plans: in park activity on Home only friends see your name, others just a number.",
     "blocked": "Blocked users",
     "blockedHint": "Set your boundaries",
     "blockedEmpty": "You have not blocked anyone.",
@@ -858,13 +859,13 @@
     "balance_other": "{{count}} paws",
     "paws_one": "{{value}} paw",
     "paws_other": "{{value}} paws",
-    "openHint": "Opens Paws"
+    "openHint": "Opens your paws"
   },
   "parkCard": {
     "tag": {
       "fenced": "Fenced",
       "smallDogArea": "Small dog area",
-      "water": "Water",
+      "water": "Swimming",
       "lighting": "Lighting"
     },
     "ratingA11y": "rated {{rating}} out of 5"
@@ -955,9 +956,9 @@
       "failed": "Couldn’t delete"
     },
     "report": {
-      "action": "Report post",
+      "action": "Report tip",
       "author": "Report or block: {{name}}",
-      "title": "What’s wrong with this post?",
+      "title": "What’s wrong with this tip?",
       "why": "Reason",
       "reasons": {
         "spam": "Spam",
@@ -967,7 +968,7 @@
       },
       "placeholder": "For example: the place has closed or dogs aren’t allowed",
       "thanksTitle": "Report received",
-      "thanksBody": "We’ll review the post. The author won’t know who reported it."
+      "thanksBody": "We’ll review the tip. The author won’t know who reported it."
     },
     "mine": {
       "title": "My tips",
@@ -1008,10 +1009,10 @@
     "bodyPlaceholder": "Freddy got a bowl of water and a biscuit straight away.",
     "earnTitle_one": "You’ll earn {{count}} paw",
     "earnTitle_other": "You’ll earn {{count}} paws",
-    "earnTitleNoPoints": "The community approves places",
-    "earnBody": "Once the place is approved. Location data is removed from photos automatically.",
+    "earnTitleNoPoints": "We review every tip",
+    "earnBody": "Once the tip is published. Location data is removed from photos automatically.",
     "uploading": "Uploading photo {{done}}/{{total}}…",
-    "submit": "Post",
+    "submit": "Send tip",
     "sent": "Tip sent. It is waiting for approval."
   },
   "rewards": {
@@ -1025,8 +1026,8 @@
     "topLevel": "You’ve reached the top level!",
     "balanceA11y": "Balance {{paws}}. {{level}}, level {{number}}. {{next}}",
     "useInShop": "Spend in the shop",
-    "streak_one": "{{count}} day outdoors in a row",
-    "streak_other": "{{count}} days outdoors in a row",
+    "streak_one": "{{count}} day in a row at the park",
+    "streak_other": "{{count}} days in a row at the park",
     "streakNone": "Start a streak at the park",
     "perDay": "+{{points}} a day",
     "weekA11y_one": "{{count}} park day in the last 7 days",
@@ -1067,7 +1068,7 @@
         "body": "3 approved tips"
       },
       "kadriorg_legend": {
-        "name": "Park legend",
+        "name": "Regular",
         "body": "20 visits to the same park"
       }
     },
@@ -1090,7 +1091,7 @@
       },
       "place_post": {
         "title": "New place",
-        "body": "When the community approves it"
+        "body": "When your tip is published"
       },
       "invite": {
         "title": "A friend joins",

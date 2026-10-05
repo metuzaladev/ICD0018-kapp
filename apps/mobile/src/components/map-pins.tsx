@@ -40,6 +40,8 @@ const PLACE_COLOR = {
   beach: 'mapBeach',
   service: 'mapService',
   vet: 'mapVet',
+  // No Figma colour for shops: they share the service colour (different icon).
+  shop: 'mapService',
 } as const;
 
 /** 40 pt circle in the category colour, 3 pt ring that separates it from the tiles, icon, tail. */

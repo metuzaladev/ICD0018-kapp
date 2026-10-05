@@ -43,7 +43,14 @@
     "ageMonths_one": "{{count}} kuu",
     "ageMonths_other": "{{count}} kuud",
     "ageYears_one": "{{count}} aasta",
-    "ageYears_other": "{{count}} aastat"
+    "ageYears_other": "{{count}} aastat",
+    "justNow": "just praegu",
+    "minutesAgo_one": "{{count}} min tagasi",
+    "minutesAgo_other": "{{count}} min tagasi",
+    "hoursAgo_one": "{{count}} h tagasi",
+    "hoursAgo_other": "{{count}} h tagasi",
+    "daysAgo_one": "{{count}} päev tagasi",
+    "daysAgo_other": "{{count}} päeva tagasi"
   },
   "errors": {
     "network": "Internetiühendus puudub või server ei vasta",
@@ -74,7 +81,9 @@
     "vetVisitAdd": "Loomaarsti külastus",
     "healthRecordEdit": "Muuda kirjet",
     "reportUser": "Teavita või blokeeri",
-    "book": "Vali aeg"
+    "book": "Vali aeg",
+    "suggestPlace": "Uus soovitus",
+    "reportPost": "Teavita postitusest"
   },
   "auth": {
     "email": "E-post",
@@ -239,7 +248,18 @@
     "noMatches": "Selle nimega kohta ei leitud.",
     "providerMarker": "{{name}}, teenusepakkuja",
     "active": "Aktiivsed",
-    "favorites": "Lemmikud"
+    "favorites": "Lemmikud",
+    "placeMarker": "{{name}}, {{kind}}",
+    "placeKinds": {
+      "park": "park",
+      "cafe": "kohvik",
+      "beach": "rand",
+      "service": "teenusepakkuja",
+      "vet": "loomakliinik",
+      "shop": "pood või muu koht"
+    },
+    "providerHint": "Avab vabad ajad ja broneerimise",
+    "emptyPlaces": "Selles kaardi osas siin veel midagi pole. Liiguta kaarti või vaata kogukonna soovitusi."
   },
   "parkRow": {
     "dogsNow": "{{dogs}} praegu",
@@ -500,7 +520,14 @@
     "bookings": "Minu broneeringud",
     "bookingsSub": "Hooldus ja kohtumised",
     "upcomingBookings_one": "{{count}} tulev kohtumine",
-    "upcomingBookings_other": "{{count}} tulevat kohtumist"
+    "upcomingBookings_other": "{{count}} tulevat kohtumist",
+    "rewards": "Käpad",
+    "rewardsSub": "{{paws}} · {{level}}",
+    "rewardsSubEmpty": "Teeni pargis käies",
+    "shop": "Pood",
+    "shopSub": "Partnerite soodustused käppadega",
+    "myPosts": "Minu soovitused",
+    "myPostsSub": "Soovitatud ja salvestatud kohad"
   },
   "settings": {
     "title": "Sinu Käpp.",
@@ -564,7 +591,11 @@
     "bookingConfirmed": "Broneering on kirjas",
     "bookingCancelled": "Broneering tühistatud",
     "bookingReminder": "Kohtumiseni varsti!",
-    "bookingBody": "{{service}} · {{provider}} · {{when}}"
+    "bookingBody": "{{service}} · {{provider}} · {{when}}",
+    "levelUp": "Uus tase!",
+    "badge": "Uus märk!",
+    "postApproved": "Sinu soovitus on avaldatud",
+    "postApprovedPoints": "+{{paws}}"
   },
   "community": {
     "nameWithDogs": "{{name}} ja {{dogs}}"
@@ -663,7 +694,8 @@
     "friendRequests": "Sõbrakutsed",
     "feedNote": "Teadete vahekaardil näed alati kõike; need lülitid puudutavad ainult tõuketeavitusi.",
     "save": "Salvesta eelistused",
-    "bookings": "Broneeringute uuendused"
+    "bookings": "Broneeringute uuendused",
+    "rewards": "Käpad ja märgid"
   },
   "invite": {
     "title": "Kutsu parki: {{name}}",
@@ -747,7 +779,13 @@
       "info": "Broneeringu info leiad oma profiilist.",
       "viewBookings": "Vaata broneeringuid",
       "home": "Tagasi avalehele"
-    }
+    },
+    "usePaws": "Kasuta käppi: −{{percent}}%",
+    "usePawsCost": "Kulub {{cost}}",
+    "usePawsShort": "Vaja {{cost}}, sul on {{balance}}",
+    "usePawsCode": "Kasutame sinu koodi {{code}}",
+    "usePawsNote": "Soodushind (−{{percent}}%) kinnitub broneeringuga. Makse ikka partneri juures.",
+    "discounted": "Hind käppadega: {{price}} (−{{percent}}%)"
   },
   "bookings": {
     "title": "Hoolt on plaanis.",
@@ -776,7 +814,10 @@
   },
   "points": {
     "balance_one": "{{count}} käpp",
-    "balance_other": "{{count}} käppa"
+    "balance_other": "{{count}} käppa",
+    "paws_one": "{{value}} käpp",
+    "paws_other": "{{value}} käppa",
+    "openHint": "Avab Käpad"
   },
   "parkCard": {
     "tag": {
@@ -791,5 +832,323 @@
     "label": "Lähim park",
     "hereNow": "Oled siin",
     "checkInHint": "Märgib kohaloleku: {{name}}"
+  },
+  "mapSheet": {
+    "freeTimes": "Vabad ajad",
+    "discountTitle": "−{{percent}}% käppadega",
+    "discountBody": "Broneerimisel saad kasutada {{cost}}.",
+    "discountBodyBalance": "Broneerimisel saad kasutada {{cost}}. Sul on {{balance}}.",
+    "services": "Teenused",
+    "book": "Broneeri",
+    "bookAt": "Broneeri {{time}}"
+  },
+  "explore": {
+    "title": "Koerasõbralikud kohad.",
+    "subtitle": "Kogukonna soovitused sinu lähedal.",
+    "switchLabel": "Kaart või Avasta",
+    "switchMap": "Kaart",
+    "switchFeed": "Avasta",
+    "communityEntry": "Kogukonna soovitused",
+    "communityEntryHint": "Avab Avasta voo",
+    "filters": {
+      "near": "Lähedal",
+      "nearFallbackHint": "Asukohata arvestame Tallinna kesklinnast",
+      "cafe": "Kohvikud",
+      "park": "Pargid",
+      "beach": "Rannad",
+      "shop": "Poed",
+      "friends": "Sõbrad"
+    },
+    "categories": {
+      "cafe": "Kohvik",
+      "park": "Park",
+      "beach": "Rand",
+      "shop": "Pood",
+      "other": "Muu"
+    },
+    "amenities": {
+      "dogs_inside": "Koerad sees",
+      "water_bowl": "Veekauss",
+      "terrace": "Terrass",
+      "dog_treats": "Koeraküpsis",
+      "fenced_area": "Aiaga ala",
+      "off_leash": "Ilma rihmata",
+      "shade": "Vari",
+      "stream": "Oja või vesi"
+    },
+    "emptyTitle": "Siin pole veel ühtegi soovitust.",
+    "emptyFriendsTitle": "Sõbrad pole veel midagi soovitanud.",
+    "emptyBody": "Tead mõnda kohta, kus koerad on oodatud? Jaga seda teistega.",
+    "suggest": "Soovita kohta",
+    "suggestHint": "Avab vormi uue koha soovitamiseks",
+    "pendingInfoTitle": "Ootab kinnitust",
+    "pendingInfoBody_one": "Vaatame soovituse üle. Kui see avaldatakse, saad {{count}} käpa.",
+    "pendingInfoBody_other": "Vaatame soovituse üle. Kui see avaldatakse, saad {{count}} käppa.",
+    "pendingInfoBodyNoPoints": "Vaatame soovituse üle. Teised näevad seda pärast kinnitamist.",
+    "post": {
+      "you": "Sina",
+      "meta": "soovitab · {{when}}",
+      "byline": "{{name}} soovitab, {{when}}",
+      "pending": "Ootab kinnitust",
+      "rejected": "Tagasi lükatud",
+      "earnedShort": "+{{points}}",
+      "earned_one": "Teenisid {{count}} käpa",
+      "earned_other": "Teenisid {{count}} käppa",
+      "more": "Rohkem valikuid",
+      "openHint": "Avab soovituse",
+      "like": "Meeldib",
+      "unlike": "Eemalda meeldimine",
+      "likes_one": "{{count}} meeldimine",
+      "likes_other": "{{count}} meeldimist",
+      "save": "Salvesta",
+      "unsave": "Eemalda salvestatutest",
+      "onMap": "Kaardil",
+      "onMapHint": "Näitab kohta kaardil"
+    },
+    "delete": {
+      "action": "Kustuta soovitus",
+      "title": "Kustutada soovitus?",
+      "body": "Soovitust „{{name}}” ei saa taastada.",
+      "failed": "Kustutamine ebaõnnestus"
+    },
+    "report": {
+      "action": "Teavita postitusest",
+      "author": "Teavita või blokeeri: {{name}}",
+      "title": "Mis selle postitusega lahti on?",
+      "why": "Põhjus",
+      "reasons": {
+        "spam": "Rämpspost",
+        "inappropriate": "Sobimatu sisu",
+        "wrong_info": "Vale info",
+        "other": "Muu"
+      },
+      "placeholder": "Näiteks: koht on suletud või koerad pole seal lubatud",
+      "thanksTitle": "Teavitus on kohal",
+      "thanksBody": "Vaatame postituse üle. Autor ei saa teada, kes teavitas."
+    },
+    "mine": {
+      "title": "Minu soovitused",
+      "subtitle": "Sinu soovitatud ja salvestatud kohad.",
+      "tabMine": "Soovitatud",
+      "tabSaved": "Salvestatud",
+      "emptyMine": "Sa pole veel ühtegi kohta soovitanud.",
+      "emptySaved": "Salvestatud kohti veel pole. Vajuta kaardil järjehoidjat, et koht siia jätta."
+    }
+  },
+  "suggest": {
+    "title": "Soovita kohta.",
+    "subtitle": "Aita teistel leida koerasõbralikke kohti.",
+    "addPhoto": "Lisa foto",
+    "addPhotoHint": "Kuni {{max}} fotot",
+    "photoNote": "Kuni {{max}} fotot, esimene on kaanepilt. Fotodelt eemaldatakse asukohaandmed automaatselt.",
+    "photoTitle": "Foto {{position}}/{{total}}",
+    "photoA11y": "Foto {{position}}/{{total}}",
+    "photoCoverA11y": "Foto {{position}}/{{total}}, kaanepilt",
+    "photoHint": "Ava valikud: kaanepilt või eemaldamine",
+    "makeCover": "Tee kaanepildiks",
+    "removePhoto": "Eemalda foto",
+    "cameraDenied": "Luba seadetes kaamera kasutamine, et kohast pilti teha.",
+    "name": "Koha nimi",
+    "namePlaceholder": "Näiteks Kohvik Kalamaja Kiri",
+    "address": "Aadress",
+    "addressPlaceholder": "Näiteks Kotzebue 9, Kalamaja",
+    "where": "Asukoht kaardil",
+    "whereHint": "Liiguta kaarti, kuni nööpnõel on koha peal.",
+    "useMyLocation": "Kasuta minu asukohta",
+    "locationDenied": "Luba seadetes asukoht või liiguta kaarti käsitsi.",
+    "locationFailed": "Asukohta ei õnnestunud leida. Liiguta kaarti käsitsi.",
+    "choosePoint": "Liiguta kaarti, et nööpnõel oleks koha peal.",
+    "category": "Kategooria",
+    "chooseCategory": "Vali kategooria",
+    "amenities": "Mis teeb selle koerasõbralikuks?",
+    "body": "Sinu kogemus",
+    "bodyPlaceholder": "Freddy sai kohe kausi vett ja küpsise.",
+    "earnTitle_one": "Teenid {{count}} käpa",
+    "earnTitle_other": "Teenid {{count}} käppa",
+    "earnTitleNoPoints": "Kogukond kinnitab koha",
+    "earnBody": "Kui koht on kinnitatud. Fotodelt eemaldatakse asukohaandmed automaatselt.",
+    "uploading": "Laen fotot {{done}}/{{total}}…",
+    "submit": "Postita",
+    "sent": "Soovitus saadetud. See ootab kinnitust."
+  },
+  "rewards": {
+    "title": "Sinu käpad.",
+    "subtitle": "Teeni pargis käies, kasuta partnerite juures.",
+    "balance": "Saldo",
+    "levelPill": "{{level}} · tase {{number}}",
+    "pawsWord_one": "käpp",
+    "pawsWord_other": "käppa",
+    "toNext": "Veel {{paws}} tasemeni {{level}}",
+    "topLevel": "Kõrgeim tase on käes!",
+    "balanceA11y": "Saldo {{paws}}. {{level}}, tase {{number}}. {{next}}",
+    "useInShop": "Kasuta poes",
+    "streak_one": "{{count}} päev järjest õues",
+    "streak_other": "{{count}} päeva järjest õues",
+    "streakNone": "Alusta seeriat pargis",
+    "perDay": "+{{points}} päevas",
+    "weekA11y_one": "Viimase 7 päeva jooksul {{count}} päev pargis",
+    "weekA11y_other": "Viimase 7 päeva jooksul {{count}} päeva pargis",
+    "howToEarn": "Kuidas teenida",
+    "plus": "+{{points}}",
+    "plusA11y": "pluss {{paws}}",
+    "withLimit_one": "{{body}} · kuni {{count}} kord päevas",
+    "withLimit_other": "{{body}} · kuni {{count}} korda päevas",
+    "badgesTitle": "Märgid",
+    "badgeUnlocked": "Käes!",
+    "badgeProgress": "{{progress}} / {{target}}",
+    "badgeProgressShort": "{{progress}}/{{target}}",
+    "historyTitle": "Ajalugu",
+    "historySubtitle": "Kõik teenitud ja kasutatud käpad.",
+    "historyEmpty": "Ajalugu on veel tühi. Esimesed käpad tulevad pargikülastusega.",
+    "historyAll": "Vaata kogu ajalugu",
+    "historyDelta": "{{delta}} käppa",
+    "honestyTitle": "Ausus ennekõike",
+    "honestyBody": "Käpad tulevad kinnitatud tegevustest. Topelt-kohalolekud ja liiga lühikesed külastused ei loe.",
+    "levels": {
+      "puppy": "Kutsikas",
+      "park_friend": "Pargisõber",
+      "park_legend": "Pargilegend",
+      "pack_leader": "Karjajuht"
+    },
+    "badges": {
+      "early_bird": {
+        "name": "Varajane linnuke",
+        "body": "Pargis enne kella 8"
+      },
+      "ten_parks": {
+        "name": "Kümme parki",
+        "body": "Käinud 10 erinevas pargis"
+      },
+      "explorer": {
+        "name": "Avastaja",
+        "body": "3 kinnitatud soovitust"
+      },
+      "kadriorg_legend": {
+        "name": "Pargi legend",
+        "body": "20 külastust samas pargis"
+      }
+    },
+    "reasons": {
+      "check_in": {
+        "title": "Pargis kohal",
+        "body": "Vähemalt 20 minutit pargis"
+      },
+      "streak": {
+        "title": "Seeria",
+        "body": "Pargis täna ja eile"
+      },
+      "plan_honoured": {
+        "title": "Plaan peetud",
+        "body": "Tulid pargi plaanitud ajal"
+      },
+      "review": {
+        "title": "Arvustus",
+        "body": "Esimene hinnang pargile"
+      },
+      "place_post": {
+        "title": "Uus koht",
+        "body": "Kui kogukond kinnitab"
+      },
+      "invite": {
+        "title": "Sõber liitub",
+        "body": "Sinu kutsel, pärast tema esimest pargikülastust"
+      },
+      "redemption": {
+        "title": "Lunastatud soodustus",
+        "body": "Kasutatud poes"
+      },
+      "redemption_refund": {
+        "title": "Tagastatud",
+        "body": "Kood tühistati"
+      }
+    },
+    "invite": {
+      "title": "Kutsu sõber",
+      "body": "Kui sõber liitub sinu koodiga ja käib esimest korda pargis, saad {{paws}}.",
+      "codeA11y": "Sinu kutsekood: {{code}}",
+      "share": "Jaga koodi",
+      "shareMessage": "Tule Käppa! Minu kutsekood: {{code}}",
+      "claimLabel": "Said koodi sõbralt?",
+      "claimPlaceholder": "Näiteks ABCD2345",
+      "claim": "Kasuta koodi",
+      "claimed": "Kood on kirjas. Sõber saab käpad, kui käid esimest korda pargis."
+    }
+  },
+  "shop": {
+    "title": "Pood.",
+    "subtitle": "Kohalikud partnerid, käppadega soodsamalt.",
+    "tabServices": "Teenused",
+    "tabProducts": "Tooted",
+    "balance": "Sul on {{paws}}",
+    "balanceSub": "Kuni −{{percent}}% partnerite juures.",
+    "myCodes": "Minu koodid",
+    "myCodesSub": "Lunastatud sooduskoodid",
+    "tiles": {
+      "grooming": "Hooldus",
+      "training": "Treening",
+      "vet": "Tervis"
+    },
+    "tileHint": "Avab teenusepakkujad",
+    "nearbyMap": "Lähedal kaardil",
+    "openMap": "Ava kaart",
+    "openMapHint": "Avab kaardi teenustega",
+    "popularServices": "Populaarsed teenused",
+    "partnerHint": "Avab teenusepakkuja",
+    "noPartners": "Partnereid veel pole.",
+    "partnerProducts": "Partnerite tooted",
+    "allProducts": "Vaata kõiki tooteid",
+    "noProducts": "Selles kategoorias tooteid pole.",
+    "discount": "−{{percent}}%",
+    "discountA11y": "−{{percent}}% käppadega, {{paws}}",
+    "productA11y": "{{name}}, {{price}}, −{{percent}}% käppadega, {{partner}}",
+    "productCategories": {
+      "all": "Kõik",
+      "food": "Toit",
+      "treats": "Maiused",
+      "toys": "Mänguasjad",
+      "accessories": "Tarvikud",
+      "care": "Hooldus"
+    },
+    "priceAtPartner": "Hind partneri juures",
+    "priceWithPaws": "Käppadega",
+    "cost": "Maksab",
+    "youHave": "Sul on {{paws}}",
+    "short": "Puudu on {{paws}}",
+    "redeem_one": "Lunasta {{value}} käpaga",
+    "redeem_other": "Lunasta {{value}} käpaga",
+    "confirmTitle": "Lunastada soodustus?",
+    "confirmBody_one": "Kulub {{paws}}. Saad −{{percent}}% sooduskoodi partnerile {{partner}}. Kood kehtib {{count}} päeva.",
+    "confirmBody_other": "Kulub {{paws}}. Saad −{{percent}}% sooduskoodi partnerile {{partner}}. Kood kehtib {{count}} päeva.",
+    "confirmAction": "Lunasta",
+    "howTitle": "Kuidas see käib?",
+    "howBody_one": "Näita koodi partneri juures. Äpis makseid pole. Kasutamata koodi saad {{count}} päeva jooksul tühistada ja käpad tagasi.",
+    "howBody_other": "Näita koodi partneri juures. Äpis makseid pole. Kasutamata koodi saad {{count}} päeva jooksul tühistada ja käpad tagasi.",
+    "noPayments": "Hinnad on informatiivsed, maksad partneri juures. Partnerid ja tooted on näidisandmed."
+  },
+  "redemptions": {
+    "title": "Minu koodid",
+    "subtitle": "Näita koodi partneri juures.",
+    "empty": "Sul pole veel ühtegi sooduskoodi.",
+    "toShop": "Ava pood",
+    "productTitle": "{{name}} · −{{percent}}%",
+    "bookingTitle": "Broneeringu soodustus · −{{percent}}%",
+    "codeLabel": "Sooduskood",
+    "codeA11y": "Sooduskood {{code}}, {{status}}",
+    "status": {
+      "active": "Aktiivne",
+      "used": "Kasutatud",
+      "cancelled": "Tühistatud",
+      "expired": "Aegunud"
+    },
+    "validUntil": "Kehtib kuni: {{date}}",
+    "howTitle": "Kuidas kasutada",
+    "howProduct": "Näita koodi partneri {{partner}} juures maksmisel. Kood kehtib ühe korra.",
+    "howBooking": "Broneeri teenus partneri {{partner}} juures ja lülita sisse „Kasuta käppi”. Kood kehtib ühe korra.",
+    "bookNow": "Broneeri aeg",
+    "cancelAction": "Tühista ja tagasta käpad",
+    "cancelTitle": "Tühistada kood?",
+    "cancelBody": "Kood kaob ja saad tagasi {{paws}}.",
+    "cancelled": "Kood tühistatud, {{paws}} on tagasi.",
+    "allCodes": "Kõik minu koodid"
   }
 }

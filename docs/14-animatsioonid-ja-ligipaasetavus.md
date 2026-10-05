@@ -50,8 +50,8 @@ Ainult failis `apps/mobile/src/lib/haptics.ts` (`haptic(reason)`); ekraan nimeta
 | Põhjus | Muster | Kus |
 |---|---|---|
 | `selection` | `selectionAsync` | Kõik kiibid (filtrid, kestused, kuupäevad, kategooriad, Tulevased/Varasemad), tärnid, teenuse valik, keelevalik, lemmiku süda |
-| `success` | Success | Check-in, broneering kinnitatud, hinnang salvestatud, plaan salvestatud |
-| `warning` | Warning | Vahetult enne hävitava tegevuse kinnitust: broneeringu tühistamine, koera / tervisekirje / foto kustutamine, sõbra eemaldamine, blokeerimine |
+| `success` | Success | Check-in, broneering kinnitatud, hinnang salvestatud, plaan salvestatud; M9b: koht soovitatud, soodustus lunastatud, kutsekood sisestatud, postitusest teavitatud |
+| `warning` | Warning | Vahetult enne hävitava tegevuse kinnitust: sooduskoodi tühistamine, soovituse kustutamine, broneeringu tühistamine, koera / tervisekirje / foto kustutamine, sõbra eemaldamine, blokeerimine |
 | `error` | Error | Server lükkas check-in'i, broneeringu, hinnangu või plaani tagasi |
 
 Natiivsed vahekaardid (`NativeTabs`) haptikat ei saa: iOS-i süsteemne tab bar ei vibreeri ja HIG ei soovita süsteemse käitumise muutmist.

@@ -7,11 +7,16 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import i18n from '@/i18n';
 import { formatDateIn, formatTimeIn, priceLabel } from '@/lib/format';
 
-/** "teisipäev, 6. oktoober, 10.00–11.00" in the provider's zone. */
-export function bookingWhen(t: ReturnType<typeof useTranslation>['t'], booking: Booking): string {
-  return t('bookings.when', {
+/**
+ * "teisipäev, 6. oktoober, 10.00–11.00" in the provider's zone. Uses the i18n instance directly:
+ * passing the hook's `t` as a parameter type made TypeScript's key inference "excessively deep"
+ * once the M9b keys grew the dictionary.
+ */
+export function bookingWhen(booking: Booking): string {
+  return i18n.t('bookings.when', {
     date: formatDateIn(booking.startsAt, booking.timeZone),
     from: formatTimeIn(booking.startsAt, booking.timeZone),
     to: formatTimeIn(booking.endsAt, booking.timeZone),
@@ -42,7 +47,7 @@ export function BookingCard({ booking, onCancel, cancelling = false }: BookingCa
           {t(`bookings.status.${booking.status}`)}
         </ThemedText>
       </View>
-      <ThemedText type="caption">{bookingWhen(t, booking)}</ThemedText>
+      <ThemedText type="caption">{bookingWhen(booking)}</ThemedText>
       <ThemedText type="caption" themeColor="muted">
         {[booking.provider.name, booking.provider.address ?? booking.provider.area, priceLabel(booking.priceCents, booking.priceIsFrom)].join(' · ')}
       </ThemedText>

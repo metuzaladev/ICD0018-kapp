@@ -52,7 +52,11 @@ Figma põhidisain on M9-st **hele**. Seaded → **Välimus**: *Süsteem*, *Hele*
 | Chip / Icon, Chip Row | `components/icon-chip.tsx` → `IconChip`, `ChipRow` (M9) |
 | Segmented Control | `components/segmented-control.tsx` (kaks valikut: Tulevased/Varasemad, Isane/Emane, kirje liik) |
 | Icon Button | `components/icon-button.tsx` (52 × 52, raadius 18, Solid / Glass) |
-| Points Badge | `components/points-badge.tsx` — peidetud, kuni M9b annab saldo (`hooks/use-points.ts` tagastab `null`) |
+| Points Badge | `components/points-badge.tsx` — saldo `GET /me/rewards`-ist (`hooks/use-points.ts`), peidetud kuni see on teada; `onPress` → Käpad |
+| Feed / Place Post | `components/place-post-card.tsx` (M9b) |
+| Product Card | `components/product-card.tsx` (M9b) |
+| Streak Tile, Progress / Reward | `app/rewards/index.tsx` (seeria käpad), `components/progress-bar.tsx` |
+| Info Card | `components/info-card.tsx` |
 | List Row (ikoon / foto) | `components/list-row.tsx` (`icon` või `photo`: 44 pt ümarnurkne foto, raadius 14), `provider-row.tsx` |
 | Park Card | `components/park-card.tsx` (foto, sildiga omadused, süda, ★, sõbrad pargis) |
 | „Lähim park" kaart | `components/nearest-park-card.tsx` („Oleme siin" → check-in) |
@@ -68,7 +72,7 @@ Figma põhidisain on M9-st **hele**. Seaded → **Välimus**: *Süsteem*, *Hele*
 
 - Koerafoto: Grzegorz Wicher, *Welsh Corgi Cardigan named Flow*, CC BY-SA 4.0, Wikimedia Commons.
 - Pargifoto: Diego Delso, *Parque de Kadriorg*, CC BY-SA 3.0, Wikimedia Commons.
-- Näidiskoerad (`apps/mobile/assets/images/sample-dogs/`, ainult tutvustusvaadetes: sissejuhatuse kaart ja kollaaž, registreerumise riba; mitte kunagi päris kasutajana): Unsplash License (tasuta kasutus, viidet ei nõuta). Allikad: luna `photo-1583511655857-d19b40a7a54e`, rex `photo-1530281700549-e82e7bf110d6`, charlie `photo-1543466835-00a7907e9de1`, pug `photo-1517849845537-4d257902454a`, aussie `photo-1587300003388-59208cc962cb`, bella `photo-1552053831-71594a27632d` (images.unsplash.com). Samad fotod on Figmas.
+- Näidiskoerad (`apps/mobile/assets/images/sample-dogs/`, tutvustusvaadetes — sissejuhatuse kaart ja kollaaž, registreerumise riba — ning Poe teenusekategooriate plaatidel illustratsioonina; mitte kunagi päris kasutaja ega partnerina): Unsplash License (tasuta kasutus, viidet ei nõuta). Allikad: luna `photo-1583511655857-d19b40a7a54e`, rex `photo-1530281700549-e82e7bf110d6`, charlie `photo-1543466835-00a7907e9de1`, pug `photo-1517849845537-4d257902454a`, aussie `photo-1587300003388-59208cc962cb`, bella `photo-1552053831-71594a27632d` (images.unsplash.com). Samad fotod on Figmas.
 - Kaart: © OpenStreetMapi kaastöötajad (ODbL).
 - Ikoonid: Lucide (ISC), `lucide-static` 1.49 SVG-failid kaustas `apps/mobile/assets/icons`.
 

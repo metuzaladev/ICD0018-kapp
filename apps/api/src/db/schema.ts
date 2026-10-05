@@ -443,7 +443,10 @@ export const notifications = pgTable(
   },
   (t) => [
     index('notifications_user_time_idx').on(t.userId, t.createdAt),
-    check('notifications_type', sql`${t.type} in ('friend_request', 'friend_accepted', 'message', 'friend_plan', 'booking_confirmed', 'booking_cancelled', 'booking_reminder')`),
+    check(
+      'notifications_type',
+      sql`${t.type} in ('friend_request', 'friend_accepted', 'message', 'friend_plan', 'booking_confirmed', 'booking_cancelled', 'booking_reminder', 'reward_level_up', 'reward_badge', 'place_post_approved')`,
+    ),
   ],
 );
 
@@ -457,6 +460,8 @@ export const notificationPreferences = pgTable('notification_preferences', {
   friendPlans: boolean('friend_plans').notNull().default(true),
   /** Figma "Broneeringute uuendused" (M6): booking reminders. */
   bookings: boolean('bookings').notNull().default(true),
+  /** M9b "Käpad ja märgid": level up, badge unlocked, recommendation published. */
+  rewards: boolean('rewards').notNull().default(true),
   updatedAt: timestamps.updatedAt,
 });
 
@@ -508,6 +513,11 @@ export const serviceProviders = pgTable(
      */
     ratingAverage: numeric('rating_average', { precision: 2, scale: 1, mode: 'number' }),
     ratingCount: integer('rating_count').notNull().default(0),
+    /**
+     * M9b: a Käpp partner gives this paw discount on bookings in exchange for Käpad points
+     * (docs/16-avasta-ja-kapad.md). Null = not a partner.
+     */
+    pawDiscountPercent: integer('paw_discount_percent'),
     ...timestamps,
   },
   (t) => [
@@ -515,6 +525,7 @@ export const serviceProviders = pgTable(
     index('service_providers_category_idx').on(t.category),
     check('service_providers_rating_range', sql`${t.ratingAverage} is null or ${t.ratingAverage} between 1 and 5`),
     check('service_providers_rating_count', sql`${t.ratingCount} >= 0`),
+    check('service_providers_paw_discount', sql`${t.pawDiscountPercent} is null or ${t.pawDiscountPercent} between 1 and 15`),
   ],
 );
 
@@ -594,10 +605,21 @@ export const bookings = pgTable(
     priceIsFrom: boolean('price_is_from').notNull(),
     status: bookingStatus('status').notNull().default('confirmed'),
     cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
+    /**
+     * M9b paw discount: the redemption code used for this booking. Unique, so one code can never
+     * discount two bookings; cancelling the booking clears it and the code can be used again.
+     */
+    redemptionId: uuid('redemption_id').references((): AnyPgColumn => redemptions.id, { onDelete: 'set null' }),
+    /** Kept after cancellation (history); with the price at booking time, still informational. */
+    discountPercent: integer('discount_percent'),
+    discountedPriceCents: integer('discounted_price_cents'),
     ...timestamps,
   },
   (t) => [
     index('bookings_user_time_idx').on(t.userId, t.startsAt),
+    uniqueIndex('bookings_redemption_uq').on(t.redemptionId),
+    check('bookings_discount', sql`(${t.discountPercent} is null) = (${t.discountedPriceCents} is null)`),
+    check('bookings_discount_range', sql`${t.discountPercent} is null or ${t.discountPercent} between 1 and 15`),
     // restrict: a service with bookings cannot vanish from someone's history. The composite key also
     // guarantees provider_id matches the service, which the overlap constraint relies on.
     foreignKey({
@@ -623,6 +645,291 @@ export const bookingDogs = pgTable(
       .references(() => dogs.id, { onDelete: 'cascade' }),
   },
   (t) => [primaryKey({ columns: [t.bookingId, t.dogId] }), index('booking_dogs_dog_idx').on(t.dogId)],
+);
+
+/* ------------------------------------------------------------------ */
+/* M9b — 09 / Explore & Rewards: place posts, Käpad, shop               */
+/* docs/16-avasta-ja-kapad.md                                           */
+/* ------------------------------------------------------------------ */
+
+export const placeCategory = pgEnum('place_category', ['cafe', 'park', 'beach', 'shop', 'other']);
+/** Extensible: `ALTER TYPE place_amenity ADD VALUE '…'` + packages/shared PLACE_AMENITIES. */
+export const placeAmenity = pgEnum('place_amenity', ['dogs_inside', 'water_bowl', 'terrace', 'dog_treats', 'fenced_area', 'off_leash', 'shade', 'stream']);
+export const placePostStatus = pgEnum('place_post_status', ['pending', 'approved', 'rejected']);
+
+/** A dog-friendly place recommended by a user ("Avasta"). Visible to others only when approved. */
+export const placePosts = pgTable(
+  'place_posts',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    authorId: text('author_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    category: placeCategory('category').notNull(),
+    location: geometry('location', { type: 'point', mode: 'xy', srid: 4326 }).notNull(),
+    address: text('address'),
+    amenities: placeAmenity('amenities').array().notNull().default(sql`'{}'`),
+    body: text('body'),
+    status: placePostStatus('status').notNull().default('pending'),
+    /** When a moderator approved or rejected it; the approval time is the day the +15 counts for. */
+    moderatedAt: timestamp('moderated_at', { withTimezone: true }),
+    ...timestamps,
+  },
+  (t) => [
+    index('place_posts_location_gist').using('gist', t.location),
+    // The feed: approved posts newest first; the author's own list.
+    index('place_posts_status_created_idx').on(t.status, t.createdAt),
+    index('place_posts_author_idx').on(t.authorId, t.createdAt),
+    check('place_posts_name_length', sql`char_length(${t.name}) between 2 and 80`),
+    check('place_posts_body_length', sql`${t.body} is null or char_length(${t.body}) <= 1000`),
+    check('place_posts_address_length', sql`${t.address} is null or char_length(${t.address}) <= 200`),
+    // Same box as ESTONIA_BBOX in packages/shared/src/explore.ts.
+    check(
+      'place_posts_in_estonia',
+      sql`ST_X(${t.location}) between 21.5 and 28.5 and ST_Y(${t.location}) between 57.3 and 59.95`,
+    ),
+    check('place_posts_moderated', sql`(${t.status} = 'pending') = (${t.moderatedAt} is null)`),
+  ],
+);
+
+/** Up to 5 photos per post; `position` 0–4 with a unique index makes the limit a database rule. */
+export const placePostPhotos = pgTable(
+  'place_post_photos',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    postId: uuid('post_id')
+      .notNull()
+      .references(() => placePosts.id, { onDelete: 'cascade' }),
+    position: integer('position').notNull(),
+    /** `places/<postId>/<photoId>/full.webp` (≤ 1600 px) and `thumb.webp` (≤ 400 px). */
+    imageKey: text('image_key').notNull(),
+    thumbnailKey: text('thumbnail_key').notNull(),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [uniqueIndex('place_post_photos_position_uq').on(t.postId, t.position), check('place_post_photos_position', sql`${t.position} between 0 and 4`)],
+);
+
+/** One like per user and post (primary key) — PUT/DELETE are idempotent. */
+export const placePostLikes = pgTable(
+  'place_post_likes',
+  {
+    postId: uuid('post_id')
+      .notNull()
+      .references(() => placePosts.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [primaryKey({ columns: [t.postId, t.userId] }), index('place_post_likes_user_idx').on(t.userId)],
+);
+
+/** "Salvesta" bookmarks; private to the user. */
+export const placePostSaves = pgTable(
+  'place_post_saves',
+  {
+    postId: uuid('post_id')
+      .notNull()
+      .references(() => placePosts.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [primaryKey({ columns: [t.postId, t.userId] }), index('place_post_saves_user_time_idx').on(t.userId, t.createdAt)],
+);
+
+export const placePostReports = pgTable(
+  'place_post_reports',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    postId: uuid('post_id')
+      .notNull()
+      .references(() => placePosts.id, { onDelete: 'cascade' }),
+    reporterId: text('reporter_id').references(() => user.id, { onDelete: 'set null' }),
+    reason: text('reason').notNull(),
+    details: text('details'),
+    status: reportStatus('status').notNull().default('open'),
+    ...timestamps,
+  },
+  (t) => [
+    // One open report per person and post: reporting again is a no-op, not more moderation work.
+    uniqueIndex('place_post_reports_once_uq').on(t.postId, t.reporterId),
+    check('place_post_reports_reason', sql`${t.reason} in ('spam', 'inappropriate', 'wrong_info', 'other')`),
+  ],
+);
+
+export const rewardReason = pgEnum('reward_reason', [
+  'check_in',
+  'plan_honoured',
+  'place_post',
+  'review',
+  'invite',
+  'streak',
+  'redemption',
+  'redemption_refund',
+]);
+
+/**
+ * Käpad ledger — append-only (a trigger in migration 0007 refuses UPDATE and direct DELETE; rows
+ * only disappear with the account). Points are only ever written by the server.
+ * `(user_id, reason, source_id)` is unique, so the same event can never pay twice: the source id
+ * names the event (`<parkId>:<day>` for check-ins, which also makes "one per park per day" a
+ * database rule; the plan, park, post, invitee or redemption id; the day for streaks).
+ */
+export const rewardLedger = pgTable(
+  'reward_ledger',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    delta: integer('delta').notNull(),
+    reason: rewardReason('reason').notNull(),
+    sourceId: text('source_id').notNull(),
+    /** Calendar day in Europe/Tallinn the entry counts for (daily caps, streaks, history). */
+    day: date('day').notNull(),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [
+    uniqueIndex('reward_ledger_event_uq').on(t.userId, t.reason, t.sourceId),
+    index('reward_ledger_user_time_idx').on(t.userId, t.createdAt),
+    check('reward_ledger_delta_nonzero', sql`${t.delta} <> 0`),
+    check('reward_ledger_source_length', sql`char_length(${t.sourceId}) between 1 and 120`),
+  ],
+);
+
+/**
+ * Materialised balance, updated in the same transaction as every ledger insert. Every writer locks
+ * the row first (`select … for update`), which serialises awards and redemptions per user; the CHECK
+ * is the last line of defence against overspending.
+ */
+export const rewardBalances = pgTable(
+  'reward_balances',
+  {
+    userId: text('user_id')
+      .primaryKey()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    balance: integer('balance').notNull().default(0),
+    /** Sum of positive entries; levels follow it, so spending never lowers a level. */
+    lifetimeEarned: integer('lifetime_earned').notNull().default(0),
+    updatedAt: timestamps.updatedAt,
+  },
+  (t) => [check('reward_balances_nonnegative', sql`${t.balance} >= 0`), check('reward_balances_earned_nonnegative', sql`${t.lifetimeEarned} >= 0`)],
+);
+
+/**
+ * Levels and badges are computed, never stored; this only remembers which ones the user has been
+ * told about, so "level up" / "badge unlocked" is notified exactly once (primary key).
+ */
+export const rewardMilestones = pgTable(
+  'reward_milestones',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    kind: text('kind').notNull(),
+    key: text('key').notNull(),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.kind, t.key] }), check('reward_milestones_kind', sql`${t.kind} in ('level', 'badge')`)],
+);
+
+/** "Kutsu sõber": one stable random code per user, created on first request. */
+export const inviteCodes = pgTable('invite_codes', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  code: text('code').notNull().unique(),
+  createdAt: timestamps.createdAt,
+});
+
+/** Who invited whom. A user can be invited once (primary key on the invitee). */
+export const referrals = pgTable(
+  'referrals',
+  {
+    inviteeId: text('invitee_id')
+      .primaryKey()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    inviterId: text('inviter_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    createdAt: timestamps.createdAt,
+  },
+  (t) => [index('referrals_inviter_idx').on(t.inviterId), check('referrals_not_self', sql`${t.inviteeId} <> ${t.inviterId}`)],
+);
+
+export const productCategory = pgEnum('product_category', ['food', 'treats', 'toys', 'accessories', 'care']);
+
+/** Products a partner (service provider) sells in its shop with a paw discount. No checkout in the app. */
+export const partnerProducts = pgTable(
+  'partner_products',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    providerId: uuid('provider_id')
+      .notNull()
+      .references(() => serviceProviders.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    description: text('description'),
+    category: productCategory('category').notNull(),
+    /** Euro cents, informational. */
+    priceCents: integer('price_cents').notNull(),
+    /** Private bucket, signed URL on read (like provider photos). */
+    imageKey: text('image_key'),
+    active: boolean('active').notNull().default(true),
+    discountPercent: integer('discount_percent').notNull().default(10),
+    ...timestamps,
+  },
+  (t) => [
+    index('partner_products_provider_idx').on(t.providerId),
+    index('partner_products_category_idx').on(t.category),
+    check('partner_products_price_nonnegative', sql`${t.priceCents} >= 0`),
+    check('partner_products_discount_range', sql`${t.discountPercent} between 1 and 15`),
+  ],
+);
+
+export const redemptionOfferType = pgEnum('redemption_offer_type', ['booking', 'product']);
+/** `expired` is derived on read (active + past expires_at), like completed bookings. */
+export const redemptionStatus = pgEnum('redemption_status', ['active', 'used', 'cancelled']);
+
+/**
+ * A paw discount bought with Käpad: a random single-use code the partner checks in person. The
+ * points are taken by a negative ledger entry with `source_id = id` in the same transaction.
+ */
+export const redemptions = pgTable(
+  'redemptions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    offerType: redemptionOfferType('offer_type').notNull(),
+    providerId: uuid('provider_id')
+      .notNull()
+      .references(() => serviceProviders.id, { onDelete: 'cascade' }),
+    productId: uuid('product_id').references(() => partnerProducts.id, { onDelete: 'set null' }),
+    discountPercent: integer('discount_percent').notNull(),
+    pointsCost: integer('points_cost').notNull(),
+    code: text('code').notNull().unique(),
+    status: redemptionStatus('status').notNull().default('active'),
+    /** The app's retry key: the same key returns the first redemption instead of paying twice. */
+    idempotencyKey: uuid('idempotency_key'),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    usedAt: timestamp('used_at', { withTimezone: true }),
+    cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
+    ...timestamps,
+  },
+  (t) => [
+    index('redemptions_user_time_idx').on(t.userId, t.createdAt),
+    uniqueIndex('redemptions_idempotency_uq').on(t.userId, t.idempotencyKey),
+    check('redemptions_discount_range', sql`${t.discountPercent} between 1 and 15`),
+    check('redemptions_cost_positive', sql`${t.pointsCost} > 0`),
+    // A booking discount never names a product (a product redemption may lose it: on delete set null).
+    check('redemptions_product', sql`${t.offerType} = 'product' or ${t.productId} is null`),
+    check('redemptions_used_at', sql`(${t.status} = 'used') = (${t.usedAt} is not null)`),
+    check('redemptions_cancelled_at', sql`(${t.status} = 'cancelled') = (${t.cancelledAt} is not null)`),
+  ],
 );
 
 /* ------------------------------------------------------------------ */

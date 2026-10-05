@@ -2,7 +2,7 @@ import type { Friend, FriendPlan, FriendRequests, PersonSummary, Relation, UserP
 import { and, eq, or, sql } from 'drizzle-orm';
 
 import type { Db } from '../../db/client';
-import { friendships } from '../../db/schema';
+import { friendships, inviteCodes, referrals } from '../../db/schema';
 import { blockedBetween, firstName } from '../safety/block-sql';
 
 export interface FriendshipRow {
@@ -35,6 +35,14 @@ export interface FriendsRepository {
   planAudience(userId: string): Promise<string[]>;
   /** Accepted friends' plans that end after now and start within `hours`, soonest first. */
   friendPlans(userId: string, hours: number): Promise<FriendPlan[]>;
+  /** M9b: the user's invite code; `candidate` is stored on first use, later calls return the stored one. */
+  inviteCode(userId: string, candidate: string): Promise<string>;
+  /** Owner of an invite code, unless either side has blocked the other (→ null, like a missing code). */
+  findInviter(viewerId: string, code: string): Promise<{ id: string; allowFriendRequests: boolean } | null>;
+  /** When the user's account was created (the claim window). */
+  accountCreatedAt(userId: string): Promise<Date | null>;
+  /** Fails with a unique violation when the invitee was already invited (primary key). */
+  createReferral(inviteeId: string, inviterId: string): Promise<void>;
 }
 
 /** Dog names of the user row aliased `u`. */
@@ -68,6 +76,30 @@ export function createFriendsRepository(db: Db): FriendsRepository {
     );
 
   return {
+    async inviteCode(userId, candidate) {
+      await db.insert(inviteCodes).values({ userId, code: candidate }).onConflictDoNothing({ target: inviteCodes.userId });
+      const [row] = await db.select({ code: inviteCodes.code }).from(inviteCodes).where(eq(inviteCodes.userId, userId));
+      if (!row) throw new Error('Invite code missing after insert');
+      return row.code;
+    },
+
+    async findInviter(viewerId, code) {
+      const { rows } = await db.execute<{ id: string; allow_friend_requests: boolean }>(sql`
+        select u.id, u.allow_friend_requests from invite_codes ic join "user" u on u.id = ic.user_id
+        where ic.code = ${code} and ${notBlockedWith(viewerId)}`);
+      const row = rows[0];
+      return row ? { id: row.id, allowFriendRequests: row.allow_friend_requests } : null;
+    },
+
+    async accountCreatedAt(userId) {
+      const { rows } = await db.execute<{ created_at: Date }>(sql`select u.created_at from "user" u where u.id = ${userId}`);
+      return rows[0] ? new Date(rows[0].created_at) : null;
+    },
+
+    async createReferral(inviteeId, inviterId) {
+      await db.insert(referrals).values({ inviteeId, inviterId });
+    },
+
     async findTarget(viewerId, userId) {
       const { rows } = await db.execute<{ id: string; allow_friend_requests: boolean }>(sql`
         select u.id, u.allow_friend_requests from "user" u

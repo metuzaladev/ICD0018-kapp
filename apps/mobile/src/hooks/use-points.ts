@@ -1,10 +1,10 @@
+import { useRewards } from './use-rewards';
+
 /**
- * The signed-in user's Käpad balance (Figma "Points Badge").
- *
- * Placeholder until M9b adds the rewards API: it returns `null`, and every PointsBadge hides itself,
- * so production UI never shows an invented number. M9b replaces the body with a TanStack query
- * (`['rewards', 'balance']`) — callers already handle "no data" and need no change.
+ * The signed-in user's spendable Käpad (Figma "Points Badge"), from GET /me/rewards (M9b).
+ * `null` while unknown (loading, offline without cache, error): every PointsBadge then hides
+ * itself, so the UI never shows an invented number.
  */
 export function usePointsBalance(): number | null {
-  return null;
+  return useRewards().data?.balance ?? null;
 }

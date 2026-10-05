@@ -9,8 +9,12 @@ import type { IconName } from '@/components/icon-sources';
 export const MAP_CATEGORIES = ['all', 'parks', 'cafes', 'services', 'beaches', 'vets'] as const;
 export type MapCategory = (typeof MAP_CATEGORIES)[number];
 
-/** Category of a single place on the map → Figma "Map Pin / Place" variant and `map*` colour. */
-export type PlaceKind = 'park' | 'cafe' | 'beach' | 'service' | 'vet';
+/**
+ * Category of a single place on the map → Figma "Map Pin / Place" variant and `map*` colour.
+ * `shop` = recommended shops and other places (API tag `other`); Figma has no own colour for them,
+ * so they share the service colour with a shop icon.
+ */
+export type PlaceKind = 'park' | 'cafe' | 'beach' | 'service' | 'vet' | 'shop';
 
 export const CATEGORY_ICON: Record<MapCategory, IconName> = {
   all: 'layers',
@@ -27,14 +31,14 @@ export const PLACE_ICON: Record<PlaceKind, IconName> = {
   beach: 'waves',
   service: 'scissors',
   vet: 'stethoscope',
+  shop: 'store',
 };
 
 /**
- * Categories backed by real data today: parks (M2) and service providers (M6, which have
- * coordinates). Cafés and beaches arrive with the M9b places API — their chips stay hidden until
- * then, because a filter that always shows an empty map would look broken.
+ * Every Figma chip is backed by data since M9b: parks (M2), service providers (M6) and community
+ * place posts tagged cafés / beaches by GET /map/places (docs/16).
  */
-export const AVAILABLE_CATEGORIES: readonly MapCategory[] = ['all', 'parks', 'services', 'vets'];
+export const AVAILABLE_CATEGORIES: readonly MapCategory[] = MAP_CATEGORIES;
 
 /** A provider's service category on the map: clinics have their own chip and colour. */
 export function providerPlaceKind(category: ServiceCategory): Extract<PlaceKind, 'service' | 'vet'> {
@@ -42,7 +46,7 @@ export function providerPlaceKind(category: ServiceCategory): Extract<PlaceKind,
 }
 
 /** Which map category a place belongs to (for filtering). */
-export function categoryOf(kind: PlaceKind): Exclude<MapCategory, 'all'> {
+export function categoryOf(kind: PlaceKind): Exclude<MapCategory, 'all'> | 'other' {
   switch (kind) {
     case 'park':
       return 'parks';
@@ -54,6 +58,9 @@ export function categoryOf(kind: PlaceKind): Exclude<MapCategory, 'all'> {
       return 'services';
     case 'vet':
       return 'vets';
+    case 'shop':
+      // Only under "Kõik": Figma has no chip for shops (API tag `other`).
+      return 'other';
   }
 }
 

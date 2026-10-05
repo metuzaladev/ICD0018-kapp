@@ -32,6 +32,12 @@ import type { PushQueue } from './modules/notifications/push-queue';
 import { createSafetyRepository } from './modules/safety/safety.repository';
 import { createSafetyService } from './modules/safety/safety.service';
 import { noRealtime, type RealtimeGateway } from './realtime/socket-gateway';
+import { createPlacePostsRepository } from './modules/place-posts/place-posts.repository';
+import { createPlacePostsService } from './modules/place-posts/place-posts.service';
+import { createRewardsRepository } from './modules/rewards/rewards.repository';
+import { createRewardsService } from './modules/rewards/rewards.service';
+import { createShopRepository } from './modules/shop/shop.repository';
+import { createShopService } from './modules/shop/shop.service';
 import { createVisitsRepository } from './modules/visits/visits.repository';
 import { createVisitsService } from './modules/visits/visits.service';
 import type { ObjectStorage } from './storage/object-storage';
@@ -79,17 +85,25 @@ export function createServices(db: Db, storage: ObjectStorage, timeoutMs: number
     log: community.log ?? silentLogger,
     timeoutMs,
   });
-  const friendsService = createFriendsService({ repository: friendsRepository, notifier, timeoutMs });
+  const log = community.log ?? silentLogger;
+  // M9b: Käpad are awarded by other services through `rewardsService.settle` (docs/16).
+  const rewardsService = createRewardsService({ repository: createRewardsRepository(db), notifier, log, timeoutMs });
+  const friendsService = createFriendsService({ repository: friendsRepository, notifier, rewards: rewardsService, timeoutMs });
   const providers = createProvidersRepository(db);
+  const shop = createShopRepository(db);
   return {
+    rewardsService,
+    shopService: createShopService({ repository: shop, storage, timeoutMs }),
+    placePostsService: createPlacePostsService({ repository: createPlacePostsRepository(db), storage, rewards: rewardsService, notifier, log, timeoutMs }),
     providersService: createProvidersService({ repository: providers, storage, timeoutMs }),
     bookingsService: createBookingsService({
       bookings: createBookingsRepository(db),
       providers,
       dogs,
+      redemptions: shop,
       notifier,
       reminders: community.bookingReminders ?? noBookingReminders,
-      log: community.log ?? silentLogger,
+      log,
       timeoutMs,
     }),
     friendsService,
@@ -113,8 +127,9 @@ export function createServices(db: Db, storage: ObjectStorage, timeoutMs: number
       dogs,
       timeoutMs,
       onPlanCreated: (userId, plan) => friendsService.announcePlan(userId, plan),
+      rewards: rewardsService,
     }),
-    reviewsService: createReviewsService({ reviews: createReviewsRepository(db), parks, timeoutMs }),
+    reviewsService: createReviewsService({ reviews: createReviewsRepository(db), parks, timeoutMs, rewards: rewardsService }),
     reportsService: createReportsService({ reports: createReportsRepository(db), parks, timeoutMs }),
     photosService: createPhotosService({ photos: createPhotosRepository(db), dogs, storage, timeoutMs }),
     healthRecordsService: createHealthRecordsService({ records: createHealthRecordsRepository(db), dogs, timeoutMs }),

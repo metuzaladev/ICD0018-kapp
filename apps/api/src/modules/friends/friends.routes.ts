@@ -1,4 +1,4 @@
-import { friendRequestInputSchema, userIdParamsSchema, userSearchQuerySchema } from '@kapp/shared';
+import { claimInviteInputSchema, friendRequestInputSchema, userIdParamsSchema, userSearchQuerySchema } from '@kapp/shared';
 import type { FastifyPluginAsync } from 'fastify';
 
 import { requireUser, type ResolveUserId } from '../../http/auth';
@@ -15,6 +15,15 @@ export const friendsRoutes: FastifyPluginAsync<FriendsRoutesOptions> = async (ap
   app.addHook('preHandler', requireUser(resolveUserId));
 
   app.get('/me/friends', async (request) => service.listFriends(request.userId!));
+
+  // M9b "Kutsu sõber" (docs/16): the own code, and entering a friend's code once after joining.
+  app.get('/me/invite', async (request) => service.getInvite(request.userId!));
+
+  app.post('/me/invite/claim', { config: { rateLimit: { max: 10, timeWindow: '1 hour' } } }, async (request, reply) => {
+    const { code } = parseRequest(claimInviteInputSchema, request.body, 'body');
+    await service.claimInvite(request.userId!, code);
+    return reply.code(204).send();
+  });
 
   app.get('/me/friends/plans', async (request) => service.friendPlans(request.userId!));
 

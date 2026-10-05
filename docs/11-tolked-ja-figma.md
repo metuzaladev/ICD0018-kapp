@@ -109,7 +109,15 @@ Figma tekstid on kasutusel kõigil olemasolevatel ekraanidel. Näidisandmed (nim
 | Kellaaeg | „17.00" | „17.00" (eesti), „17:00" (en/ru) | Intl annaks eesti keeles „17:00". |
 | Keelevalik | puudub | Seaded → Keel | Mitmekeelsuse nõue. |
 | Välimus (M9) | ainult hele (M9) / ainult tume (varem) | Seaded → Välimus: Süsteem / Hele (vaikimisi) / Tume | Figma põhidisain on hele; tume jääb valikuna. |
-| Käpad (M9) | „320" otsingus, avalehel, profiilis | peidetud; „Käpad" ja „Pood" profiilis puuduvad | Saldo API tuleb M9b-ga; väljamõeldud arvu ei näidata. |
+| Käpad (M9b) | „320" otsingus, avalehel, profiilis | saldo `GET /me/rewards`-ist; märk avab Käpad; profiilis read „Käpad", „Pood", „Minu soovitused" | Väljamõeldud arvu ei näidata: märk on peidetud, kuni saldo on teada. |
+| Explore / Map (M9b) | kiibid Kõik / Pargid / Kohvikud / Teenused / Rannad / Kliinikud | kõik kiibid; kohad `GET /map/places`-ist; lisatud nupp „Kogukonna soovitused" | Figma kaardil pole teed Avastasse; Segmented Control on Avasta pool (docs/16). |
+| Map + provider sheet (M9b) | süda, „Teeni 20 käppa / Broneeri Käpa kaudu. 320 käpaga saad −15%." | südant pole; „−15% käppadega / Broneerimisel saad kasutada 150 käppa. Sul on 320 käppa." (summad serverist); sulgemisnupp | Pakkujaid ei saa lemmikuks lisada; broneering ei anna käppasid (docs/16 reeglid), soodustus küll. |
+| Explore / Avasta (M9b) | autori koera foto, kommentaaride arv | autori eesnime algustäht; kommentaare pole; „…" menüü (teavita / blokeeri / kustuta) | Postituse API annab ainult eesnime; kommentaarid on skoobist väljas (docs/16). |
+| Explore / Avasta (M9b) | „Kalamaja · 1,2 km · avatud 21-ni" | aadress · kaugus | Lahtiolekuaegu andmemudelis pole. |
+| Suggest Place (M9b) | ainult aadressiväli „Asukoht" | „Aadress" + väike kaart liikumatu nõelaga + „Kasuta minu asukohta"; kategooria „Muu"; kõik 8 mugavust | Kaardile on vaja punkti; geokodeerijat pole (docs/16). |
+| Rewards / Käpad (M9b) | „Teeni jalutades", rida „Jalutuskäik +10", „Topelt-kohalolekud ja võltsitud jalutuskäigud ei loe." | „Teeni pargis käies"; jalutuskäigu rida puudub; read serveri `waysToEarn`-ist (ka päevapiir); „…ja liiga lühikesed külastused ei loe."; lisatud märgid, ajalugu ja kutsekaart | Jalutuskäike ei maksta (docs/16); märgid, ajalugu ja kutse on API osad. |
+| Marketplace / Pood (M9b) | kategooriaplaadid koerafotodega, „Populaarsed teenused" | samad (Unsplash näidiskoerad, docs/05); lisatud „Minu koodid"; Tooted-vahel kategooriakiibid ja kõik tooted | Koodid peavad olema leitavad; seemne toodetel pole pilte (kategooria ikoon). |
+| Product Card (M9b) | „+" nurganupp | kogu kaart avab toote, kus on „Lunasta X käpaga" | Üks selge puutepind; lunastus vajab kinnitust. |
 
 **Ekraanid**
 

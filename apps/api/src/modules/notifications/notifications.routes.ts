@@ -1,9 +1,10 @@
 import {
   notificationIdParamsSchema,
-  notificationPreferencesSchema,
-  notificationsQuerySchema,
+  notificationPreferencesInputSchema,
+  notificationsFeedQuerySchema,
   pushTokenInputSchema,
   pushTokenParamsSchema,
+  unreadCountQuerySchema,
 } from '@kapp/shared';
 import type { FastifyPluginAsync } from 'fastify';
 
@@ -21,11 +22,14 @@ export const notificationsRoutes: FastifyPluginAsync<NotificationsRoutesOptions>
 
   // Notifications / Activity, newest first, `before` = id of the last item shown.
   app.get('/me/notifications', async (request) => {
-    const query = parseRequest(notificationsQuerySchema, request.query, 'query');
+    const query = parseRequest(notificationsFeedQuerySchema, request.query, 'query');
     return service.list(request.userId!, query);
   });
 
-  app.get('/me/notifications/unread-count', async (request) => service.unreadCount(request.userId!));
+  app.get('/me/notifications/unread-count', async (request) => {
+    const { include } = parseRequest(unreadCountQuerySchema, request.query, 'query');
+    return service.unreadCount(request.userId!, include === 'rewards');
+  });
 
   // PUT: marking read is idempotent.
   app.put('/me/notifications/:notificationId/read', async (request, reply) => {
@@ -43,7 +47,7 @@ export const notificationsRoutes: FastifyPluginAsync<NotificationsRoutesOptions>
   app.get('/me/notification-preferences', async (request) => service.getPreferences(request.userId!));
 
   app.put('/me/notification-preferences', async (request) => {
-    const preferences = parseRequest(notificationPreferencesSchema, request.body, 'body');
+    const preferences = parseRequest(notificationPreferencesInputSchema, request.body, 'body');
     return service.setPreferences(request.userId!, preferences);
   });
 

@@ -1,4 +1,4 @@
-import type { AppNotification } from '@kapp/shared';
+import { isRewardNotificationType, type AnyNotification } from '@kapp/shared';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,14 +20,15 @@ import { useMarkAllNotificationsRead, useMarkNotificationRead, useNotificationFe
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { useTheme } from '@/hooks/use-theme';
 import { errorMessage } from '@/lib/api';
-import { formatDay, formatMessageTime, formatTime } from '@/lib/format';
+import { formatDay, formatMessageTime, formatTime, pawsLabel } from '@/lib/format';
+import { badgeNameKey, levelNameKey } from '@/lib/rewards';
 
 type Filter = 'all' | 'friends' | 'messages';
 const FILTERS: Filter[] = ['all', 'friends', 'messages'];
 const FILTER_ICON: Record<Filter, IconName> = { all: 'layers', friends: 'users', messages: 'message-circle' };
-const FRIEND_TYPES: AppNotification['type'][] = ['friend_request', 'friend_accepted', 'friend_plan'];
-/** Booking rows (M6) only show under "Kõik": they are neither friends nor messages. */
-const matches = (n: AppNotification, filter: Filter) =>
+const FRIEND_TYPES: AnyNotification['type'][] = ['friend_request', 'friend_accepted', 'friend_plan'];
+/** Booking (M6) and Käpad (M9b) rows only show under "Kõik": they are neither friends nor messages. */
+const matches = (n: AnyNotification, filter: Filter) =>
   filter === 'all' || (filter === 'messages' ? n.type === 'message' : FRIEND_TYPES.includes(n.type));
 
 /** Figma 06 / Notifications / Activity: the feed, rendered in the app's language from type + data. */
@@ -42,7 +43,7 @@ export default function NotificationsScreen() {
   const items = (feed.data?.pages.flatMap((p) => p.items) ?? []).filter((n) => matches(n, filter));
   const refresh = usePullToRefresh(feed.refetch, unread.refetch);
 
-  function text(n: AppNotification): { title: string; subtitle: string } {
+  function text(n: AnyNotification): { title: string; subtitle: string } {
     const name = n.actor?.firstName ?? t('notifications.someone');
     const when = formatMessageTime(n.createdAt);
     switch (n.type) {
@@ -78,12 +79,30 @@ export default function NotificationsScreen() {
           }),
         };
       }
+      // M9b Käpad rows (feed asked with include=rewards); names come from ids, amounts from the server.
+      case 'reward_level_up':
+        return { title: t('notifications.levelUp'), subtitle: `${n.data.levelId ? t(levelNameKey(n.data.levelId)) : ''} · ${when}` };
+      case 'reward_badge':
+        return { title: t('notifications.badge'), subtitle: `${n.data.badgeId ? t(badgeNameKey(n.data.badgeId)) : ''} · ${when}` };
+      case 'place_post_approved': {
+        const points = Number(n.data.points);
+        return {
+          title: t('notifications.postApproved'),
+          subtitle: [n.data.placeName, Number.isFinite(points) && points > 0 ? t('notifications.postApprovedPoints', { paws: pawsLabel(points) }) : null, when]
+            .filter(Boolean)
+            .join(' · '),
+        };
+      }
     }
   }
 
-  function open(n: AppNotification) {
+  function open(n: AnyNotification) {
     if (!n.readAt) markRead.mutate(n.id);
-    if (n.data.bookingId) {
+    if (n.type === 'place_post_approved' && n.data.postId) {
+      router.push({ pathname: '/place-posts/[postId]', params: { postId: n.data.postId } });
+    } else if (n.type === 'reward_level_up' || n.type === 'reward_badge') {
+      router.push('/rewards');
+    } else if (n.data.bookingId) {
       router.push('/bookings');
     } else if (n.type === 'message' && n.data.conversationId) {
       router.push({ pathname: '/messages/[conversationId]', params: { conversationId: n.data.conversationId } });
@@ -118,9 +137,9 @@ export default function NotificationsScreen() {
             <ListRow
               title={title}
               subtitle={subtitle}
-              // People get their initial in a rounded square; bookings (no person) the scissors icon.
+              // People get their initial in a rounded square; bookings the scissors, Käpad rows a trophy / sparkles.
               photo={n.actor ? { name: n.actor.firstName } : undefined}
-              icon={n.actor ? undefined : 'scissors'}
+              icon={n.actor ? undefined : isRewardNotificationType(n.type) ? (n.type === 'place_post_approved' ? 'sparkles' : 'trophy') : 'scissors'}
               accessibilityHint={n.readAt ? undefined : t('notifications.unreadHint')}
               leading={<View style={[styles.dot, { backgroundColor: n.readAt ? 'transparent' : c.brand }]} accessibilityElementsHidden />}
               onPress={() => open(n)}

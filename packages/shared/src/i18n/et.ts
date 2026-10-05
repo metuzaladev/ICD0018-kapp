@@ -59,6 +59,16 @@ export const et = {
   'validation.messageEmpty': 'kirjuta sõnum',
   'validation.pushToken': 'ei ole Expo push-märk',
   'validation.bothCoordinates': 'anna nii lat kui ka lng',
+
+  /* ---------- M9b validation (docs/16-avasta-ja-kapad.md) ---------- */
+  'validation.duplicateAmenity': 'mugavus on mitu korda',
+  'validation.maxPhotos': 'kuni {{max}} fotot',
+  'validation.duplicatePhoto': 'sama foto on mitu korda',
+  'validation.outsideEstonia': 'koht peab asuma Eestis',
+  'validation.mapTags': 'tundmatu kaardi silt',
+  'validation.bboxOrder': 'ala ülemine piir peab olema alumisest suurem',
+  'validation.bboxTooLarge': 'kaardiala võib olla kuni {{max}} kraadi',
+  'validation.inviteCode': 'kutsekood on 8 tähte või numbrit',
   'validation.maxDogs': 'kuni {{max}} koera',
 
   /* ---------- API errors ---------- */
@@ -107,6 +117,19 @@ export const et = {
   'errors.slotTaken': 'Keegi jõudis selle aja just broneerida, vali teine aeg',
   'errors.cancelTooLate': 'Tühistada saab kuni {{hours}} tundi enne algust',
 
+  /* ---------- M9b errors (docs/16-avasta-ja-kapad.md) ---------- */
+  'errors.placePostNotFound': 'Postitust ei leitud',
+  'errors.productNotFound': 'Toodet ei leitud',
+  'errors.offerNotFound': 'Pakkumist ei leitud',
+  'errors.notEnoughPoints': 'Käppasid ei ole piisavalt: vaja {{cost}}, sul on {{balance}}',
+  'errors.redemptionNotFound': 'Sooduskoodi ei leitud',
+  'errors.redemptionUnavailable': 'Seda sooduskoodi ei saa selle broneeringu juures kasutada',
+  'errors.redemptionNotCancellable': 'Kasutatud või aegunud sooduskoodi ei saa tühistada',
+  'errors.inviteNotFound': 'Kutsekoodi ei leitud',
+  'errors.inviteOwnCode': 'Oma kutsekoodi ei saa kasutada',
+  'errors.inviteTooLate': 'Kutsekoodi saab sisestada {{days}} päeva jooksul pärast liitumist',
+  'errors.inviteAlreadyClaimed': 'Oled kutsekoodi juba sisestanud',
+
   /* ---------- push notifications (written in the recipient's language, docs/12-kogukond.md) ---------- */
   'push.friendRequest.title': 'Uus sõbrakutse',
   'push.friendRequest.body': '{{name}} tahab sinuga sõbraks saada',
@@ -119,6 +142,22 @@ export const et = {
   'push.bookingCancelled.title': 'Broneering tühistatud',
   'push.bookingReminder.title': 'Kohtumiseni varsti!',
   'push.booking.body': '{{service}} · {{provider}} · {{when}}',
+
+  /* ---------- M9b push texts and reward names (docs/16-avasta-ja-kapad.md) ---------- */
+  'push.rewardLevelUp.title': 'Uus tase!',
+  'push.rewardLevelUp.body': 'Sinu uus tase: {{level}}',
+  'push.rewardBadge.title': 'Uus märk!',
+  'push.rewardBadge.body': 'Avasid märgi „{{badge}}“',
+  'push.placePostApproved.title': 'Sinu soovitus on avaldatud',
+  'push.placePostApproved.body': '{{place}} · +{{points}} käppa',
+  'rewards.level.puppy': 'Kutsikas',
+  'rewards.level.park_friend': 'Pargisõber',
+  'rewards.level.park_legend': 'Pargilegend',
+  'rewards.level.pack_leader': 'Karjajuht',
+  'rewards.badge.early_bird': 'Varajane lind',
+  'rewards.badge.ten_parks': '10 parki',
+  'rewards.badge.explorer': 'Avastaja',
+  'rewards.badge.kadriorg_legend': 'Pargi püsikülaline',
 
   /* ---------- Better Auth errors ---------- */
   'auth.userExists': 'Selle e-postiga konto on juba olemas',

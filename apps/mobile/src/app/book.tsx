@@ -1,4 +1,4 @@
-import { BOOKING_CUTOFF_MINUTES, BOOKING_NOTE_MAX, bookingInputSchema, MAX_BOOKING_DOGS, type Booking } from '@kapp/shared';
+import { BOOKING_CUTOFF_MINUTES, BOOKING_NOTE_MAX, bookingWithRedemptionInputSchema, MAX_BOOKING_DOGS, type BookingWithDiscount } from '@kapp/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,14 +13,18 @@ import { Screen } from '@/components/screen';
 import { SkeletonList } from '@/components/skeleton';
 import { SlotPicker } from '@/components/slot-picker';
 import { SuccessMark } from '@/components/success-mark';
+import { SwitchRow } from '@/components/switch-row';
 import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { useCreateBooking } from '@/hooks/use-bookings';
 import { useMyDogs } from '@/hooks/use-dogs';
+import { usePointsBalance } from '@/hooks/use-points';
+import { useRedeemOnce } from '@/hooks/use-redeem-once';
 import { useProvider, useServiceSlots } from '@/hooks/use-services';
+import { useRedemptions, useShop } from '@/hooks/use-shop';
 import { errorMessage } from '@/lib/api';
-import { formatDuration, priceLabel } from '@/lib/format';
+import { formatDuration, formatPrice, pawsLabel, priceLabel } from '@/lib/format';
 import { validateForm } from '@/lib/form';
 import { haptic } from '@/lib/haptics';
 
@@ -28,7 +32,7 @@ import { haptic } from '@/lib/haptics';
 const DEVICE_TIME_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 /** After booking: Figma 06 / Booking / Confirmed — success mark, "Kohtumiseni!", the booking card. */
-function Confirmed({ booking }: { booking: Booking }) {
+function Confirmed({ booking }: { booking: BookingWithDiscount }) {
   const { t } = useTranslation();
   return (
     <Screen underHeader>
@@ -40,6 +44,12 @@ function Confirmed({ booking }: { booking: Booking }) {
       <Entering index={2}>
         <BookingCard booking={booking} />
       </Entering>
+      {booking.discount ? (
+        // The discounted price is the server's (informational: paid at the provider, no payment here).
+        <ThemedText type="label">
+          {t('booking.discounted', { price: formatPrice(booking.discount.discountedPriceCents), percent: booking.discount.discountPercent })}
+        </ThemedText>
+      ) : null}
       <ThemedText type="caption" themeColor="muted">
         {t('booking.confirmed.info')}
       </ThemedText>
@@ -69,25 +79,37 @@ function Confirmed({ booking }: { booking: Booking }) {
  */
 export default function BookScreen() {
   const { t } = useTranslation();
-  const { providerId, serviceId } = useLocalSearchParams<{ providerId: string; serviceId: string }>();
+  // `startsAt` preselects a time chosen in the map's provider sheet (M9b).
+  const { providerId, serviceId, startsAt: preset } = useLocalSearchParams<{ providerId: string; serviceId: string; startsAt?: string }>();
   const provider = useProvider(providerId);
   const slots = useServiceSlots(serviceId);
   const { data: dogs } = useMyDogs();
   const create = useCreateBooking();
+  // M9b "Kasuta käppi": partners take a paw discount; an unused booking code for this provider is
+  // reused (e.g. after a slot was taken), otherwise a new one is redeemed right before booking.
+  const partner = useShop(null).data?.partners.find((p) => p.id === providerId);
+  const openCode = useRedemptions().data?.find(
+    (r) => r.offerType === 'booking' && r.status === 'active' && r.provider.id === providerId && r.bookingId === null,
+  );
+  const balance = usePointsBalance();
+  const redeem = useRedeemOnce();
+  const [usePaws, setUsePaws] = useState(false);
+  const canUsePaws = Boolean(partner && (openCode || (balance !== null && balance >= partner.pointsCost)));
   const service = provider.data?.services.find((s) => s.id === serviceId);
 
   const [date, setDate] = useState<string | null>(null);
-  const [startsAt, setStartsAt] = useState<string | null>(null);
+  const [startsAt, setStartsAt] = useState<string | null>(preset ?? null);
   const [chosenDogs, setChosenDogs] = useState<string[] | null>(null);
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [booked, setBooked] = useState<Booking | null>(null);
+  const [booked, setBooked] = useState<BookingWithDiscount | null>(null);
 
   if (booked) return <Confirmed booking={booked} />;
 
   const days = slots.data?.days ?? [];
   // Until the user picks, open the first day that has a free time.
-  const shownDate = date ?? days.find((d) => d.slots.length > 0)?.date ?? days[0]?.date ?? null;
+  const presetDay = preset ? days.find((d) => d.slots.some((sl) => sl.startsAt === preset))?.date : undefined;
+  const shownDate = date ?? presetDay ?? days.find((d) => d.slots.length > 0)?.date ?? days[0]?.date ?? null;
   // A time that vanished after a refetch (someone booked it) is no longer selected.
   const selectedStart = days.some((d) => d.slots.some((s) => s.startsAt === startsAt)) ? startsAt : null;
   const selectedDogs = chosenDogs ?? (dogs?.length === 1 ? [dogs[0]!.id] : []);
@@ -98,11 +120,12 @@ export default function BookScreen() {
 
   async function submit() {
     if (!selectedStart) return setError(t('booking.chooseTime'));
-    const { data, errors } = validateForm(bookingInputSchema, { serviceId, startsAt: selectedStart, dogIds: selectedDogs, note });
+    const { data, errors } = validateForm(bookingWithRedemptionInputSchema, { serviceId, startsAt: selectedStart, dogIds: selectedDogs, note });
     if (!data) return setError(Object.values(errors)[0] ?? t('errors.checkChoices'));
     setError(null);
     try {
-      setBooked(await create.mutateAsync(data));
+      const redemptionId = usePaws && canUsePaws ? (openCode ?? (await redeem.run({ offerType: 'booking', offerId: providerId }))).id : null;
+      setBooked(await create.mutateAsync({ ...data, redemptionId }));
       haptic('success');
     } catch (e) {
       // 409 (taken meanwhile): the hook refetches the free times, the stale one disappears.
@@ -171,7 +194,30 @@ export default function BookScreen() {
         </View>
       ) : null}
 
-      <Button label={t('booking.submit')} loading={create.isPending} disabled={!service || dogs?.length === 0} onPress={submit} />
+      {partner ? (
+        <>
+          <SwitchRow
+            label={t('booking.usePaws', { percent: partner.pawDiscountPercent })}
+            hint={
+              openCode
+                ? t('booking.usePawsCode', { code: openCode.code })
+                : balance !== null && balance < partner.pointsCost
+                  ? t('booking.usePawsShort', { cost: pawsLabel(partner.pointsCost), balance: pawsLabel(balance) })
+                  : t('booking.usePawsCost', { cost: pawsLabel(partner.pointsCost) })
+            }
+            value={usePaws && canUsePaws}
+            disabled={!canUsePaws}
+            onValueChange={setUsePaws}
+          />
+          {usePaws && canUsePaws && service ? (
+            <ThemedText type="caption" themeColor="muted">
+              {t('booking.usePawsNote', { percent: partner.pawDiscountPercent })}
+            </ThemedText>
+          ) : null}
+        </>
+      ) : null}
+
+      <Button label={t('booking.submit')} loading={create.isPending || redeem.isPending} disabled={!service || dogs?.length === 0} onPress={submit} />
     </Screen>
   );
 }

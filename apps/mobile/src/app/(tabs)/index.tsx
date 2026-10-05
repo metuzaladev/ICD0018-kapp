@@ -65,7 +65,7 @@ export default function HomeScreen() {
             {greetName ? t('home.greeting', { name: greetName }) : t('home.greetingNoName')}
           </ThemedText>
         </View>
-        <PointsBadge />
+        <PointsBadge onPress={() => router.push('/rewards')} />
       </View>
       <ThemedText themeColor="muted">{t('home.subtitle', { date: formatToday() })}</ThemedText>
       <OfflineBanner />

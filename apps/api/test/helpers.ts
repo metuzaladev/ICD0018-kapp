@@ -33,6 +33,12 @@ import type { BookingsRepository } from '../src/modules/bookings/bookings.reposi
 import type { BookingsService } from '../src/modules/bookings/bookings.service';
 import type { ProvidersRepository } from '../src/modules/providers/providers.repository';
 import type { ProvidersService } from '../src/modules/providers/providers.service';
+import type { PlacePostsRepository } from '../src/modules/place-posts/place-posts.repository';
+import type { PlacePostsService } from '../src/modules/place-posts/place-posts.service';
+import type { RewardsRepository } from '../src/modules/rewards/rewards.repository';
+import type { RewardsService } from '../src/modules/rewards/rewards.service';
+import type { ShopRepository } from '../src/modules/shop/shop.repository';
+import type { ShopService } from '../src/modules/shop/shop.service';
 
 export const PARK_ID = '4ddabe8d-7306-4724-a125-ace7ae3a87b9';
 export const USER_ID = 'user_test_1';
@@ -211,6 +217,8 @@ export async function buildTestApp(deps: Partial<AppDeps> = {}, config: Partial<
       'getProfile',
       'friendPlans',
       'announcePlan',
+      'getInvite',
+      'claimInvite',
     ]);
   const messages =
     (deps.messagesService as Mocked<MessagesService> | undefined) ??
@@ -231,8 +239,16 @@ export async function buildTestApp(deps: Partial<AppDeps> = {}, config: Partial<
   const providers = (deps.providersService as Mocked<ProvidersService> | undefined) ?? mockAll<ProvidersService>(['list', 'getProvider', 'listSlots']);
   const bookings =
     (deps.bookingsService as Mocked<BookingsService> | undefined) ?? mockAll<BookingsService>(['create', 'list', 'get', 'cancel', 'sendReminder']);
+  const placePosts = (deps.placePostsService as Mocked<PlacePostsService> | undefined) ?? mockPlacePostsService();
+  const rewards = (deps.rewardsService as Mocked<RewardsService> | undefined) ?? mockAll<RewardsService>(['settle', 'summary', 'history']);
+  const shop =
+    (deps.shopService as Mocked<ShopService> | undefined) ??
+    mockAll<ShopService>(['overview', 'products', 'product', 'redeem', 'listRedemptions', 'cancelRedemption']);
   const app = await buildApp(
     {
+      placePostsService: placePosts,
+      rewardsService: rewards,
+      shopService: shop,
       friendsService: friends,
       messagesService: messages,
       notificationsService: notifications,
@@ -255,7 +271,27 @@ export async function buildTestApp(deps: Partial<AppDeps> = {}, config: Partial<
     },
     { ...defaultAppConfig, ...config },
   );
-  return { app, service, profile, favorites, dogs, visits, reviews, reports, photos, health, friends, messages, notifications, safety, providers, bookings };
+  return {
+    app,
+    service,
+    profile,
+    favorites,
+    dogs,
+    visits,
+    reviews,
+    reports,
+    photos,
+    health,
+    friends,
+    messages,
+    notifications,
+    safety,
+    providers,
+    bookings,
+    placePosts,
+    rewards,
+    shop,
+  };
 }
 
 /** Resolver that treats `Authorization: Bearer test` as USER_ID — stands in for Better Auth. */
@@ -275,6 +311,10 @@ export const mockFriendsRepository = () =>
     'profile',
     'planAudience',
     'friendPlans',
+    'inviteCode',
+    'findInviter',
+    'accountCreatedAt',
+    'createReferral',
   ]);
 export const mockMessagesRepository = () =>
   mockAll<MessagesRepository>(['findOrCreateDirect', 'findMembership', 'listConversations', 'listMessages', 'createMessage', 'markRead']);
@@ -297,3 +337,12 @@ export const mockSafetyRepository = () =>
 export const mockProvidersRepository = () => mockAll<ProvidersRepository>(['list', 'findById', 'findService', 'findFreeSlots']);
 export const mockBookingsRepository = () =>
   mockAll<BookingsRepository>(['create', 'findOwn', 'findById', 'listUpcoming', 'listPast', 'cancel']);
+
+export const mockPlacePostsService = () =>
+  mockAll<PlacePostsService>(['createUpload', 'create', 'feed', 'saved', 'mine', 'get', 'remove', 'setLike', 'setSave', 'report', 'moderate', 'mapPlaces']);
+export const mockPlacePostsRepository = () =>
+  mockAll<PlacePostsRepository>(['create', 'feed', 'saved', 'mine', 'findVisible', 'remove', 'setLike', 'setSave', 'reactions', 'report', 'moderate', 'mapPlaces']);
+export const mockRewardsRepository = () =>
+  mockAll<RewardsRepository>(['settle', 'balance', 'qualifyingDays', 'badgeStats', 'history', 'addMilestones', 'inviterDue']);
+export const mockShopRepository = () =>
+  mockAll<ShopRepository>(['categories', 'partners', 'findPartner', 'products', 'findProduct', 'redeem', 'cancel', 'listOwn', 'findOwn']);

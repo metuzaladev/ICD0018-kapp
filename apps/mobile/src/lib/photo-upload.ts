@@ -53,3 +53,19 @@ export async function uploadToStorage(upload: PhotoUpload, photo: PreparedPhoto)
   // Storage answers in XML, not in our { error, message } shape — map it to one safe text.
   if (!res.ok) throw new ApiRequestError(i18n.t('errors.uploadFailed'), res.status);
 }
+
+/**
+ * The device half of one upload for any feature (dog photos, place posts): re-encode → ask our API
+ * for a presigned PUT (the caller names the endpoint) → PUT the bytes with the signed headers.
+ * Returns the upload key the feature's create request lists; the server then verifies the bytes,
+ * re-encodes them and strips EXIF/GPS.
+ */
+export async function uploadPickedPhoto(
+  picked: { uri: string; width: number; height: number },
+  requestUpload: (body: { contentType: 'image/jpeg'; byteSize: number }) => Promise<PhotoUpload>,
+): Promise<string> {
+  const photo = await preparePhoto(picked);
+  const upload = await requestUpload({ contentType: 'image/jpeg', byteSize: photo.blob.size });
+  await uploadToStorage(upload, photo);
+  return upload.uploadKey;
+}

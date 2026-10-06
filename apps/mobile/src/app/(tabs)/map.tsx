@@ -125,7 +125,11 @@ function MapScreen() {
     );
   }
 
-  const tabBarSpace = insets.bottom + ios.tabBarHeight + Spacing.three;
+  // Space between the bottom block and the floating tab bar. Inside a NativeTabs screen the safe-area
+  // bottom inset already includes the tab bar (34 + 49 = 83 pt on iPhone); adding the bar height on
+  // top of it lifted the card ~50 pt above the bar. Add it only where the inset does not include it.
+  const tabBarTop = insets.bottom >= ios.tabBarHeight ? insets.bottom : insets.bottom + ios.tabBarHeight;
+  const tabBarSpace = tabBarTop + Spacing.two;
   const bottomBlock = BOTTOM_CARD + Spacing.three + 52;
   const mapError = error ?? placesQuery.error;
 

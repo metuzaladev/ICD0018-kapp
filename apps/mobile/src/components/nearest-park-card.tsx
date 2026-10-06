@@ -68,12 +68,10 @@ export function NearestParkCard({
         {/* Parks have no photos in the API yet: the licensed placeholder (docs/05). */}
         <Image source={require('@/assets/images/park-placeholder.jpg')} style={styles.photo} contentFit="cover" accessible={false} />
         <View style={styles.text}>
-          <ThemedText type="micro" themeColor="muted">
-            {t('nearestPark.label')}
-          </ThemedText>
+          {/* Name first, then "Lähim park · 0,3 km · praegu vaikne": the park is what the eye looks for. */}
           <ThemedText type="heading">{park.name}</ThemedText>
           <ThemedText type="caption" themeColor="muted">
-            {meta}
+            {`${t('nearestPark.label')} · ${meta}`}
           </ThemedText>
         </View>
       </PressableScale>

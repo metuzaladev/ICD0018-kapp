@@ -39,6 +39,7 @@ export const ICON_SOURCES = {
   map: require('@/assets/icons/map.svg'),
   'map-pin': require('@/assets/icons/map-pin.svg'),
   'message-circle': require('@/assets/icons/message-circle.svg'),
+  minus: require('@/assets/icons/minus.svg'),
   navigation: require('@/assets/icons/navigation.svg'),
   'paw-print': require('@/assets/icons/paw-print.svg'),
   plus: require('@/assets/icons/plus.svg'),

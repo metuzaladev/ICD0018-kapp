@@ -1,11 +1,33 @@
 # Käpp · ICD0018
 
-Käpp on mobiilirakendus Tallinna koeraomanikele: koerapargid kaardil, kes on praegu pargis, külastuste planeerimine, koera profiil ja privaatne terviseinfo, sõbrad, sõnumid, groomerite ja kliinikute broneeringud ning kogukonna soovitatud koerasõbralikud kohad ja Käppade preemiapunktid.
+Käpp on mobiilirakendus Eesti koeraomanikele: koertepargid üle Eesti kaardil (otsing ka aadressi järgi), kes on praegu pargis, külastuste planeerimine, koera profiil ja privaatne terviseinfo, sõbrad, sõnumid, groomerite ja kliinikute broneeringud ning kogukonna soovitatud koerasõbralikud kohad ja Käppade preemiapunktid.
 
 TalTechi kursuse **ICD0018 Hübriidmobiilirakendused** projekt · autor Kristofer Metusala
 
 - Disain: [Figma — Käpp Design System & Screens](https://www.figma.com/design/V2HKxpEsay19chlBD4AUV4)
 - Tehnoloogiad: React Native (Expo SDK 57) · Node.js (Fastify 5) · PostgreSQL 17 + PostGIS · TypeScript läbivalt
+
+## Õppejõule: kiire käivitus
+
+> **NB! Äpp ei tööta Expo Go's.** Kaart (MapLibre) on natiivne moodul, seega on vaja *development build*'i (`npx expo run:ios` või `run:android`). Esimene build võtab ~5–10 minutit.
+
+1. **Eeldused:** Node.js 22.12+ (või 24), Docker Desktop (käib), ning kas Xcode (iOS-i simulaator, ainult macOS) või Android Studio (emulaator).
+2. **Taustateenused ja andmed** (repo juurkaustas):
+   ```bash
+   npm install
+   cp apps/api/.env.example apps/api/.env
+   npm run db:up && npm run db:migrate && npm run db:seed   # 71 päris koerteparki üle Eesti + näidisandmed
+   npm run dev:api                                         # API → http://localhost:3000 (jäta jooksma)
+   ```
+3. **Äpp** (teises terminalis):
+   ```bash
+   cd apps/mobile
+   npx expo run:ios        # või: npx expo run:android
+   ```
+4. **Konto:** loo äpis uus konto (e-post + parool). Kinnituskirja ei saadeta päriselt – link ilmub API logisse, kuid sisselogimist see ei takista.
+5. **Mida proovida:** Kaart → otsi „Kalamaja“ või „Kotzebue 9“ → kaart viib kohale; „+“/„−“ suumivad. Pargi lehel „Oleme siin“. Profiil → Minu koerad → lisa koer ja foto. Avasta → Soovita kohta.
+
+Testid: `npm test` (~1000 ühik- ja HTTP-testi, ei vaja andmebaasi). Disain: Figma link ülal.
 
 ## Dokumentatsioon
 
@@ -14,7 +36,7 @@ TalTechi kursuse **ICD0018 Hübriidmobiilirakendused** projekt · autor Kristofe
 | [01 Uuring](docs/01-uuring.md) | Raamistike ja teekide võrdlus, versioonid, mis on praktikas kontrollitud, riskid |
 | [02 Arhitektuur](docs/02-arhitektuur.md) | Süsteemi osad ja põhimõtted |
 | [03 Andmemudel](docs/03-andmemudel.md) | Tabelid ja seos Figma vaadetega |
-| [04 Arendusplaan](docs/04-arendusplaan.md) | Etapid M0–M10, töövõtted |
+| [04 Arendusplaan](docs/04-arendusplaan.md) | Etapid M0–M12, töövõtted |
 | [05 Disainisüsteem](docs/05-disainisusteem.md) | Figma tokenid koodis, Apple HIG reeglid |
 | [06 Koodistandard](docs/06-koodistandard.md) | Kaustade ja nimede põhjendused, vigade leping, turvalisus, testid |
 | [07 Autentimine](docs/07-autentimine.md) | Sessioonid, vood, endpoint'id, Apple/Google seadistamine |
@@ -28,6 +50,8 @@ TalTechi kursuse **ICD0018 Hübriidmobiilirakendused** projekt · autor Kristofe
 | [15 Pakendamine ja levitamine](docs/15-pakendamine-ja-levitamine.md) | EAS Build, TestFlight, Play internal testing, API Docker image, hostimine EL-is, GDPR, keskkonnamuutujad, varukoopiad |
 | [16 Avasta, Käpad ja Pood](docs/16-avasta-ja-kapad.md) | Kohtade soovitused, kaardi sildid, punktide reeglid ja pettusekindlus, tasemed ja märgid, sooduskoodid, modereerimiskäsk |
 | [17 Konto, privaatsus ja e-post](docs/17-konto-privaatsus-e-post.md) | Konto kustutamine, andmete eksport, privaatsuspoliitika ja tingimused (äpis ja `/legal/*`), nõusolek, e-posti saatmine, IKÜM kaardistus |
+| [18 Avalehe tegevus](docs/18-avalehe-tegevus.md) | „Lemmikparkides täna“, kogukonna soovitused avalehel, kaardi klastrid |
+| [19 Kaardi otsing](docs/19-kaardi-otsing.md) | Otsingusoovitused (pargid, teenused, aadressid Maa-ameti In-ADS-ist), suumimine |
 
 ## Käivitamine
 

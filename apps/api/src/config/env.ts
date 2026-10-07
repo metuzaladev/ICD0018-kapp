@@ -120,6 +120,18 @@ const envSchema = z.object({
     .default('true')
     .transform((v) => v === 'true'),
 
+  /* ---- map search (docs/19) ---- */
+
+  /** Land Board In-ADS gazetteer for address suggestions in the map search. */
+  ADDRESS_SEARCH_URL: urlWithDevDefault('https://inaadress.maaamet.ee/inaadress/gazetteer'),
+  /** Set false to search only the app's own places (offline development, outages). */
+  ADDRESS_SEARCH_ENABLED: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((v) => v === 'true'),
+  /** In-ADS is best-effort: a slower answer is dropped and the app shows its own places only. */
+  ADDRESS_SEARCH_TIMEOUT_MS: z.coerce.number().int().min(200).max(10_000).default(2500),
+
   /* ---- email (M10, docs/17-konto-privaatsus-e-post.md) ---- */
 
   /**

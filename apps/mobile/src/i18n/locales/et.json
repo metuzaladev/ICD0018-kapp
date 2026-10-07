@@ -263,9 +263,9 @@
     "marker": "{{name}}, {{dogs}} praegu",
     "filtersHint": "Avab filtrid",
     "emptyAction": "Tühjenda filtrid",
-    "searchPlaceholder": "Otsi parke ja kohti",
+    "searchPlaceholder": "Otsi kohta või aadressi",
     "searchLabel": "Otsi kaardilt",
-    "searchHint": "Kaardile jäävad ainult nime järgi sobivad kohad",
+    "searchHint": "Pakume parke, teenuseid, soovitusi ja aadresse. Valik viib kaardi sinna.",
     "categories": {
       "all": "Kõik",
       "parks": "Pargid",
@@ -295,7 +295,19 @@
     "cluster_one": "{{count}} koht, suumi lähemale",
     "cluster_other": "{{count}} kohta, suumi lähemale",
     "myLocation": "Sinu asukoht",
-    "markerQuiet": "{{name}}, praegu vaikne"
+    "markerQuiet": "{{name}}, praegu vaikne",
+    "zoomIn": "Suumi sisse",
+    "zoomOut": "Suumi välja",
+    "searchPin": "Otsitud koht: {{name}}",
+    "search": {
+      "suggestions": "Otsingu soovitused",
+      "addresses": "Aadressid",
+      "selectHint": "Viib kaardi sellesse kohta",
+      "loading": "Otsin…",
+      "empty": "Midagi ei leitud. Proovi teist nime või aadressi.",
+      "failed": "Otsing ei õnnestunud. Kontrolli internetiühendust.",
+      "addressesUnavailable": "Aadresse ei saanud praegu otsida, näitame ainult Käpa kohti."
+    }
   },
   "parkRow": {
     "dogsNow": "{{dogs}} praegu",

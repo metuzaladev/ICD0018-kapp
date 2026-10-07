@@ -42,6 +42,8 @@ import { safetyRoutes } from './modules/safety/safety.routes';
 import type { SafetyService } from './modules/safety/safety.service';
 import type { SocketGateway } from './realtime/socket-gateway';
 import { placePostsRoutes } from './modules/place-posts/place-posts.routes';
+import { searchRoutes } from './modules/search/search.routes';
+import type { SearchService } from './modules/search/search.service';
 import type { PlacePostsService } from './modules/place-posts/place-posts.service';
 import { rewardsRoutes } from './modules/rewards/rewards.routes';
 import type { RewardsService } from './modules/rewards/rewards.service';
@@ -74,6 +76,7 @@ export interface AppDeps {
   bookingsService: BookingsService;
   /** M9b (docs/16-avasta-ja-kapad.md). */
   placePostsService: PlacePostsService;
+  searchService: SearchService;
   rewardsService: RewardsService;
   shopService: ShopService;
   /** M11 "Lemmikparkides täna" on Home (docs/18). */
@@ -183,6 +186,7 @@ export async function buildApp(deps: AppDeps, config: AppConfig = defaultAppConf
   await app.register(providersRoutes, { prefix: API_PREFIX, service: deps.providersService });
   await app.register(bookingsRoutes, { prefix: API_PREFIX, service: deps.bookingsService, resolveUserId });
   await app.register(placePostsRoutes, { prefix: API_PREFIX, service: deps.placePostsService, resolveUserId });
+  await app.register(searchRoutes, { prefix: API_PREFIX, service: deps.searchService, resolveUserId });
   await app.register(rewardsRoutes, { prefix: API_PREFIX, service: deps.rewardsService, resolveUserId });
   await app.register(shopRoutes, { prefix: API_PREFIX, service: deps.shopService, resolveUserId });
 

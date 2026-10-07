@@ -48,6 +48,9 @@ import { createVisitsRepository } from './modules/visits/visits.repository';
 import { createVisitsService } from './modules/visits/visits.service';
 import type { ObjectStorage } from './storage/object-storage';
 import { createS3Storage } from './storage/s3-storage';
+import { noAddressLookup, type AddressLookup } from './modules/search/address-lookup';
+import { createSearchRepository } from './modules/search/search.repository';
+import { createSearchService } from './modules/search/search.service';
 
 /** The S3 storage described by the environment (MinIO locally, R2 in production). */
 export function createStorageFromEnv(env: Env): ObjectStorage {
@@ -80,6 +83,8 @@ export interface CommunityDeps {
   accountAuth?: AccountAuth;
   /** Audit log for account deletion (info/error); defaults to silent. */
   accountLog?: AccountLog;
+  /** Map search addresses (In-ADS, docs/19); defaults to none so tests never call the network. */
+  addressLookup?: AddressLookup;
 }
 
 /** Without Better Auth (seed scripts, some tests) no password matches and no confirmation is sent. */
@@ -148,6 +153,7 @@ export function createServices(db: Db, storage: ObjectStorage, timeoutMs: number
     notificationsService: createNotificationsService({ notifications: notificationsRepository, tokens: createPushTokensRepository(db), timeoutMs }),
     safetyService: createSafetyService({ repository: createSafetyRepository(db), timeoutMs }),
     parksService: createParksService({ repository: parks, timeoutMs }),
+    searchService: createSearchService({ repository: createSearchRepository(db), addresses: community.addressLookup ?? noAddressLookup, timeoutMs }),
     parkActivityService: createParkActivityService({ repository: createParkActivityRepository(db), timeoutMs }),
     profileService: createProfileService({ repository: createProfileRepository(db), timeoutMs }),
     favoritesService: createFavoritesService({ favorites: createFavoritesRepository(db), parks, timeoutMs }),

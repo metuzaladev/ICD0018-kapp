@@ -7,7 +7,10 @@ import type { Redis } from 'ioredis';
 import { noAuthYet, type ResolveUserId } from './http/auth';
 import { registerErrorHandling } from './http/error-handler';
 import { TooManyRequestsError } from './http/errors';
+import { accountRoutes, type ResolveSessionStart } from './modules/account/account.routes';
+import type { AccountService } from './modules/account/account.service';
 import { authRoutes } from './modules/auth/auth.routes';
+import { legalRoutes } from './modules/legal/legal.routes';
 import { bookingsRoutes } from './modules/bookings/bookings.routes';
 import type { BookingsService } from './modules/bookings/bookings.service';
 import { providersRoutes } from './modules/providers/providers.routes';
@@ -71,6 +74,10 @@ export interface AppDeps {
   placePostsService: PlacePostsService;
   rewardsService: RewardsService;
   shopService: ShopService;
+  /** M10 deletion, export, legal acceptance, confirmation resend (docs/17). */
+  accountService: AccountService;
+  /** When the request's session started (re-authentication window); absent = unknown (treated as old). */
+  resolveSessionStart?: ResolveSessionStart;
   /** Socket.IO gateway attached to this app's HTTP server (M5); absent in HTTP tests. */
   realtime?: SocketGateway;
   checkDatabase: () => Promise<boolean>;
@@ -144,10 +151,18 @@ export async function buildApp(deps: AppDeps, config: AppConfig = defaultAppConf
   const resolveUserId = deps.resolveUserId ?? noAuthYet;
 
   await app.register(healthRoutes, { checkDatabase: deps.checkDatabase });
+  // Public pages for people and app stores (privacy policy, terms, "email confirmed"), outside /api/v1.
+  await app.register(legalRoutes);
   if (deps.authHandler) {
     await app.register(authRoutes, { prefix: API_PREFIX, handler: deps.authHandler });
   }
   await app.register(profileRoutes, { prefix: API_PREFIX, service: deps.profileService, resolveUserId });
+  await app.register(accountRoutes, {
+    prefix: API_PREFIX,
+    service: deps.accountService,
+    resolveUserId,
+    resolveSessionStart: deps.resolveSessionStart ?? (async () => null),
+  });
   await app.register(favoritesRoutes, { prefix: API_PREFIX, service: deps.favoritesService, resolveUserId });
   await app.register(dogsRoutes, { prefix: API_PREFIX, service: deps.dogsService, resolveUserId });
   await app.register(photosRoutes, { prefix: API_PREFIX, service: deps.photosService, resolveUserId });

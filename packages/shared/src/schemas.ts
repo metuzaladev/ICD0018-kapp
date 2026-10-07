@@ -160,6 +160,12 @@ export const profileSchema = z.object({
   allowFriendRequests: z.boolean(),
   /** The app's language; push notifications are written in it. (M5) */
   language: z.enum(LANGUAGES),
+  /** M10: false until the user opens the link in the confirmation email ("Kinnita e-post" banner). */
+  emailVerified: z.boolean(),
+  /** M10: an email + password account confirms deletion with the password; Apple/Google accounts sign in again. */
+  hasPassword: z.boolean(),
+  /** M10: accepted terms/privacy versions; the app asks again when they are not the current ones. */
+  legal: z.object({ termsVersion: z.string().nullable(), privacyVersion: z.string().nullable(), acceptedAt: z.string().nullable() }),
 });
 export type Profile = z.infer<typeof profileSchema>;
 

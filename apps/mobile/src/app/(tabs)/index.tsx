@@ -13,6 +13,7 @@ import { PointsBadge } from '@/components/points-badge';
 import { Screen } from '@/components/screen';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { VerifyEmailBanner } from '@/components/verify-email-banner';
 import { Radius, Spacing } from '@/constants/theme';
 import { useDeviceLocation } from '@/hooks/use-device-location';
 import { photoSource } from '@/hooks/use-photos';
@@ -69,6 +70,7 @@ export default function HomeScreen() {
       </View>
       <ThemedText themeColor="muted">{t('home.subtitle', { date: formatToday() })}</ThemedText>
       <OfflineBanner />
+      <VerifyEmailBanner />
 
       {/* Figma hero photo: the user's dog when it has a profile photo, otherwise the brand corgi (decorative). */}
       <Image

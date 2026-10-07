@@ -62,7 +62,8 @@ function OptionGroup<T extends string>({
 }
 
 /**
- * Figma 07 / Settings / Overview: edit profile, notifications, privacy, language, appearance, sign out.
+ * Figma 07 / Settings / Overview: edit profile, notifications, privacy, language, appearance, and
+ * (M10) the "Konto" section: privacy & terms, sign out, delete account.
  * Location, help and "add a park" from Figma arrive with the features they control.
  */
 export default function SettingsScreen() {
@@ -107,7 +108,13 @@ export default function SettingsScreen() {
         onSelect={(o) => void appearance.set(o)}
       />
 
+      {/* M10 (docs/17): legal texts, data export and account deletion; deletion is the last, red row. */}
+      <ThemedText type="heading" accessibilityRole="header">
+        {t('settings.account')}
+      </ThemedText>
+      <ListRow icon="shield" title={t('settings.legal')} subtitle={t('settings.legalSub')} onPress={() => router.push('/privacy-terms')} />
       <Button label={t('settings.signOut')} variant="tertiary" loading={signingOut} onPress={signOut} />
+      <ListRow icon="trash-2" danger title={t('settings.deleteAccount')} subtitle={t('settings.deleteAccountSub')} onPress={() => router.push('/delete-account')} />
     </Screen>
   );
 }

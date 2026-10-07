@@ -22,7 +22,8 @@
     "test:scripts": "vitest run --root scripts",
     "lint": "npm run lint --workspaces --if-present",
     "i18n:check": "tsx scripts/i18n-check.ts",
-    "a11y:check": "tsx scripts/a11y-check.ts"
+    "a11y:check": "tsx scripts/a11y-check.ts",
+    "legal:build": "tsx scripts/legal-build.ts"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",

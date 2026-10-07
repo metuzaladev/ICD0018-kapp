@@ -96,6 +96,9 @@ jobs:
           S3_SECRET_ACCESS_KEY=ci-secret
           RATE_LIMIT_STORE=redis
           REALTIME_ADAPTER=redis
+          MAIL_PROVIDER=resend
+          RESEND_API_KEY=re_ci_not_a_real_key
+          MAIL_FROM=Käpp <noreply@ci.invalid>
           ENV
           docker run --rm --network host --env-file ci.env kapp-api:ci node dist/migrate.js
           docker run -d --name api --network host --env-file ci.env kapp-api:ci

@@ -11,10 +11,13 @@ import { FormError } from '@/components/form-error';
 import { PhotoTile } from '@/components/photo-tile';
 import { Screen } from '@/components/screen';
 import { SocialSignIn } from '@/components/social-sign-in';
+import { LegalLinks } from '@/components/legal-links';
 import { TextField } from '@/components/text-field';
 import { ThemedText } from '@/components/themed-text';
 import { Radius } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { currentLanguage } from '@/i18n';
+import { currentLegalVersions } from '@/lib/account';
 import { authClient, authErrorMessage } from '@/lib/auth-client';
 import { validateForm } from '@/lib/form';
 import { SAMPLE_DOGS } from '@/lib/sample-dogs';
@@ -58,7 +61,12 @@ export default function SignUpScreen() {
     if (!data) return;
 
     setLoading(true);
-    const { error } = await authClient.signUp.email(data);
+    // M10: the accepted legal versions are recorded with the account (the text above the button),
+    // and the language makes the confirmation email arrive in the app's language. They are Better
+    // Auth `additionalFields` on the server; a separate object (not a literal) passes them through the
+    // client's typed signature without pulling in its type-inference plugin.
+    const body = { ...data, ...currentLegalVersions(), language: currentLanguage() };
+    const { error } = await authClient.signUp.email(body);
     setLoading(false);
     setFormError(authErrorMessage(error));
   }
@@ -106,6 +114,7 @@ export default function SignUpScreen() {
       <ThemedText type="caption" themeColor="muted">
         {t('auth.signUp.terms')}
       </ThemedText>
+      <LegalLinks />
       <Button label={t('auth.signUp.submit')} trailingIcon="arrow-right" loading={loading} onPress={submit} />
       <Button label={t('auth.signUp.haveAccount')} variant="tertiary" onPress={() => router.replace('/sign-in')} />
     </Screen>

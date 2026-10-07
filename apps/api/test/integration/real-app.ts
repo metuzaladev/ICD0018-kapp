@@ -6,8 +6,10 @@ import { buildApp, defaultAppConfig } from '../../src/app';
 import { env } from '../../src/config/env';
 import { db } from '../../src/db/client';
 import { createAuth } from '../../src/modules/auth/auth';
-import type { Mailer } from '../../src/modules/auth/mailer';
+import type { StorageCleanup } from '../../src/modules/account/storage-cleanup';
+import { createAccountAuth, createSessionStartResolver } from '../../src/modules/auth/account-auth';
 import { createSessionResolver } from '../../src/modules/auth/session-resolver';
+import { noMailer, type Mailer } from '../../src/modules/mail/mailer';
 import type { BookingReminders } from '../../src/modules/bookings/booking-reminders';
 import type { PushQueue } from '../../src/modules/notifications/push-queue';
 import { createSocketGateway, type SocketGateway } from '../../src/realtime/socket-gateway';
@@ -20,9 +22,12 @@ export interface RealAppOptions {
   realtime?: SocketGateway;
   pushQueue?: Pick<PushQueue, 'enqueue'>;
   bookingReminders?: BookingReminders;
+  storageCleanup?: StorageCleanup;
+  /** Same as production: Better Auth's own limiter is off in integration tests, ours stays. */
+  rateLimitMax?: number;
 }
 
-export async function buildRealApp(mailer: Mailer = { sendPasswordReset: async () => {} }, options: RealAppOptions = {}) {
+export async function buildRealApp(mailer: Mailer = noMailer, options: RealAppOptions = {}) {
   const auth = createAuth({
     db,
     mailer,
@@ -36,13 +41,21 @@ export async function buildRealApp(mailer: Mailer = { sendPasswordReset: async (
   });
   return buildApp(
     {
-      ...createServices(db, testStorage, 5000, { realtime: options.realtime, pushQueue: options.pushQueue, bookingReminders: options.bookingReminders }),
+      ...createServices(db, testStorage, 5000, {
+        realtime: options.realtime,
+        pushQueue: options.pushQueue,
+        bookingReminders: options.bookingReminders,
+        mailer,
+        storageCleanup: options.storageCleanup,
+        accountAuth: createAccountAuth(auth),
+      }),
       realtime: options.realtime,
       checkDatabase: async () => true,
       resolveUserId: createSessionResolver(auth),
+      resolveSessionStart: createSessionStartResolver(auth),
       authHandler: auth.handler,
     },
-    defaultAppConfig,
+    { ...defaultAppConfig, ...(options.rateLimitMax ? { rateLimitMax: options.rateLimitMax } : {}) },
   );
 }
 

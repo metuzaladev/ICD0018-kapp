@@ -26,9 +26,11 @@ type SocialSignInProps = {
   showGoogle?: boolean;
   /** Drawn under the buttons when at least one is shown (Figma "või e-postiga" divider). */
   footer?: ReactNode;
+  /** M10 re-authentication before deleting the account: called after a successful sign-in. */
+  onSuccess?: () => void;
 };
 
-export function SocialSignIn({ onError, mode = 'continue', showGoogle = true, footer }: SocialSignInProps) {
+export function SocialSignIn({ onError, mode = 'continue', showGoogle = true, footer, onSuccess }: SocialSignInProps) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
   const [appleAvailable, setAppleAvailable] = useState(false);
@@ -51,6 +53,7 @@ export function SocialSignIn({ onError, mode = 'continue', showGoogle = true, fo
       if (!credential.identityToken) throw new Error('missing identity token');
       const { error } = await authClient.signIn.social({ provider: 'apple', idToken: { token: credential.identityToken } });
       onError(authErrorMessage(error));
+      if (!error) onSuccess?.();
     } catch (e) {
       // The user closing the Apple sheet is not an error.
       if ((e as { code?: string }).code === 'ERR_REQUEST_CANCELED') return;
@@ -62,6 +65,7 @@ export function SocialSignIn({ onError, mode = 'continue', showGoogle = true, fo
     onError(null);
     const { error } = await authClient.signIn.social({ provider: 'google', callbackURL: '/' });
     onError(authErrorMessage(error));
+    if (!error) onSuccess?.();
   }
 
   const google = showGoogle && AUTH_GOOGLE_ENABLED;

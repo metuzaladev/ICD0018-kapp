@@ -6,7 +6,7 @@ Tabelid on tuletatud Figma vaadetest (leht *03 · Screens*, sektsioonid 01–08)
 
 | Valdkond | Tabelid | Figma vaated |
 |---|---|---|
-| Konto | `user`, `session`, `account`, `verification` (Better Auth) | 01 Welcome & Account, 07 Profile / Edit, Settings / Privacy |
+| Konto | `user` (M10: `terms_version`, `privacy_version`, `legal_accepted_at`), `session`, `account`, `verification` (Better Auth) | 01 Welcome & Account, 07 Profile / Edit, Settings / Privacy, M10 Kustuta konto |
 | Koerad | `dogs`, `dog_photos` | 04 My Dogs, Dog Profile, Edit Profile, Photos |
 | Tervis (privaatne) | `health_records` (vaktsiin / visiit) | 04 Health, Add Vaccination, Vet Visit |
 | Pargid | `parks` (PostGIS punkt, omadused, staatus) | 02 Map, Park List, Filters, Park Overview; 06 Add Park |
@@ -35,6 +35,8 @@ Tabelid on tuletatud Figma vaadetest (leht *03 · Screens*, sektsioonid 01–08)
 - **Käpad (M9b):** punkte kirjutab ainult server; `reward_ledger` on ainult lisamiseks (päästik), sama sündmus maksab ühe korra (`reward_ledger_event_uq` = `user_id, reason, source_id`), saldo on lukustatud real `reward_balances` (`CHECK balance >= 0`), tase järgib `lifetime_earned`-i. Vt [16-avasta-ja-kapad.md](16-avasta-ja-kapad.md).
 - **Avasta (M9b):** postitus on `pending` kuni modereerimiseni, asukoht Eesti piires (`CHECK`), kuni 5 fotot (`position 0–4` unikaalne), üks meeldimine kasutaja kohta (liitvõti); teised näevad ainult `approved` ja blokeeringud kehtivad mõlemas suunas.
 - **Sooduskoodid (M9b):** juhuslik unikaalne kood, ühekordne (`bookings_redemption_uq`), lunastamine ja tagasimakse käivad kanderaamatu kaudu samas transaktsioonis.
+- **Konto kustutamine (M10):** `DELETE /me` kustutab kasutaja ühes transaktsioonis; peaaegu kõik viited on `on delete cascade`. Erandid: `messages.sender_id` → `null` (sõnum jääb vestluskaaslasele, „Kustutatud kasutaja"), `parks.created_by` → `null` (avalik park jääb), esitatud teated kustutatakse selgesõnaliselt, tühjaks jäänud vestlused kustutatakse. Integratsioonitest kontrollib üle kõigi `"user"`-ile viitavate võõrvõtmete, et ühtki rida ei jää. Vt [17-konto-privaatsus-e-post.md](17-konto-privaatsus-e-post.md).
+- **Nõusolek (M10):** `user.terms_version` / `privacy_version` / `legal_accepted_at`; `null` = pole nõustunud (sotsiaalne registreerimine, vanem konto), äpp küsib.
 - **Pildid:** tabelites ainult objektivõtmed (`photo_key`, `image_key`, `thumbnail_key`, `document_key`), failid privaatses S3-hoidlas (R2 / arenduses MinIO). Koera profiilipilt on viide `dogs.profile_photo_id → dog_photos.id` (`on delete set null`), vt [10-koerad-ja-tervis.md](10-koerad-ja-tervis.md).
 
 ## Avatud küsimused
@@ -42,4 +44,4 @@ Tabelid on tuletatud Figma vaadetest (leht *03 · Screens*, sektsioonid 01–08)
 - ~~Kas sõbrad on ühesuunalised või kahesuunalised?~~ Otsustatud M5-s: kahesuunalised, kinnitatava kutsega.
 - ~~Kas teenusepakkujad on äpi kasutajad (oma vaade) või haldab neid admin?~~ Otsustatud M6-s: haldab Käpi meeskond (seeme / admin), pakkujakontosid pole; broneering kinnitub kohe.
 - ~~Kuidas punkte jagada nii, et neid ei saaks võltsida?~~ Otsustatud M9b-s: ainult serveri nähtud faktidest, piirangutega, unikaalse sündmuse võtmega (docs/16).
-- Kui kaua hoitakse lõpetatud kohalolekut ajaloo jaoks (GDPR: säilitusaeg)?
+- Kui kaua hoitakse lõpetatud kohalolekut ajaloo jaoks (GDPR: säilitusaeg)? M10 seisuga: kuni konto kustutamiseni, nii on see ka privaatsuspoliitikas kirjas. Lühem tähtaeg (nt 12 kuud) vajaks ajastatud kustutustööd ja poliitika uut versiooni. Sama kehtib modereeritud teadete kohta.

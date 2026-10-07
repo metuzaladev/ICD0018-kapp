@@ -130,6 +130,13 @@ export const et = {
   'errors.inviteTooLate': 'Kutsekoodi saab sisestada {{days}} päeva jooksul pärast liitumist',
   'errors.inviteAlreadyClaimed': 'Oled kutsekoodi juba sisestanud',
 
+  /* ---------- M10 account, legal and email (docs/17-konto-privaatsus-e-post.md) ---------- */
+  'errors.reauthPasswordRequired': 'Sisesta konto kustutamiseks oma parool',
+  'errors.reauthPasswordWrong': 'Parool ei ole õige',
+  'errors.reauthRequired': 'Turvalisuse huvides logi uuesti sisse ja kustuta konto kohe pärast seda',
+  'errors.legalVersionOutdated': 'Tingimused muutusid vahepeal, ava need uuesti',
+  'errors.emailAlreadyVerified': 'E-posti aadress on juba kinnitatud',
+
   /* ---------- push notifications (written in the recipient's language, docs/12-kogukond.md) ---------- */
   'push.friendRequest.title': 'Uus sõbrakutse',
   'push.friendRequest.body': '{{name}} tahab sinuga sõbraks saada',
@@ -158,6 +165,28 @@ export const et = {
   'rewards.badge.ten_parks': '10 parki',
   'rewards.badge.explorer': 'Avastaja',
   'rewards.badge.kadriorg_legend': 'Pargi püsikülaline',
+
+  /* ---------- M10 emails (plain text + HTML, recipient's language) and public pages ---------- */
+  'email.greeting': 'Tere, {{name}}!',
+  'email.linkFallback': 'Kui nupp ei tööta, kopeeri see link brauserisse:',
+  'email.footer': 'Käpp — koerapargid ja koerasõbrad. Said selle kirja, sest see e-posti aadress on Käpa kontol.',
+  'email.passwordReset.subject': 'Käpp: parooli taastamine',
+  'email.passwordReset.intro': 'Keegi (loodetavasti sina) palus Käpa konto parooli taastada.',
+  'email.passwordReset.action': 'Määra uus parool',
+  'email.passwordReset.expiry': 'Link kehtib 1 tunni. Kui sa parooli taastamist ei palunud, ära tee midagi — sinu parool ei muutu.',
+  'email.verify.subject': 'Käpp: kinnita oma e-posti aadress',
+  'email.verify.intro': 'Aitäh, et liitusid Käpaga! Kinnita, et see e-posti aadress kuulub sulle.',
+  'email.verify.action': 'Kinnita e-post',
+  'email.verify.expiry': 'Link kehtib 24 tundi. Kui sa Käpa kontot ei loonud, ära tee midagi.',
+  'email.deleted.subject': 'Käpp: sinu konto on kustutatud',
+  'email.deleted.intro': 'Sinu Käpa konto ja sellega seotud andmed on kustutatud. Seda ei saa tagasi võtta.',
+  'email.deleted.details': 'Fotod kustutatakse failihoidlast mõne minuti jooksul ja varukoopiatest hiljemalt 30 päeva pärast. Sinu saadetud sõnumid jäävad vestluskaaslasele nähtavaks ilma sinu nimeta.',
+  'email.deleted.notYou': 'Kui sa kontot ise ei kustutanud, kirjuta meile privaatsuspoliitikas toodud aadressil: {{privacyUrl}}',
+  'pages.emailVerified.title': 'E-post on kinnitatud',
+  'pages.emailVerified.body': 'Võid selle akna sulgeda ja Käpa äppi naasta.',
+  'pages.emailVerifyFailed.title': 'Linki ei saanud kasutada',
+  'pages.emailVerifyFailed.body': 'Link on aegunud või juba kasutatud. Ava Käpp ja küsi uus kinnituslink.',
+  'pages.otherLanguages': 'Teised keeled',
 
   /* ---------- Better Auth errors ---------- */
   'auth.userExists': 'Selle e-postiga konto on juba olemas',

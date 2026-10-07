@@ -1,4 +1,8 @@
 import type { Env } from './config/env';
+import { createAccountRepository } from './modules/account/account.repository';
+import { createAccountService, type AccountAuth, type AccountLog } from './modules/account/account.service';
+import { noStorageCleanup, type StorageCleanup } from './modules/account/storage-cleanup';
+import { noMailer, type Mailer } from './modules/mail/mailer';
 import { noBookingReminders, type BookingReminders } from './modules/bookings/booking-reminders';
 import { createBookingsRepository } from './modules/bookings/bookings.repository';
 import { createBookingsService } from './modules/bookings/bookings.service';
@@ -68,7 +72,22 @@ export interface CommunityDeps {
   /** M6 booking reminder queue (BullMQ); when absent no reminders are scheduled. */
   bookingReminders?: BookingReminders;
   log?: Logger;
+  /** M10 (docs/17): outgoing email, the deleted account's file cleanup queue, Better Auth for re-auth. */
+  mailer?: Mailer;
+  storageCleanup?: StorageCleanup;
+  accountAuth?: AccountAuth;
+  /** Audit log for account deletion (info/error); defaults to silent. */
+  accountLog?: AccountLog;
 }
+
+/** Without Better Auth (seed scripts, some tests) no password matches and no confirmation is sent. */
+const noAccountAuth: AccountAuth = {
+  verifyPassword: async () => false,
+  sendVerificationEmail: async () => {
+    throw new Error('email verification needs Better Auth (CommunityDeps.accountAuth)');
+  },
+};
+const silentAccountLog: AccountLog = { info: () => {}, error: () => {} };
 
 const noPushQueue: Pick<PushQueue, 'enqueue'> = { enqueue: async () => {} };
 
@@ -92,6 +111,15 @@ export function createServices(db: Db, storage: ObjectStorage, timeoutMs: number
   const providers = createProvidersRepository(db);
   const shop = createShopRepository(db);
   return {
+    accountService: createAccountService({
+      repository: createAccountRepository(db),
+      auth: community.accountAuth ?? noAccountAuth,
+      storageCleanup: community.storageCleanup ?? noStorageCleanup,
+      reminders: community.bookingReminders ?? noBookingReminders,
+      mailer: community.mailer ?? noMailer,
+      log: community.accountLog ?? silentAccountLog,
+      timeoutMs,
+    }),
     rewardsService,
     shopService: createShopService({ repository: shop, storage, timeoutMs }),
     placePostsService: createPlacePostsService({ repository: createPlacePostsRepository(db), storage, rewards: rewardsService, notifier, log, timeoutMs }),

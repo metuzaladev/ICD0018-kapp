@@ -7,14 +7,14 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { db, pool } from '../../src/db/client';
 import { user } from '../../src/db/schema';
-import type { Mailer } from '../../src/modules/auth/mailer';
+import { noMailer, type Mailer } from '../../src/modules/mail/mailer';
 import { buildRealApp } from './real-app';
 
 const EMAIL_DOMAIN = '@auth-flow.test.invalid';
 const email = `kasutaja-${Date.now()}${EMAIL_DOMAIN}`;
 const password = 'pikk-parool-123';
 const sentResets: { to: string; url: string }[] = [];
-const mailer: Mailer = { sendPasswordReset: async (m) => void sentResets.push(m) };
+const mailer: Mailer = { ...noMailer, sendPasswordReset: async (m) => void sentResets.push(m) };
 
 let app: Awaited<ReturnType<typeof buildRealApp>>;
 const origin = { 'expo-origin': 'kapp://' };

@@ -14,7 +14,7 @@ TalTechi kursuse **ICD0018 Hübriidmobiilirakendused** projekt · autor Kristofe
 | [01 Uuring](docs/01-uuring.md) | Raamistike ja teekide võrdlus, versioonid, mis on praktikas kontrollitud, riskid |
 | [02 Arhitektuur](docs/02-arhitektuur.md) | Süsteemi osad ja põhimõtted |
 | [03 Andmemudel](docs/03-andmemudel.md) | Tabelid ja seos Figma vaadetega |
-| [04 Arendusplaan](docs/04-arendusplaan.md) | Etapid M0–M9, töövõtted |
+| [04 Arendusplaan](docs/04-arendusplaan.md) | Etapid M0–M10, töövõtted |
 | [05 Disainisüsteem](docs/05-disainisusteem.md) | Figma tokenid koodis, Apple HIG reeglid |
 | [06 Koodistandard](docs/06-koodistandard.md) | Kaustade ja nimede põhjendused, vigade leping, turvalisus, testid |
 | [07 Autentimine](docs/07-autentimine.md) | Sessioonid, vood, endpoint'id, Apple/Google seadistamine |
@@ -27,6 +27,7 @@ TalTechi kursuse **ICD0018 Hübriidmobiilirakendused** projekt · autor Kristofe
 | [14 Animatsioonid ja ligipääsetavus](docs/14-animatsioonid-ja-ligipaasetavus.md) | Liikumise tokenid, haptika, VoiceOver, Dynamic Type, Reduce Motion |
 | [15 Pakendamine ja levitamine](docs/15-pakendamine-ja-levitamine.md) | EAS Build, TestFlight, Play internal testing, API Docker image, hostimine EL-is, GDPR, keskkonnamuutujad, varukoopiad |
 | [16 Avasta, Käpad ja Pood](docs/16-avasta-ja-kapad.md) | Kohtade soovitused, kaardi sildid, punktide reeglid ja pettusekindlus, tasemed ja märgid, sooduskoodid, modereerimiskäsk |
+| [17 Konto, privaatsus ja e-post](docs/17-konto-privaatsus-e-post.md) | Konto kustutamine, andmete eksport, privaatsuspoliitika ja tingimused (äpis ja `/legal/*`), nõusolek, e-posti saatmine, IKÜM kaardistus |
 
 ## Käivitamine
 
@@ -49,7 +50,7 @@ Kohtade soovitused ootavad modereerimist; demo jaoks: `npm run moderate:post -w 
 
 Push-teavitused vajavad füüsilist seadet ja EAS projekti ID-d (`npx eas-cli@latest init`), vt [docs/12](docs/12-kogukond.md).
 
-Arenduses saadetud parooli taastamise lingid ilmuvad API logisse (e-posti teenust veel pole).
+Arenduses (`MAIL_PROVIDER=log`) ei saadeta kirju: parooli taastamise ja e-posti kinnituse lingid ilmuvad API logisse. Päris saatmine (`smtp` / `resend`), privaatsuspoliitika ja konto kustutamine: [docs/17](docs/17-konto-privaatsus-e-post.md). Privaatsuspoliitika ja tingimused on `http://localhost:3000/legal/privacy` ja `/legal/terms`; muudatuse järel `npm run legal:build`.
 
 ## Toodang
 

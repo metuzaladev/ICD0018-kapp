@@ -142,7 +142,8 @@ export type MessageInput = z.infer<typeof messageInputSchema>;
 export const messageSchema = z.object({
   id: z.uuid(),
   conversationId: z.uuid(),
-  senderId: z.string(),
+  /** Null when the sender has deleted their account (M10): shown as "Kustutatud kasutaja". */
+  senderId: z.string().nullable(),
   body: z.string(),
   createdAt: z.string(),
 });
@@ -161,7 +162,8 @@ export type MessagePage = z.infer<typeof messagePageSchema>;
 
 export const conversationSchema = z.object({
   id: z.uuid(),
-  other: personSummarySchema.pick({ id: true, firstName: true, dogNames: true }),
+  /** Null when the other person has deleted their account (M10): the history stays readable, nothing can be sent. */
+  other: personSummarySchema.pick({ id: true, firstName: true, dogNames: true }).nullable(),
   lastMessage: messageSchema.nullable(),
   unreadCount: z.number().int().nonnegative(),
   /** false when the two are no longer friends: history stays readable, new messages are refused. */

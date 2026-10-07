@@ -15,6 +15,7 @@ Kuidas Käpp jõuab testijateni (TestFlight, Google Play internal testing) ja ku
 | CI: image ehitus + suitsutest | `.github/workflows/ci.yml` (job `docker`) | ✅ |
 | Käsitsi väljalaske mallid | `.github/workflows/release-api.yml`, `release-mobile.yml` | ✅ mallid, käivitamata |
 | Näide ühe VM-i jaoks | `docker-compose.prod.yml` + `apps/api/.env.production.example` | ✅ `docker compose config` kontrollitud |
+| Konto kustutamine, privaatsuspoliitika/tingimused, e-post (M10) | docs/17 | ✅ testitud; vastutava töötleja andmed ja e-posti võtmed käsitsi |
 
 ## 15.1 Hostimine EL-is — soovitus
 
@@ -37,10 +38,11 @@ Miks mitte kohe Kubernetes vms: üks arendaja, kursuse koormus ja selge väljala
   - **Push-teavitused** käivad läbi Expo push-teenuse (USA) ning Apple APNs / Google FCM. Push sisaldab saatja nime ja kuni 120-märgilist sõnumi eelvaadet (`push-messages.ts`). Kirjelda seda privaatsuspoliitikas; vajadusel muuda sõnumi-push sisutuks („Uus sõnum").
   - **EAS Build** (USA) näeb ainult lähtekoodi ja ehitusmuutujaid, mitte kasutajaandmeid. Sinna ei panda saladusi peale `EXPO_PUBLIC_*` (need on niikuinii äpis avalikud).
   - **Kaardiplaadid** (OpenFreeMap) — seade laeb plaate otse; teenus näeb seadme IP-d ja vaadatavat piirkonda.
-- **Logid ilma isikuandmeteta:** päringulogis on ainult meetod, tee ja marsruut — ei query stringi (koordinaadid, otsingusõnad) ega IP-d (`lib/log-serializers.ts`); `Authorization`/cookie päised on peidetud; toodangu e-postiteenuse puudumise logi ei sisalda aadressi. Hoia logisid 14–30 päeva.
-- **Säilitamine:** kohalolek aegub ise (docs/09); sõnumid, koerad, tervisekirjed ja fotod säilivad konto kustutamiseni. Varukoopiad aeguvad 30 päevaga, seega kustutatud andmed kaovad ka varukoopiatest hiljemalt 30 päeva pärast — kirjuta see privaatsuspoliitikasse.
-- **Kustutamine:** ⚠️ **äpis pole veel konto kustutamist.** GDPR (õigus olla unustatud), Apple (App Store Review Guideline 5.1.1(v)) ja Google Play nõuavad, et kasutaja saaks konto ise äpis kustutada (Google lisaks veebilingi kaudu). TestFlighti sisemiseks testimiseks see ei takista, poodi avaldamiseks ja TestFlighti välistestijate ülevaatuseks on see vajalik. Teostus: `DELETE /api/v1/me` (kaskaadiga read + objektid hoidlast parima tahte järgi, nagu fotode kustutamine docs/10) ja nupp Seadetes kinnitusdialoogiga.
-- **E-post:** toodangus pole veel e-postiteenust, parooli taastamise kiri jääb saatmata (logis on viga ilma aadressita). Enne avalikku väljalaset ühenda EL-i teenus `Mailer` liidese taha (`modules/auth/mailer.ts`), nt Brevo või Mailjet (Prantsusmaa) või Resend EL-i regiooniga.
+- **Logid ilma isikuandmeteta:** päringulogis on ainult meetod, tee ja marsruut — ei query stringi (koordinaadid, otsingusõnad) ega IP-d (`lib/log-serializers.ts`); `Authorization`/cookie päised on peidetud; e-posti töötaja ja kustutamise auditirida logivad ainult ID-sid ja arve, mitte aadresse (docs/17). Hoia logisid 14–30 päeva.
+- **Säilitamine:** kohalolek aegub ise (docs/09); koerad, tervisekirjed, fotod ja ajalugu säilivad konto kustutamiseni; saadetud sõnumid jäävad vestluskaaslasele anonüümselt kuni tema konto kustutamiseni. Varukoopiad aeguvad 30 päevaga, seega kustutatud andmed kaovad ka varukoopiatest hiljemalt 30 päeva pärast. Kõik see on privaatsuspoliitikas (docs/17).
+- **Kustutamine (M10):** Seaded → Konto → „Kustuta konto" (`DELETE /api/v1/me`, taas-autentimine, üks transaktsioon, failid R2-st BullMQ tööga pärast commit'i). Google Play nõuab lisaks veebilinki: privaatsuspoliitika URL (p 8). Vt docs/17.
+- **E-post (M10):** `MAIL_PROVIDER=smtp|resend` (toodangus kohustuslik), järjekord BullMQ-s, kordused ja idempotentsus. Saatja domeenile SPF + DKIM (+ DMARC). Vt docs/17.
+- **Privaatsuspoliitika ja tingimused (M10):** `https://api.<domeen>/legal/privacy` ja `/legal/terms` (et/en/ru); äpis Seaded → „Privaatsus ja tingimused". Enne avaldamist täida vastutav töötleja (docs/17 p 17.5).
 - **Privaatsuspoliitika ja poe vormid:** Apple'i „App Privacy" (nutrition label) ja Google'i „Data safety" peavad ühtima `app.json` → `ios.privacyManifests.NSPrivacyCollectedDataTypes`-iga: nimi, e-post, kasutaja ID, seadme ID (push-märk), ligikaudne asukoht (kohalolek pargis), fotod, sõnumid, muu kasutaja sisu (bio, hinnangud); kõik „seotud kasutajaga", eesmärk „rakenduse funktsionaalsus", **jälgimist pole** (`NSPrivacyTracking: false`). Seadme täpset asukohta ei salvestata: lähimate parkide päring kasutab seda ainult päringu ajal.
 
 ## 15.3 Keskkonnamuutujad
@@ -64,10 +66,14 @@ Toodangus (`NODE_ENV=production`) keeldub API käivitumast, kui kohustuslik vä�
 | `RATE_LIMIT_MAX` | – | `120` | Päringut minutis IP kohta |
 | `RATE_LIMIT_STORE` | `redis`, kui instantse on > 1 | `memory` | 15.4 |
 | `REALTIME_ADAPTER` | `redis`, kui instantse on > 1 | `memory` | 15.4 |
-| `PUSH_WORKER_ENABLED` | `false` API instantsidel, kui eraldi töötaja | `true` | 15.4 |
+| `PUSH_WORKER_ENABLED` | `false` API instantsidel, kui eraldi töötaja | `true` | 15.4; kõik BullMQ töötajad (push, meeldetuletused, e-post, failide koristus) |
 | `PUSH_QUEUE_PREFIX` | eri keskkondadel eri väärtus, kui Redis on jagatud | `kapp` | Ka Socket.IO kanali eesliide |
 | `EXPO_ACCESS_TOKEN` | kui Expo „enhanced push security" on sees | – | |
 | `APPLE_*`, `GOOGLE_*` | valikulised | – | docs/07 |
+| `MAIL_PROVIDER` | **`smtp` või `resend`** (`log` keelatud) | `log` | E-posti transport (docs/17) |
+| `MAIL_FROM` | **kohustuslik** | arenduses `Käpp <noreply@localhost>` | Saatja; domeenil SPF + DKIM |
+| `SMTP_URL` | kui `MAIL_PROVIDER=smtp` | – | `smtps://kasutaja:parool@host:465` (saladus) |
+| `RESEND_API_KEY` | kui `MAIL_PROVIDER=resend` | – | Resendi saatmisvõti (saladus); domeen EL-i piirkonnas |
 | `SHUTDOWN_TIMEOUT_MS` | alla platvormi seiskamisaja | `9000` | Docker annab 10 s, Fly `kill_timeout`, Render 30 s |
 | `LOG_LEVEL` | – | `info` (toodang) / `debug` | pino tase |
 | `DB_STATEMENT_TIMEOUT_MS`, `SERVICE_TIMEOUT_MS`, `BODY_LIMIT_BYTES` | – | 5000, 8000, 64 KB | docs/06 |
@@ -132,7 +138,7 @@ Load balancer peab toetama WebSocketi upgrade'i; sticky session'it pole vaja, se
 ## 15.6 Monitooring ja häired
 
 - **Uptime:** väline kontroll iga minut `GET https://api.<domeen>/health`; häire, kui vastus pole 200 **või** kehas pole `"database":"up"` (märksõnakontroll). EL-is asuv teenus (nt Better Stack, UptimeRobot) — kontroll ei sisalda isikuandmeid.
-- **Logid:** pino JSON stdout'i; platvorm või `docker logs` (compose'is rotatsioon 5 × 10 MB). Häire tasemel `error` (50+) ridadele, eriti `shutdown timed out`, `request failed`, `password reset requested but no email provider`, `push job failed`.
+- **Logid:** pino JSON stdout'i; platvorm või `docker logs` (compose'is rotatsioon 5 × 10 MB). Häire tasemel `error` (50+) ridadele, eriti `shutdown timed out`, `request failed`, `email failed permanently`, `could not queue email`, `storage cleanup failed permanently`, `account storage cleanup could not be queued`, `push job failed`. Hoiatus `privacy policy / terms still contain the controller placeholder` tähendab, et docs/17 p 17.5 samm 1 on tegemata.
 - **Andmebaas:** ketta täituvus > 80 %, ühenduste arv, aeglased päringud (hallatud teenuse vaade).
 - **Push:** Expo receipts'i vead (`DeviceNotRegistered` puhastab märgid ise, docs/12); BullMQ ebaõnnestunud tööde arv.
 - **Äpp:** krahhid — TestFlighti ja Play Console'i krahhiaruanded on tasuta; Sentry (EL-i regioon `de.sentry.io`) on hilisem samm.
@@ -228,7 +234,7 @@ Androidi testijad saavad APK lingi/QR-koodi, iOS-i testijad paigaldavad lingilt 
 
 1. `npx eas-cli@latest build --profile production --platform ios`
 2. `npx eas-cli@latest submit --platform ios --latest` — esimesel korral loob EAS App Store Connecti äpi kirje (bundle id `ee.icd0018.kapp`) või küsib selle ID-d.
-3. App Store Connect → TestFlight → *Internal Testing* → lisa grupp ja testijad (App Store Connecti kasutajad, kuni 100). Sisemine testimine ei vaja Apple'i ülevaatust; välistestijad vajavad Beta App Review'd (siis on vaja privaatsuspoliitika URL-i ja konto kustutamist, 15.2).
+3. App Store Connect → TestFlight → *Internal Testing* → lisa grupp ja testijad (App Store Connecti kasutajad, kuni 100). Sisemine testimine ei vaja Apple'i ülevaatust; välistestijad vajavad Beta App Review'd (privaatsuspoliitika URL `https://api.<domeen>/legal/privacy`; konto kustutamine on Seaded → Konto, docs/17).
 
 ### G. Google Play internal testing
 
@@ -253,7 +259,8 @@ Androidi testijad saavad APK lingi/QR-koodi, iOS-i testijad paigaldavad lingilt 
 - [ ] Äpp: `eas build --profile production` → `eas submit` → TestFlight / Play internal testing → testijate tagasiside
 - [ ] Natiivne muutus (uus natiivne pakett, lubade tekst)? → uus build, mitte OTA
 - [ ] Poe metaandmed et/en/ru: nimi, alapealkiri, kirjeldus, märksõnad, ekraanipildid, tugi-URL
-- [ ] Privaatsuspoliitika URL, App Privacy (Apple) ja Data safety (Google) vastavad 15.2-le
+- [ ] Privaatsuspoliitika URL (`/legal/privacy`), App Privacy (Apple) ja Data safety (Google, sh kustutamise veebilink) vastavad 15.2-le; vastutav töötleja täidetud, versiooni tõstetud, kui tekst muutus (docs/17)
+- [ ] E-post: `MAIL_PROVIDER`, `MAIL_FROM`, võti; SPF/DKIM/DMARC kirjed; testkiri (parooli taastamine) jõudis postkasti
 - [ ] Vanuse hinnang, sisu deklaratsioonid, testkonto App Review jaoks (e-post + parool)
 - [ ] Varukoopia tehtud enne migratsiooni; taastamise harjutus viimase kuu jooksul
 

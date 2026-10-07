@@ -39,6 +39,7 @@ import type { RewardsRepository } from '../src/modules/rewards/rewards.repositor
 import type { RewardsService } from '../src/modules/rewards/rewards.service';
 import type { ShopRepository } from '../src/modules/shop/shop.repository';
 import type { ShopService } from '../src/modules/shop/shop.service';
+import type { AccountService } from '../src/modules/account/account.service';
 
 export const PARK_ID = '4ddabe8d-7306-4724-a125-ace7ae3a87b9';
 export const USER_ID = 'user_test_1';
@@ -99,6 +100,9 @@ export function makeProfile(overrides: Partial<Profile> = {}): Profile {
     presenceSharing: 'friends',
     allowFriendRequests: true,
     language: 'et',
+    emailVerified: true,
+    hasPassword: true,
+    legal: { termsVersion: '2026-10-05', privacyVersion: '2026-10-05', acceptedAt: '2026-10-05T10:00:00.000Z' },
     ...overrides,
   };
 }
@@ -244,8 +248,12 @@ export async function buildTestApp(deps: Partial<AppDeps> = {}, config: Partial<
   const shop =
     (deps.shopService as Mocked<ShopService> | undefined) ??
     mockAll<ShopService>(['overview', 'products', 'product', 'redeem', 'listRedemptions', 'cancelRedemption']);
+  const account =
+    (deps.accountService as Mocked<AccountService> | undefined) ?? mockAll<AccountService>(['deleteAccount', 'acceptLegal', 'exportData', 'resendVerification']);
   const app = await buildApp(
     {
+      accountService: account,
+      resolveSessionStart: deps.resolveSessionStart,
       placePostsService: placePosts,
       rewardsService: rewards,
       shopService: shop,
@@ -273,6 +281,7 @@ export async function buildTestApp(deps: Partial<AppDeps> = {}, config: Partial<
   );
   return {
     app,
+    account,
     service,
     profile,
     favorites,

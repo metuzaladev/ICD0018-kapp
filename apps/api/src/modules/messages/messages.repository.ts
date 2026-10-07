@@ -7,7 +7,8 @@ import { firstName } from '../safety/block-sql';
 
 /** The viewer's membership in a conversation and what the service needs to decide about it. */
 export interface Membership {
-  otherId: string;
+  /** Null when the other member has deleted their account (M10): readable, but nothing can be sent. */
+  otherId: string | null;
   /** Someone in the pair has blocked the other: the conversation is hidden (→ 404). */
   blocked: boolean;
   /** Still accepted friends: only then can new messages be sent. */
@@ -30,7 +31,7 @@ export interface MessagesRepository {
 
 const directKey = (a: string, b: string) => (a < b ? `${a}:${b}` : `${b}:${a}`);
 
-const toMessage = (r: { id: string; conversationId: string; senderId: string; body: string; createdAt: Date | string }): Message => ({
+const toMessage = (r: { id: string; conversationId: string; senderId: string | null; body: string; createdAt: Date | string }): Message => ({
   id: r.id,
   conversationId: r.conversationId,
   senderId: r.senderId,
@@ -63,7 +64,9 @@ export function createMessagesRepository(db: Db): MessagesRepository {
     },
 
     async findMembership(conversationId, userId) {
-      const { rows } = await db.execute<{ other_id: string; blocked: boolean; friends: boolean }>(sql`
+      // `left join`: after the other member deleted their account (M10) the row is gone, but the
+      // remaining member can still read the history (other_id null, never "blocked" or "friends").
+      const { rows } = await db.execute<{ other_id: string | null; blocked: boolean; friends: boolean }>(sql`
         select o.user_id as other_id,
           exists (select 1 from user_blocks ub
                   where (ub.blocker_id = ${userId} and ub.blocked_id = o.user_id)
@@ -72,7 +75,7 @@ export function createMessagesRepository(db: Db): MessagesRepository {
                   and ((f.requester_id = ${userId} and f.addressee_id = o.user_id)
                     or (f.requester_id = o.user_id and f.addressee_id = ${userId}))) as friends
         from conversation_members me
-        join conversation_members o on o.conversation_id = me.conversation_id and o.user_id <> me.user_id
+        left join conversation_members o on o.conversation_id = me.conversation_id and o.user_id <> me.user_id
         where me.conversation_id = ${conversationId} and me.user_id = ${userId}
         limit 1`);
       const row = rows[0];
@@ -83,8 +86,8 @@ export function createMessagesRepository(db: Db): MessagesRepository {
       const only = conversationId ? sql`and me.conversation_id = ${conversationId}` : sql``;
       const { rows } = await db.execute<{
         id: string;
-        other_id: string;
-        other_name: string;
+        other_id: string | null;
+        other_name: string | null;
         dog_names: string[];
         last_id: string | null;
         last_sender: string | null;
@@ -97,15 +100,16 @@ export function createMessagesRepository(db: Db): MessagesRepository {
           coalesce((select array_agg(d.name order by d.name) from dogs d where d.owner_id = u.id), '{}') as dog_names,
           lm.id as last_id, lm.sender_id as last_sender, lm.body as last_body, lm.created_at as last_at,
           (select count(*)::int from messages m
-            where m.conversation_id = c.id and m.sender_id <> ${userId}
+            where m.conversation_id = c.id and m.sender_id is distinct from ${userId}
               and (me.last_read_at is null or m.created_at > me.last_read_at)) as unread,
           exists (select 1 from friendships f where f.status = 'accepted'
                   and ((f.requester_id = ${userId} and f.addressee_id = u.id)
                     or (f.requester_id = u.id and f.addressee_id = ${userId}))) as friends
         from conversation_members me
         join conversations c on c.id = me.conversation_id
-        join conversation_members o on o.conversation_id = c.id and o.user_id <> me.user_id
-        join "user" u on u.id = o.user_id
+        -- left joins: a deleted account (M10) leaves the conversation with one member and u.* null.
+        left join conversation_members o on o.conversation_id = c.id and o.user_id <> me.user_id
+        left join "user" u on u.id = o.user_id
         left join lateral (
           select m.id, m.sender_id, m.body, m.created_at from messages m
           where m.conversation_id = c.id order by m.created_at desc, m.id desc limit 1
@@ -118,9 +122,9 @@ export function createMessagesRepository(db: Db): MessagesRepository {
         limit 100`);
       return rows.map((r) => ({
         id: r.id,
-        other: { id: r.other_id, firstName: firstName(r.other_name), dogNames: r.dog_names ?? [] },
+        other: r.other_id && r.other_name !== null ? { id: r.other_id, firstName: firstName(r.other_name), dogNames: r.dog_names ?? [] } : null,
         lastMessage:
-          r.last_id && r.last_sender && r.last_body !== null && r.last_at
+          r.last_id && r.last_body !== null && r.last_at
             ? toMessage({ id: r.last_id, conversationId: r.id, senderId: r.last_sender, body: r.last_body, createdAt: r.last_at })
             : null,
         unreadCount: r.unread,
@@ -132,7 +136,7 @@ export function createMessagesRepository(db: Db): MessagesRepository {
       const cursor = before
         ? sql`and (m.created_at, m.id) < (select m2.created_at, m2.id from messages m2 where m2.id = ${before} and m2.conversation_id = ${conversationId})`
         : sql``;
-      const { rows } = await db.execute<{ id: string; conversation_id: string; sender_id: string; body: string; created_at: Date }>(sql`
+      const { rows } = await db.execute<{ id: string; conversation_id: string; sender_id: string | null; body: string; created_at: Date }>(sql`
         select m.id, m.conversation_id, m.sender_id, m.body, m.created_at from messages m
         where m.conversation_id = ${conversationId} ${cursor}
         order by m.created_at desc, m.id desc

@@ -39,6 +39,8 @@ import type { RewardsRepository } from '../src/modules/rewards/rewards.repositor
 import type { RewardsService } from '../src/modules/rewards/rewards.service';
 import type { ShopRepository } from '../src/modules/shop/shop.repository';
 import type { ShopService } from '../src/modules/shop/shop.service';
+import type { ParkActivityRepository } from '../src/modules/park-activity/park-activity.repository';
+import type { ParkActivityService } from '../src/modules/park-activity/park-activity.service';
 import type { AccountService } from '../src/modules/account/account.service';
 
 export const PARK_ID = '4ddabe8d-7306-4724-a125-ace7ae3a87b9';
@@ -250,8 +252,10 @@ export async function buildTestApp(deps: Partial<AppDeps> = {}, config: Partial<
     mockAll<ShopService>(['overview', 'products', 'product', 'redeem', 'listRedemptions', 'cancelRedemption']);
   const account =
     (deps.accountService as Mocked<AccountService> | undefined) ?? mockAll<AccountService>(['deleteAccount', 'acceptLegal', 'exportData', 'resendVerification']);
+  const parkActivity = (deps.parkActivityService as Mocked<ParkActivityService> | undefined) ?? mockAll<ParkActivityService>(['today']);
   const app = await buildApp(
     {
+      parkActivityService: parkActivity,
       accountService: account,
       resolveSessionStart: deps.resolveSessionStart,
       placePostsService: placePosts,
@@ -281,6 +285,7 @@ export async function buildTestApp(deps: Partial<AppDeps> = {}, config: Partial<
   );
   return {
     app,
+    parkActivity,
     account,
     service,
     profile,
@@ -355,3 +360,4 @@ export const mockRewardsRepository = () =>
   mockAll<RewardsRepository>(['settle', 'balance', 'qualifyingDays', 'badgeStats', 'history', 'addMilestones', 'inviterDue']);
 export const mockShopRepository = () =>
   mockAll<ShopRepository>(['categories', 'partners', 'findPartner', 'products', 'findProduct', 'redeem', 'cancel', 'listOwn', 'findOwn']);
+export const mockParkActivityRepository = () => mockAll<ParkActivityRepository>(['findPublicParks', 'visiblePlans']);

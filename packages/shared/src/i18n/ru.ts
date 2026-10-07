@@ -62,6 +62,7 @@ export const ru: Messages = {
   'validation.bboxTooLarge': 'область карты может быть не более {{max}} градусов',
   'validation.inviteCode': 'код приглашения состоит из 8 букв или цифр',
   'validation.maxDogs': 'максимальное число собак: {{max}}',
+  'validation.parkIds': 'укажите от 1 до {{max}} идентификаторов парков через запятую',
 
   'errors.badRequest': 'Неверный запрос',
   'errors.unauthorized': 'Пожалуйста, войдите в аккаунт',

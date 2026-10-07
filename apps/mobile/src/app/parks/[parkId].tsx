@@ -2,7 +2,7 @@ import type { ParkDetail } from '@kapp/shared';
 import { Image } from 'expo-image';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { ReduceMotion, ZoomIn } from 'react-native-reanimated';
 
 import { Button } from '@/components/button';
@@ -24,21 +24,12 @@ import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { useActiveCheckIn, useEndCheckIn, useParkReviews, useParkVisitors } from '@/hooks/use-visits';
 import { useTheme } from '@/hooks/use-theme';
 import { errorMessage } from '@/lib/api';
+import { openDirections } from '@/lib/directions';
 import { formatKm, formatRating, formatTime, reviewsLabel } from '@/lib/format';
 import { haptic } from '@/lib/haptics';
 import { POP_SPRING } from '@/lib/motion';
 
 const FEATURES = ['fenced', 'smallDogArea', 'water', 'lighting'] as const satisfies readonly (keyof ParkDetail)[];
-
-/** Opens Apple Maps on iOS and the default maps app on Android with walking directions. */
-function openDirections(park: ParkDetail) {
-  const label = encodeURIComponent(park.name);
-  const url =
-    Platform.OS === 'ios'
-      ? `maps://?daddr=${park.lat},${park.lng}&dirflg=w&q=${label}`
-      : `geo:${park.lat},${park.lng}?q=${park.lat},${park.lng}(${label})`;
-  Linking.openURL(url);
-}
 
 /** The header heart; re-keyed on change so it pops (one spring) when toggled. Static with Reduce Motion. */
 function Heart({ filled }: { filled: boolean }) {

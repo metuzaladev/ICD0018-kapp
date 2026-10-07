@@ -47,6 +47,8 @@ import { rewardsRoutes } from './modules/rewards/rewards.routes';
 import type { RewardsService } from './modules/rewards/rewards.service';
 import { shopRoutes } from './modules/shop/shop.routes';
 import type { ShopService } from './modules/shop/shop.service';
+import { parkActivityRoutes } from './modules/park-activity/park-activity.routes';
+import type { ParkActivityService } from './modules/park-activity/park-activity.service';
 import { visitsRoutes } from './modules/visits/visits.routes';
 import type { VisitsService } from './modules/visits/visits.service';
 
@@ -74,6 +76,8 @@ export interface AppDeps {
   placePostsService: PlacePostsService;
   rewardsService: RewardsService;
   shopService: ShopService;
+  /** M11 "Lemmikparkides täna" on Home (docs/18). */
+  parkActivityService: ParkActivityService;
   /** M10 deletion, export, legal acceptance, confirmation resend (docs/17). */
   accountService: AccountService;
   /** When the request's session started (re-authentication window); absent = unknown (treated as old). */
@@ -170,6 +174,7 @@ export async function buildApp(deps: AppDeps, config: AppConfig = defaultAppConf
   await app.register(visitsRoutes, { prefix: API_PREFIX, service: deps.visitsService, resolveUserId });
   await app.register(reviewsRoutes, { prefix: API_PREFIX, service: deps.reviewsService, resolveUserId });
   await app.register(reportsRoutes, { prefix: API_PREFIX, service: deps.reportsService, resolveUserId });
+  await app.register(parkActivityRoutes, { prefix: API_PREFIX, service: deps.parkActivityService, resolveUserId });
   await app.register(parksRoutes, { prefix: API_PREFIX, service: deps.parksService, resolveUserId });
   await app.register(friendsRoutes, { prefix: API_PREFIX, service: deps.friendsService, resolveUserId });
   await app.register(messagesRoutes, { prefix: API_PREFIX, service: deps.messagesService, resolveUserId });

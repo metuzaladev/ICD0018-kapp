@@ -125,7 +125,11 @@ function MapScreen() {
     );
   }
 
-  const tabBarSpace = insets.bottom + ios.tabBarHeight + Spacing.three;
+  // Space between the bottom block and the floating tab bar. Inside a NativeTabs screen the safe-area
+  // bottom inset already includes the tab bar (34 + 49 = 83 pt on iPhone); adding the bar height on
+  // top of it lifted the card ~50 pt above the bar. Add it only where the inset does not include it.
+  const tabBarTop = insets.bottom >= ios.tabBarHeight ? insets.bottom : insets.bottom + ios.tabBarHeight;
+  const tabBarSpace = tabBarTop + Spacing.two;
   const bottomBlock = BOTTOM_CARD + Spacing.three + 52;
   const mapError = error ?? placesQuery.error;
 
@@ -145,8 +149,9 @@ function MapScreen() {
         overlay={{ top: insets.top + TOP_UI, bottom: tabBarSpace + bottomBlock }}
         locateSignal={locateSignal}
       />
-      {/* Status bar legibility over the tiles (Figma top fade). */}
-      <Fade direction="up" style={{ top: 0, height: insets.top + 40 }} />
+      {/* Figma top fade, down to the chips row: status bar stays legible and pins sliding under the
+          search and chips fade out instead of being cut by the floating controls (M11). */}
+      <Fade direction="up" style={{ top: 0, height: insets.top + TOP_UI + Spacing.three }} />
 
       <View style={[styles.top, { paddingTop: insets.top + Spacing.two }]} pointerEvents="box-none">
         <View style={styles.searchRow}>
@@ -233,7 +238,7 @@ function MapScreen() {
               <EmptyState title={query ? t('map.noMatches') : t('map.emptyPlaces')} />
             </View>
           ) : null}
-          {nearest ? <NearestParkCard park={nearest} floating /> : null}
+          {nearest ? <NearestParkCard park={nearest} usingFallback={location.usingFallback} floating /> : null}
         </View>
       )}
     </View>
@@ -251,7 +256,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.two,
     paddingLeft: Spacing.three,
-    paddingRight: Spacing.two,
+    // (52 − 32 pt Points Badge) / 2: the pill is inset equally on the right, top and bottom.
+    paddingRight: 10,
     borderRadius: 18,
     borderWidth: 1,
     shadowColor: '#000',

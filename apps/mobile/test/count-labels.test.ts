@@ -4,7 +4,7 @@ import { afterAll, describe, expect, it, vi } from 'vitest';
 vi.mock('expo-localization', () => ({ getLocales: () => [{ languageTag: 'et-EE', languageCode: 'et' }] }));
 
 import i18n from '@/i18n';
-import { dogsLabel, formatAgo, formatNumber, friendsInParkLabel, pawsLabel } from '@/lib/format';
+import { dogsLabel, formatAgo, formatList, formatNumber, friendsInParkLabel, pawsLabel, plannedVisitsLabel } from '@/lib/format';
 
 /**
  * Counted nouns on the M9 map pins ("6 koera"), park cards ("3 sõpra pargis") and the Käpad badge
@@ -86,5 +86,23 @@ describe('count labels', () => {
       expect(formatAgo('2026-09-27T12:00:00Z', now)).toBe('5 дней назад');
     });
     await inLanguage('en', () => expect(formatAgo('2026-09-30T12:00:00Z', now)).toBe('2 days ago'));
+  });
+
+  it('M11: planned visits and friend name lists', async () => {
+    await inLanguage('et', () => {
+      expect(plannedVisitsLabel(1)).toBe('1 plaanitud külastus');
+      expect(plannedVisitsLabel(4)).toBe('4 plaanitud külastust');
+      expect(formatList([])).toBe('');
+      expect(formatList(['Mari'])).toBe('Mari');
+      expect(formatList(['Mari', 'Jaan'])).toBe('Mari ja Jaan');
+      expect(formatList(['Mari', 'Jaan', 'Luna'])).toBe('Mari, Jaan ja Luna');
+    });
+    await inLanguage('ru', () => {
+      expect(plannedVisitsLabel(1)).toBe('1 запланированный визит');
+      expect(plannedVisitsLabel(3)).toBe('3 запланированных визита');
+      expect(plannedVisitsLabel(5)).toBe('5 запланированных визитов');
+      expect(formatList(['Мари', 'Яан'])).toBe('Мари и Яан');
+    });
+    await inLanguage('en', () => expect(formatList(['Mari', 'Jaan', 'Luna'])).toBe('Mari, Jaan and Luna'));
   });
 });

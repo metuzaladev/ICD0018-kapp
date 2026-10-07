@@ -137,7 +137,11 @@ Figma tekstid on kasutusel kõigil olemasolevatel ekraanidel. Näidisandmed (nim
 | Permissions / Location (M9) | täisekraan, kaardi eelvaade, kolm eelist, „Luba asukoht", „Valin piirkonna ise" | täisekraan Kaardi vahekaardil, kuni luba on otsustamata (sessiooni jooksul „Mitte praegu" peidab); „Mitte praegu"; keelatud olekus näidatakse uuesti alles „Näita minu asukohta" vajutusel | Piirkonna valikut pole veel; keelatud loaga kasutajat ei blokeerita igal käivitusel. |
 | Home / Today | „Õue, Freddy?" | koera nimi, kui koer on üks; muidu omaniku eesnimi | Mitme koera korral ei saa ühte valida. |
 | Home / Today (M9) | suur koerafoto, käpad „320" | kasutaja koera profiilifoto, kui see on olemas, muidu brändi corgi (dekoratiivne); Käpad-märk peidetud | Käpad tulevad M9b-ga; väljamõeldud saldot ei näidata. |
-| Home / Today (M9) | „Lähim park" + „Oleme siin" | sama (lähim park API järjestusest), „Oleme siin" avab check-in'i; seal juba olles „Oled siin" → pargi leht | Olemasolev check-in voog. |
+| Home / Today (M9, M11) | „Lähim park" + „Oleme siin" | lähim **koertepark** (ujumiskoht ainult siis, kui muud pole); nupp kauguse järgi: ≤ 300 m „Oleme siin" (check-in), kaugemal „Juhata kohale", asukohata „Vaata parki", seal juba olles „Oled siin" → pargi leht; sama kaardil | Tootejuhi tagasiside: 1+ km kauguselt „Oleme siin" pole tõsi (docs/18). |
+| Home / Today (M11) | „Kolmapäev, 30. september · Tallinn", „Teie lähedal" | kuupäev ilma linnata; „Sinu lähedal" | Pargid on üle Eesti; äpp kasutab „sina"-vormi. |
+| Home / Today (M11) | — | jaotised „Lemmikparkides täna" (koerad praegu, plaanid hommikul/päeval/õhtul, sõbrad) ja „Kogukonna soovitused" (3 soovitust, „Vaata kõiki") | Tootejuhi soov; Figmas veel pole (docs/18). |
+| Explore / Map (M11) | üksikud nööpnõelad | lähedased vaiksed kohad liidetakse klastriks (brändiring, käpp, arv); koertega pargid ja kasutaja täpp alati peal; kaart avaneb linna suumil | 71 päris parki kattusid ja peitsid kaardi sildid (docs/18). |
+| Points Badge (M11) | 56:113 pill | sama pill, 32 pt kõrge ja rea keskel; otsinguväljas 10 pt vahe igast servast | Märk istus otsinguväljas kõrgel (`alignSelf: flex-start`). |
 | Home / Visit / Active | „Freddy on Kadrioru koerapargis.", „Olete nähtavad kuni 18.00" | „Head mängimist!" + pargi nimi + „Freddy · kuni 18.00" / pargi lehel „Oled pargis kuni 18.00" | Pargi nime ei käänata; nähtavus sõltub privaatsusseadest. |
 | Home | vahekaart „Lisa" | puudub | Lisamise voog (park, plaan) pole veel üks ekraan. |
 | Explore / Map (M9) | täisekraani kaart, otsing + käpad, filtrid, kiibid Kõik / Pargid / Kohvikud / Teenused / Rannad / Kliinikud, „Lähim park" | sama; kiibid **Kõik / Pargid / Teenused / Kliinikud** (Kohvikud ja Rannad peidetud kuni M9b andmeteni); otsing filtreerib kaardil nime järgi; lisatud nimekirja nupp | Andmeteta filter näitaks alati tühja kaarti. Nimekiri on ligipääsetav alternatiiv kaardi nööpnõeltele. |
@@ -206,6 +210,36 @@ Figma tekstid on kasutusel kõigil olemasolevatel ekraanidel. Näidisandmed (nim
 | „Иду в парк X пятница, 2 окт. в 17:00" (nimetav pärast eessõnata tegusõna) | „Иду в парк X: пятница, 2 окт., 17:00"; eesti „Lähen parki X: reede, 2. okt kell 17.00" |
 
 **Reegel:** kuu- või nädalapäeva nime (Intl annab nimetava) ei panda eesti ega vene keeles eessõna või käänet nõudva sõna järele („kuni laupäev", „до суббота", „с октябрь"). Kasuta sildivormi („Tühistamise tähtaeg: …", „Sünnikuupäev: …") või numbrilist kuupäeva.
+
+### M11 tekstide ülevaade
+
+Tootejuhi palve „tekst oleks loogiline": `et.json` läbi vaadatud ekraanide kaupa, tähendus peegeldatud `en.json`-i ja `ru.json`-i. Põhimõtted: tekst ei luba midagi, mida äpp ei tee; „sina"-vorm; üks termin ühe asja kohta (**koertepark**, **soovitus** kogukonna postituse kohta, **Avasta** = vaade, **kohalolek** = check-in, nupp „Oleme siin"); lausekirjas pealkirjad, hüüumärke säästlikult.
+
+| Võti | Enne | Pärast | Miks |
+|---|---|---|---|
+| „Lähim park" nupp | „Oleme siin" (alati) | ≤ 300 m „Oleme siin", muidu „Juhata kohale" / „Vaata parki" | Kilomeetri kauguselt pole „oleme siin" tõsi. |
+| `onboarding.connect.pawsBody` | „Iga jalutuskäik ja pargikülastus toob soodustusi partneritelt." | „Pargikülastused, peetud plaanid ja soovitused toovad käppi, mida saad partnerite juures soodustuseks vahetada." | Jalutuskäigud ei teeni (docs/16). |
+| `onboarding.connect.planTitle` | „Planeeri jalutuskäik" | „Planeeri pargikäik" | Plaan on pargikülastus. |
+| `onboarding.discover.seeBody` | „Koerte arv ja nende tempo…" | „Näed koerte arvu juba enne, kui kodust välja astud." | „Tempot" äpp ei näita. |
+| `onboarding.discover.crewBody` | „Väikesed, rahulikud või mängulised: vali, mis teie koerale sobib." | „Aiaga park, ujumiskoht või valgustus: vali, mis sinu koerale sobib." | Suuruse/meeleolu filtreid pole; olemasolevad filtrid; „sina". |
+| `home.idleBody` | „Märgi pargis kohalolek või planeeri käik, et sõbrad teaksid tulla." | „Planeeri pargikäik, siis saavad sõbrad teate. Pargis olles märgi kohalolek." | Plaan teavitab sõpru; kohalolekut näevad nad ainult privaatsusseade järgi. |
+| `home.subtitle` | „{kuupäev} · Tallinn" | „{kuupäev}" | Pargid ja kasutajad on üle Eesti. |
+| `home.nearby`, `location.title`, `filters.title`, `review.title` | „Teie lähedal", „Mis on teie lähedal?", „Just teile sobiv.", „Kuidas teil läks?" | „Sinu lähedal", „Mis on sinu lähedal?", „Just sulle sobiv.", „Kuidas läks?" | „Sina"-vorm järjekindlalt. |
+| `parkRow.quiet` | „hetkel vaikne" | „praegu vaikne" | Sama sõna nagu „Praegu on pargis vaikne", „6 koera praegu". |
+| `filters.water`, `park.feature.water`, `parkCard.tag.water` | „Joogivesi olemas", „Vesi" | „Ujumiskoht koertele", „Ujumiskoht", „Ujumine" | Päris andmetes tähistab `water` ujumiskohta (`park-import.ts`), joogivee andmeid pole. |
+| `dogs.list.emptyBody`, `dogs.edit.subtitle` | „…aitavad leida sobivat seltskonda / mängukaaslasi." | „Tõug, vanus ja iseloom aitavad pargisõpradel sinu koera tundma õppida." / „Nime ja tõugu näevad kõik, vanust ja iseloomu ainult sinu sõbrad." | Sobitamist pole; ütleb, kes mida näeb (docs/12). |
+| `friends.emptyBody` | „Ava koera profiil ja saada omanikule sõbrakutse." | „Pargi lehel näed, kes on praegu kohal. Ava nende profiil või otsi sõpra nime järgi." | Kutse saadetakse inimese profiililt, koera profiililt ei saa. |
+| `privacy.presenceHint` | „…Sõbrad näevad ka sinu plaane." (vene keeles puudus esimene lause) | „…Sama valik kehtib plaanidele: avalehe pargitegevuses näevad sinu nime ainult sõbrad, teised ainult arvu." | M11 plaanide loendus (docs/12). |
+| `settings.notificationsSub` | „Sõbrad, sõnumid ja plaanid" | „Sõnumid, sõbrad, broneeringud ja käpad" | Lülitid on ka broneeringutele ja käppadele. |
+| `rewards.streak` | „3 päeva järjest õues" | „3 päeva järjest pargis" | Seeria loeb pargipäevi. |
+| `rewards.badges.kadriorg_legend.name` | „Pargi legend" | „Püsikülaline" | Segunes tasemega „Pargilegend". |
+| `rewards.reasons.place_post.body`, `suggest.earnTitleNoPoints`, `suggest.earnBody` | „Kui kogukond kinnitab", „Kogukond kinnitab koha" | „Kui soovitus avaldatakse", „Vaatame soovituse üle" | Üle vaatab Käpa meeskond, mitte kogukond. |
+| `explore.report.*`, `nav.reportPost`, `suggest.submit` | „Teavita postitusest", „Mis selle postitusega…", „Postita" | „Teavita soovitusest", „Mis selle soovitusega…", „Saada soovitus" | Üks termin: soovitus. |
+| `explore.mine.emptySaved` | „Vajuta kaardil järjehoidjat…" | „Vajuta soovitusel järjehoidjat…" | Järjehoidja on voos, mitte kaardil. |
+| `booking.usePawsNote` | „Makse ikka partneri juures." | „Maksad ikka partneri juures." | Loomulikum. |
+| `points.openHint` | „Avab Käpad" | „Avab käppade vaate" | Käändes. |
+| iOS asukohaloa tekst | „…lähimaid koeraparke…" | „…lähimaid koerteparke…" | Päris andmete termin. |
+
 
 ## Mida pole kontrollitud
 

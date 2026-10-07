@@ -1,4 +1,4 @@
-import type { Park, ParkDetail } from '@kapp/shared';
+import type { Park, ParkActivityResponse, ParkDetail } from '@kapp/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { apiGet, apiSend } from '@/lib/api';
@@ -13,6 +13,7 @@ export const parkKeys = {
   nearby: (origin: { lat: number; lng: number }, filters: ParkFilters) => ['parks', 'nearby', origin, filters] as const,
   detail: (parkId: string) => ['parks', 'detail', parkId] as const,
   favorites: ['parks', 'favorites'] as const,
+  activity: (ids: readonly string[]) => ['parks', 'activity', ids] as const,
 };
 
 export function useNearbyParks(origin: { lat: number; lng: number }, filters: ParkFilters) {
@@ -35,6 +36,21 @@ export function useParkDetail(parkId: string) {
 
 export function useFavoriteParks() {
   return useQuery({ queryKey: parkKeys.favorites, queryFn: () => apiGet<Park[]>('/me/favorites') });
+}
+
+/**
+ * M11 "Lemmikparkides täna" (docs/18): dogs now and today's planned visits per part of day for the
+ * given parks. Under ['parks'], so a check-in or a favourite change refreshes it with the rest;
+ * people come and go, so it is stale after a minute like the visitor list.
+ */
+export function useParkActivity(ids: readonly string[]) {
+  return useQuery({
+    queryKey: parkKeys.activity(ids),
+    queryFn: () => apiGet<ParkActivityResponse>('/parks/activity', { ids: ids.join(',') }),
+    enabled: ids.length > 0,
+    staleTime: 60_000,
+    placeholderData: (previous) => previous,
+  });
 }
 
 /**

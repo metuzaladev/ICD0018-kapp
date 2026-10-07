@@ -7,7 +7,9 @@ import { Button } from '@/components/button';
 import { Entering } from '@/components/entering';
 import { ListRow } from '@/components/list-row';
 import { OfflineBanner } from '@/components/offline-banner';
+import { CommunityPicks } from '@/components/community-picks';
 import { NearestParkCard } from '@/components/nearest-park-card';
+import { ParkActivitySection } from '@/components/park-activity-section';
 import { ParkCard } from '@/components/park-card';
 import { PointsBadge } from '@/components/points-badge';
 import { Screen } from '@/components/screen';
@@ -20,17 +22,22 @@ import { photoSource } from '@/hooks/use-photos';
 import { useMyDogs } from '@/hooks/use-dogs';
 import { useFriendPlans } from '@/hooks/use-friends';
 import { useHealthReminders } from '@/hooks/use-health';
-import { useNearbyParks } from '@/hooks/use-parks';
+import { usePlacePostFeed } from '@/hooks/use-explore';
+import { useFavoriteParks, useNearbyParks, useParkActivity } from '@/hooks/use-parks';
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 import { useActiveCheckIn, usePlannedVisits } from '@/hooks/use-visits';
+import { errorMessage } from '@/lib/api';
 import { authClient } from '@/lib/auth-client';
+import { DEFAULT_FEED_FILTERS, feedQueryParams } from '@/lib/explore';
 import { dueLabel, formatDate, formatDay, formatTime, formatToday } from '@/lib/format';
+import { activityParkIds, COMMUNITY_PICKS, communityPicks } from '@/lib/home-activity';
+import { parkKindOf } from '@/lib/map-categories';
 import { useParkFilters } from '@/state/park-filters';
 
 /**
  * Figma 02 / Home / Today (10:69, M9 light redesign): "käpp" + Käpad badge, greeting, a dog photo,
- * current visit, own plans, friends' plans (M5), health reminders, the "Lähim park" card with
- * "Oleme siin" (replaces the old "Leia lähim park" button) and nearby parks as Park Cards.
+ * current visit, the "Lähim park" card (main action by distance), M11 "Lemmikparkides täna", own
+ * plans, friends' plans (M5), M11 "Kogukonna soovitused", health reminders and nearby parks.
  */
 export default function HomeScreen() {
   const { t } = useTranslation();
@@ -43,15 +50,34 @@ export default function HomeScreen() {
   const remindersQuery = useHealthReminders();
   const { data: dogs } = useMyDogs();
   const friendPlansQuery = useFriendPlans();
+  const favoritesQuery = useFavoriteParks();
   const { data: parks = [] } = nearby;
   const { data: active } = activeQuery;
   const { data: plans = [] } = plansQuery;
   const { data: reminders = [] } = remindersQuery;
   const { data: friendPlans = [] } = friendPlansQuery;
-  const refresh = usePullToRefresh(nearby.refetch, activeQuery.refetch, plansQuery.refetch, remindersQuery.refetch, friendPlansQuery.refetch);
+  // M11: favourites decide the activity parks; until they are known nothing is asked (no flash of
+  // the nearest-park fallback for a user who has favourites).
+  const activityTarget = activityParkIds(favoritesQuery.data, parks);
+  const activityEnabled = favoritesQuery.isSuccess && activityTarget.ids.length > 0;
+  const activityQuery = useParkActivity(activityEnabled ? activityTarget.ids : []);
+  // Same feed as Avasta "Lähedal", a few rows only (own pending posts are filtered out below).
+  const feedQuery = usePlacePostFeed({ ...feedQueryParams(DEFAULT_FEED_FILTERS, location.origin), limit: COMMUNITY_PICKS + 2 });
+  const picks = communityPicks(feedQuery.data?.pages[0]?.items ?? []);
+  const refresh = usePullToRefresh(
+    nearby.refetch,
+    activeQuery.refetch,
+    plansQuery.refetch,
+    remindersQuery.refetch,
+    friendPlansQuery.refetch,
+    favoritesQuery.refetch,
+    activityQuery.refetch,
+    feedQuery.refetch,
+  );
   // Figma asks the dog ("Õue, Freddy?"); with several dogs (or none) the owner is greeted instead.
   const greetName = dogs?.length === 1 ? dogs[0]!.name : session?.user.name.split(' ')[0];
   const heroPhoto = dogs?.find((d) => d.profilePhoto)?.profilePhoto?.url ?? null;
+  const nearestPark = parks.find((p) => parkKindOf(p) === 'park') ?? parks[0];
   const openPark = (parkId: string) => router.push({ pathname: '/parks/[parkId]', params: { parkId } });
 
   return (
@@ -91,15 +117,26 @@ export default function HomeScreen() {
           </ThemedText>
           <Button label={t('home.openPark')} variant="secondary" onPress={() => openPark(active.park.id)} />
         </ThemedView>
+      ) : null}
+      {/* No idle "how to use" card: when not in a park, the nearest park and the activity in the
+          user's parks below answer "what now?" with real data, and they move up the screen (M11). */}
+
+      {/* Figma Home: the nearest dog park right under today's card — the main action of the app
+          ("Oleme siin" nearby, directions from further away; same choice as on the map). */}
+      {nearestPark ? (
+        <NearestParkCard park={nearestPark} usingFallback={location.usingFallback} />
       ) : (
-        <ThemedView type="soft" style={styles.card}>
-          <ThemedText type="heading">{t('home.idleTitle')}</ThemedText>
-          <ThemedText themeColor="muted">{t('home.idleBody')}</ThemedText>
-        </ThemedView>
+        <Button label={t('home.findPark')} onPress={() => router.navigate('/map')} />
       )}
 
-      {/* Figma Home: the nearest park with "Oleme siin" right under today's card — the main action of the app. */}
-      {parks[0] ? <NearestParkCard park={parks[0]} /> : <Button label={t('home.findPark')} onPress={() => router.navigate('/map')} />}
+      {/* Hidden when favourites cannot be loaded: "no favourites yet" would be wrong then. */}
+      {favoritesQuery.isError && !favoritesQuery.data ? null : (
+        <ParkActivitySection
+          query={activityQuery}
+          source={activityTarget.source}
+          loading={favoritesQuery.isPending || (activityEnabled && activityQuery.isPending)}
+        />
+      )}
 
       {plans.slice(0, 2).map((p, i) => (
         <Entering key={p.id} index={i}>
@@ -128,6 +165,13 @@ export default function HomeScreen() {
         ))}
         <Button label={t('home.findFriends')} variant="secondary" onPress={() => router.push('/friends')} />
       </ThemedView>
+
+      <CommunityPicks
+        posts={picks}
+        loading={feedQuery.isPending}
+        error={feedQuery.error && !feedQuery.data ? { message: errorMessage(feedQuery.error), retry: () => void feedQuery.refetch(), retrying: feedQuery.isFetching } : null}
+        onSuggest={() => router.push('/suggest-place')}
+      />
 
       {reminders.length > 0 ? (
         <>
@@ -171,6 +215,8 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.three },
   headerText: { flex: 1, gap: 2 },
   // Figma 342 × 184 at 390 pt; the ratio keeps it right on every width.
-  hero: { width: '100%', aspectRatio: 342 / 184, borderRadius: Radius[24] },
+  // Lower than the Figma 342×184: Home now carries park activity and community picks, which should
+  // start above the fold on a 6.1" phone.
+  hero: { width: '100%', aspectRatio: 342 / 120, borderRadius: Radius[24] },
   card: { padding: Spacing.four, borderRadius: Radius[16], gap: Spacing.two },
 });

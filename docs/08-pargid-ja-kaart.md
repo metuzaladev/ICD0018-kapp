@@ -16,7 +16,7 @@
 ## Otsused ja põhjused
 
 - **Asukoht ümardatakse ~100 m täpsuseni**, enne kui see API-le läheb. Lähima pargi leidmiseks piisab sellest ja server ei saa kunagi kasutaja täpset asukohta. See hoiab ka vahemälu võtme stabiilsena, kui kasutaja seisab paigal.
-- **Kaamera sobitatakse kasutaja ja kõigi parkide piiridesse**, aga alles pärast `onDidFinishLoadingMap`-i. Enne stiili laadimist saadetud kaamerakäsud jätab natiivne kaart tähelepanuta (leitud simulaatoris testides).
+- ~~Kaamera sobitatakse kasutaja ja kõigi parkide piiridesse~~ — M11: 71 päris pargiga tähendas see kogu Eestit; kaart avaneb nüüd kasutaja (või Tallinna) kohal suumil 12,5 ja lähedased nööpnõelad liidetakse klastriteks ([18-avalehe-tegevus.md](18-avalehe-tegevus.md#kaart-klastrid)). Kaamerakäsud saadetakse alles pärast `onDidFinishLoadingMap`-i. Enne stiili laadimist saadetud kaamerakäsud jätab natiivne kaart tähelepanuta (leitud simulaatoris testides).
 - **Lemmikud on `PUT`/`DELETE`, mitte `POST`.** Topeltvajutus või võrgutõrke järel kordamine ei tekita duplikaate.
 - **Mitteavalik park annab 404** ka lemmikuks lisamisel, et modereerimata parkide ID-sid ei saaks välja selgitada.
 - **Lemmiku eemaldamine ei kontrolli parki**, et kasutaja saaks eemaldada ka hiljem tagasi lükatud pargi.

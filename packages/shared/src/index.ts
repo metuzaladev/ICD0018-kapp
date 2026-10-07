@@ -8,3 +8,4 @@ export * from './tokens';
 export * from './validation';
 export * from './legal';
 export * from './activity';
+export * from './search';

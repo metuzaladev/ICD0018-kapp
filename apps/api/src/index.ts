@@ -26,6 +26,7 @@ import { createShutdown, type ShutdownStep } from './lib/graceful-shutdown';
 import { serializeReply, serializeRequest } from './lib/log-serializers';
 import { createRateLimitRedis, createRealtimeRedisAdapter } from './lib/redis-clients';
 import { createServices, createStorageFromEnv } from './services';
+import { createInAdsLookup, noAddressLookup } from './modules/search/address-lookup';
 
 const isProduction = env.NODE_ENV === 'production';
 // JSON lines on stdout: the container platform collects them (docs/15). No personal data:
@@ -97,6 +98,14 @@ const services = createServices(db, storage, env.SERVICE_TIMEOUT_MS, {
   storageCleanup,
   accountAuth: createAccountAuth(auth),
   accountLog: logger,
+  addressLookup: env.ADDRESS_SEARCH_ENABLED
+    ? createInAdsLookup({
+        baseUrl: env.ADDRESS_SEARCH_URL,
+        timeoutMs: env.ADDRESS_SEARCH_TIMEOUT_MS,
+        // Ids only, never the query (it can be someone's home address).
+        onError: (error) => logger.warn({ err: error instanceof Error ? error.message : String(error) }, 'address search unavailable'),
+      })
+    : noAddressLookup,
 });
 const reminderWorker = env.PUSH_WORKER_ENABLED
   ? startBookingReminderWorker(queueConnection, (bookingId) => services.bookingsService.sendReminder(bookingId), logger)

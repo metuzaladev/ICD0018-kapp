@@ -42,6 +42,8 @@ import type { ShopService } from '../src/modules/shop/shop.service';
 import type { ParkActivityRepository } from '../src/modules/park-activity/park-activity.repository';
 import type { ParkActivityService } from '../src/modules/park-activity/park-activity.service';
 import type { AccountService } from '../src/modules/account/account.service';
+import type { SearchRepository } from '../src/modules/search/search.repository';
+import type { SearchService } from '../src/modules/search/search.service';
 
 export const PARK_ID = '4ddabe8d-7306-4724-a125-ace7ae3a87b9';
 export const USER_ID = 'user_test_1';
@@ -253,9 +255,11 @@ export async function buildTestApp(deps: Partial<AppDeps> = {}, config: Partial<
   const account =
     (deps.accountService as Mocked<AccountService> | undefined) ?? mockAll<AccountService>(['deleteAccount', 'acceptLegal', 'exportData', 'resendVerification']);
   const parkActivity = (deps.parkActivityService as Mocked<ParkActivityService> | undefined) ?? mockAll<ParkActivityService>(['today']);
+  const search = (deps.searchService as Mocked<SearchService> | undefined) ?? mockAll<SearchService>(['search']);
   const app = await buildApp(
     {
       parkActivityService: parkActivity,
+      searchService: search,
       accountService: account,
       resolveSessionStart: deps.resolveSessionStart,
       placePostsService: placePosts,
@@ -286,6 +290,7 @@ export async function buildTestApp(deps: Partial<AppDeps> = {}, config: Partial<
   return {
     app,
     parkActivity,
+    search,
     account,
     service,
     profile,
@@ -361,3 +366,4 @@ export const mockRewardsRepository = () =>
 export const mockShopRepository = () =>
   mockAll<ShopRepository>(['categories', 'partners', 'findPartner', 'products', 'findProduct', 'redeem', 'cancel', 'listOwn', 'findOwn']);
 export const mockParkActivityRepository = () => mockAll<ParkActivityRepository>(['findPublicParks', 'visiblePlans']);
+export const mockSearchRepository = () => mockAll<SearchRepository>(['places']);

@@ -64,6 +64,22 @@ export function PlacePin({ kind, selected = false }: { kind: PlaceKind; selected
   );
 }
 
+/**
+ * The address chosen in the map search (docs/19): a brand pin with a map-pin icon, slightly larger
+ * than place pins so it reads as "you asked for this" among them.
+ */
+export function SearchPin() {
+  const c = useTheme();
+  return (
+    <View style={[styles.pin, styles.shadow]}>
+      <View style={[styles.bubble, styles.searchBubble, { backgroundColor: c.brand, borderColor: c.mapPinRing }]}>
+        <Icon name="map-pin" size={22} color={c.onBrand} />
+      </View>
+      <Tail color={c.brand} width={14} />
+    </View>
+  );
+}
+
 type DogPinProps = {
   /** Up to three faces (signed thumbnail URL, bundled sample image, or null → paw placeholder). */
   faces: (string | number | null)[];
@@ -139,6 +155,7 @@ export function UserDot() {
 
 const styles = StyleSheet.create({
   pin: { alignItems: 'center' },
+  searchBubble: { width: 46, height: 46, borderRadius: 23 },
   cluster: {
     alignItems: 'center',
     justifyContent: 'center',

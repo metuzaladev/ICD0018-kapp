@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
-import { ClusterPin, DogPin, PlacePin, UserDot } from '@/components/map-pins';
+import { ClusterPin, DogPin, PlacePin, SearchPin, UserDot } from '@/components/map-pins';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 import { useTheme } from '@/hooks/use-theme';
@@ -13,6 +13,7 @@ import { placeKindOf, type LngLatBox } from '@/lib/explore';
 import { CITY_ZOOM, clustersIn, createClusterIndex, debounce, expansionTarget, WORLD_BOX } from '@/lib/map-clusters';
 import { parkKindOf, parkPinModel } from '@/lib/map-categories';
 import { MAP_STYLE } from '@/lib/map-style';
+import { stepZoom } from '@/lib/map-search';
 
 type Point = { lat: number; lng: number };
 
@@ -31,13 +32,17 @@ type ParkMapProps = {
   onPlacePress?: (place: MapPlace) => void;
   /** Visible box after the user (or the camera) moved the map: drives the places query. */
   onRegionChange?: (bounds: LngLatBox) => void;
-  /** One-shot "centre here" (post "Kaardil"); replaces the initial camera when present. */
-  focus?: { lat: number; lng: number; nonce: number } | null;
+  /** One-shot "centre here" (post "Kaardil", a search result); replaces the initial camera when present. */
+  focus?: { lat: number; lng: number; nonce: number; zoom?: number } | null;
   onFocusApplied?: (nonce: number) => void;
   /** Space covered by floating UI (search + chips above, nearest-park card and tab bar below). */
   overlay: { top: number; bottom: number };
   /** Incremented by the locate button: the camera returns to `center`. */
   locateSignal?: number;
+  /** + / − buttons: each new nonce zooms one level in (1) or out (−1) around the current centre. */
+  zoomSignal?: { direction: 1 | -1; nonce: number } | null;
+  /** The address chosen in the search (docs/19): a marker so the user sees where the map took them. */
+  searchPin?: { lat: number; lng: number; name: string } | null;
 };
 
 /** What goes into the cluster index: quiet parks and places. Parks with dogs are drawn on their own. */
@@ -47,7 +52,7 @@ type Clusterable = { key: string; lat: number; lng: number } & ({ kind: 'park'; 
  * Marker stacking (iOS: layer zPosition, explicit so it does not depend on latitude): quiet pins
  * under clusters, live dog pins above both, the user's own position always on top.
  */
-const Z = { place: 10, cluster: 20, dogs: 30, me: 100 } as const;
+const Z = { place: 10, cluster: 20, dogs: 30, search: 40, me: 100 } as const;
 
 /** Region changes within this window are coalesced before clusters are recomputed. */
 const REGION_DEBOUNCE_MS = 120;
@@ -78,6 +83,8 @@ export function ParkMap({
   onFocusApplied,
   overlay,
   locateSignal = 0,
+  zoomSignal = null,
+  searchPin = null,
 }: ParkMapProps) {
   const c = useTheme();
   const { t } = useTranslation();
@@ -90,6 +97,8 @@ export function ParkMap({
   // Visible box + zoom the clusters are computed for; the whole world until the first report.
   const [view, setView] = useState<{ bounds: LngLatBox; zoom: number }>({ bounds: WORLD_BOX, zoom: CITY_ZOOM });
   const setViewSoon = useMemo(() => debounce(setView, REGION_DEBOUNCE_MS), []);
+  // Latest zoom, updated at once (not debounced) so quick + / − taps add up instead of repeating.
+  const zoomRef = useRef(CITY_ZOOM);
   useEffect(() => () => setViewSoon.cancel(), [setViewSoon]);
   // Exact position for the "you are here" dot (the `center` prop is rounded to ~100 m for the API).
   const position = useCurrentPosition({ enabled: showUserLocation, minDisplacement: 5 });
@@ -112,7 +121,9 @@ export function ParkMap({
   useEffect(() => {
     if (!loaded || !focus) return;
     handedOver.current = true;
-    camera.current?.easeTo({ center: [focus.lng, focus.lat], zoom: 15, padding, duration: cameraDuration });
+    const zoom = focus.zoom ?? 15;
+    zoomRef.current = zoom;
+    camera.current?.easeTo({ center: [focus.lng, focus.lat], zoom, padding, duration: cameraDuration });
     onFocusApplied?.(focus.nonce);
     // Only a new focus request (nonce) moves the camera.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -128,10 +139,21 @@ export function ParkMap({
 
   useEffect(() => {
     if (!loaded || locateSignal === 0) return;
+    zoomRef.current = 14;
     camera.current?.easeTo({ center: [center.lng, center.lat], zoom: 14, padding, duration: cameraDuration });
     // Only the button press (signal change) moves the camera.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locateSignal]);
+
+  useEffect(() => {
+    if (!loaded || !zoomSignal) return;
+    handedOver.current = true;
+    const next = stepZoom(zoomRef.current, zoomSignal.direction);
+    zoomRef.current = next;
+    camera.current?.zoomTo(next, { duration: cameraDuration === 0 ? 0 : 250 });
+    // Only a new tap (nonce) zooms.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [zoomSignal?.nonce]);
 
   const openPark = (park: Park) => onParkPress(park);
 
@@ -149,6 +171,7 @@ export function ParkMap({
       onRegionDidChange={(event) => {
         const { bounds, zoom, userInteraction } = event.nativeEvent;
         if (userInteraction) handedOver.current = true;
+        zoomRef.current = zoom;
         setViewSoon({ bounds, zoom });
         onRegionChange?.(bounds);
       }}>
@@ -218,6 +241,13 @@ export function ParkMap({
           </Marker>
         );
       })}
+      {searchPin ? (
+        <Marker id="search-pin" anchor="bottom" lngLat={[searchPin.lng, searchPin.lat]} style={{ zIndex: Z.search }}>
+          <View accessible accessibilityLabel={t('map.searchPin', { name: searchPin.name })} pointerEvents="none">
+            <SearchPin />
+          </View>
+        </Marker>
+      ) : null}
       {showUserLocation && position ? (
         <Marker id="me" lngLat={[position.coords.longitude, position.coords.latitude]} style={{ zIndex: Z.me }}>
           <View accessible accessibilityLabel={t('map.myLocation')} pointerEvents="none">

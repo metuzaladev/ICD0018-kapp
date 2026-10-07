@@ -1,9 +1,9 @@
-import { ios, type MapPlace, type Park } from '@kapp/shared';
+import { ios, type MapPlace, type Park, type SearchResult } from '@kapp/shared';
 import { PermissionStatus } from 'expo-location';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { Keyboard, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/empty-state';
@@ -17,19 +17,22 @@ import { ChipRow, IconChip } from '@/components/icon-chip';
 import { LocationPrompt } from '@/components/location-prompt';
 import { NearestParkCard } from '@/components/nearest-park-card';
 import { OfflineBanner } from '@/components/offline-banner';
+import { PressableScale } from '@/components/pressable-scale';
 import { ParkMap } from '@/components/park-map';
 import { PointsBadge } from '@/components/points-badge';
 import { ProviderSheet } from '@/components/provider-sheet';
+import { SearchSuggestions } from '@/components/search-suggestions';
 import { Radius, Spacing, Type } from '@/constants/theme';
 import { useDeviceLocation } from '@/hooks/use-device-location';
 import { useMapPlaces } from '@/hooks/use-explore';
+import { useMapSearch } from '@/hooks/use-map-search';
 import { useNearbyParks } from '@/hooks/use-parks';
 import { useTheme } from '@/hooks/use-theme';
-import { currentLocaleTag } from '@/i18n';
 import { errorMessage } from '@/lib/api';
 import { bboxAround, bboxFromRegion, mapTagsFor, placeRoute, type Bbox } from '@/lib/explore';
 import { AVAILABLE_CATEGORIES, CATEGORY_ICON, categoryShows, parkKindOf, type MapCategory } from '@/lib/map-categories';
 import { clearMapFocus, useExploreState } from '@/state/explore-view';
+import { searchableQuery } from '@/lib/map-search';
 import { activeFilterCount, DEFAULT_FILTERS, setParkFilters, useParkFilters } from '@/state/park-filters';
 
 /** Floating UI heights used to keep pins clear of it (search 52 + chips 44 + gaps). */
@@ -70,6 +73,17 @@ function MapScreen() {
   const placesQuery = useMapPlaces(bbox, mapTagsFor(category));
   const [selected, setSelected] = useState<MapPlace | null>(null);
   const [query, setQuery] = useState('');
+  // Map search (docs/19): suggestions while the field is focused; choosing one moves the camera
+  // (searchFocus) and, for an address, drops a pin there (searchPin).
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchFocus, setSearchFocus] = useState<{ lat: number; lng: number; zoom: number; nonce: number } | null>(null);
+  const [searchPin, setSearchPin] = useState<{ lat: number; lng: number; name: string } | null>(null);
+  const [zoomSignal, setZoomSignal] = useState<{ direction: 1 | -1; nonce: number } | null>(null);
+  const { height: windowHeight } = useWindowDimensions();
+  // Sort suggestions from what the user is looking at: the map centre, else their location.
+  const searchOrigin = region ? { lat: (region.minLat + region.maxLat) / 2, lng: (region.minLng + region.maxLng) / 2 } : location.origin;
+  const search = useMapSearch(query, searchOrigin);
+  const showSuggestions = searchOpen && searchableQuery(query) !== null;
   const [locateSignal, setLocateSignal] = useState(0);
   // Per session: "Mitte praegu" hides the permission screen until the next launch.
   const [promptDismissed, setPromptDismissed] = useState(false);
@@ -88,17 +102,15 @@ function MapScreen() {
     if (focus && focus.lat === undefined) clearMapFocus(focus.nonce);
   }, [focus]);
 
-  const matches = useMemo(() => {
-    const q = query.trim().toLocaleLowerCase(currentLocaleTag());
-    return (name: string) => q === '' || name.toLocaleLowerCase(currentLocaleTag()).includes(q);
-  }, [query]);
-  const visibleParks = useMemo(() => parks.filter((p) => categoryShows(category, parkKindOf(p)) && matches(p.name)), [category, parks, matches]);
+  // The search moves the map instead of hiding pins (docs/19): filtering by name hid everything as
+  // soon as an address was typed, and the "Lähim park" card disappeared with it.
+  const visibleParks = useMemo(() => parks.filter((p) => categoryShows(category, parkKindOf(p))), [category, parks]);
   const visiblePlaces = useMemo<MapPlace[]>(() => {
     // Parks already drawn from the nearby list (with their dog counts) are not drawn twice.
     const drawn = new Set(parks.map((p) => p.id));
-    return (placesQuery.data ?? []).filter((p) => !(p.kind === 'park' && drawn.has(p.id)) && matches(p.name));
-  }, [placesQuery.data, parks, matches]);
-  // The API sorts by distance, so the first visible park is the nearest one (or the best search match).
+    return (placesQuery.data ?? []).filter((p) => !(p.kind === 'park' && drawn.has(p.id)));
+  }, [placesQuery.data, parks]);
+  // The API sorts by distance, so the first visible park is the nearest one.
   // "Lähim park" means a dog park: a swimming spot is only offered when nothing else is visible.
   const nearest: Park | undefined = visibleParks.find((p) => parkKindOf(p) === 'park') ?? visibleParks[0];
 
@@ -133,6 +145,24 @@ function MapScreen() {
   const bottomBlock = BOTTOM_CARD + Spacing.three + 52;
   const mapError = error ?? placesQuery.error;
 
+  /**
+   * A suggestion moves the camera to the result at a zoom that frames it (a house closer than a
+   * town). A provider also opens its sheet; an address gets a pin, because nothing else marks it.
+   */
+  const chooseResult = (result: SearchResult) => {
+    Keyboard.dismiss();
+    setSearchOpen(false);
+    setQuery(result.name);
+    setSearchFocus({ lat: result.lat, lng: result.lng, zoom: result.zoom, nonce: Date.now() });
+    setSearchPin(result.kind === 'address' ? { lat: result.lat, lng: result.lng, name: result.name } : null);
+    if (result.kind === 'provider' && result.id) {
+      setSelected({ id: result.id, kind: 'provider', tag: result.category === 'vet' ? 'clinics' : 'services', category: result.category ?? 'grooming', name: result.name, lat: result.lat, lng: result.lng });
+    } else {
+      setSelected(null);
+    }
+  };
+  const zoom = (direction: 1 | -1) => setZoomSignal({ direction, nonce: Date.now() });
+
   return (
     <View style={[styles.root, { backgroundColor: c.background }]}>
       <ParkMap
@@ -144,8 +174,10 @@ function MapScreen() {
         onParkPress={(park) => router.push({ pathname: '/parks/[parkId]', params: { parkId: park.id } })}
         onPlacePress={(place) => (place.kind === 'provider' ? setSelected(place) : router.push(placeRoute(place)))}
         onRegionChange={(bounds) => setRegion(bboxFromRegion(bounds))}
-        focus={focus?.lat !== undefined && focus.lng !== undefined ? { lat: focus.lat, lng: focus.lng, nonce: focus.nonce } : null}
-        onFocusApplied={clearMapFocus}
+        focus={searchFocus ?? (focus?.lat !== undefined && focus.lng !== undefined ? { lat: focus.lat, lng: focus.lng, nonce: focus.nonce } : null)}
+        onFocusApplied={(nonce) => (searchFocus?.nonce === nonce ? setSearchFocus(null) : clearMapFocus(nonce))}
+        zoomSignal={zoomSignal}
+        searchPin={searchPin}
         overlay={{ top: insets.top + TOP_UI, bottom: tabBarSpace + bottomBlock }}
         locateSignal={locateSignal}
       />
@@ -159,7 +191,17 @@ function MapScreen() {
             <Icon name="search" size={20} color={c.muted} />
             <TextInput
               value={query}
-              onChangeText={setQuery}
+              onChangeText={(text) => {
+                setQuery(text);
+                setSearchOpen(true);
+                if (text.trim() === '') setSearchPin(null);
+              }}
+              onFocus={() => setSearchOpen(true)}
+              // Enter takes the first suggestion, like a search field on the web.
+              onSubmitEditing={() => {
+                const first = search.data?.results[0];
+                if (first) chooseResult(first);
+              }}
               placeholder={t('map.searchPlaceholder')}
               placeholderTextColor={c.muted}
               accessibilityLabel={t('map.searchLabel')}
@@ -181,6 +223,16 @@ function MapScreen() {
             onPress={() => router.push('/park-filters')}
           />
         </View>
+        {showSuggestions ? (
+          <SearchSuggestions
+            results={search.data?.results}
+            loading={search.isFetching}
+            addressesAvailable={search.data?.addressesAvailable ?? true}
+            failed={search.isError && !search.data}
+            onSelect={chooseResult}
+            maxHeight={Math.round(windowHeight * 0.45)}
+          />
+        ) : (
         <ChipRow radiogroup bleed={Spacing.three}>
           {AVAILABLE_CATEGORIES.map((key) => (
             <IconChip
@@ -196,6 +248,7 @@ function MapScreen() {
             />
           ))}
         </ChipRow>
+        )}
         <OfflineBanner />
         {/* Cached pins stay on the map when a refresh fails (offline); only report the error. */}
         {mapError && (parks.length > 0 || visiblePlaces.length > 0) ? <FormError message={errorMessage(mapError)} /> : null}
@@ -209,6 +262,16 @@ function MapScreen() {
         </View>
       ) : (
         <View style={[styles.bottom, { bottom: tabBarSpace }]} pointerEvents="box-none">
+          {/* + / − next to the pinch gesture: one-handed use, and VoiceOver users cannot pinch. */}
+          <View style={[styles.zoom, { backgroundColor: c.surface, borderColor: c.border }]}>
+            <PressableScale accessibilityRole="button" accessibilityLabel={t('map.zoomIn')} onPress={() => zoom(1)} style={styles.zoomButton}>
+              <Icon name="plus" size={22} color={c.text} />
+            </PressableScale>
+            <View style={[styles.zoomDivider, { backgroundColor: c.border }]} />
+            <PressableScale accessibilityRole="button" accessibilityLabel={t('map.zoomOut')} onPress={() => zoom(-1)} style={styles.zoomButton}>
+              <Icon name="minus" size={22} color={c.text} />
+            </PressableScale>
+          </View>
           <View style={styles.controls} pointerEvents="box-none">
             <CommunityEntry />
             <View style={styles.spacer} pointerEvents="none" />
@@ -227,7 +290,7 @@ function MapScreen() {
           {!isPending && !error && category === 'parks' && visibleParks.length === 0 ? (
             <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
               <EmptyState
-                title={query ? t('map.noMatches') : t('map.empty')}
+                title={t('map.empty')}
                 actionLabel={featureCount > 0 || filters.radiusKm !== DEFAULT_FILTERS.radiusKm ? t('map.emptyAction') : undefined}
                 onAction={() => setParkFilters(DEFAULT_FILTERS)}
               />
@@ -235,7 +298,7 @@ function MapScreen() {
           ) : null}
           {!placesQuery.isPending && category !== 'all' && category !== 'parks' && visiblePlaces.length === 0 ? (
             <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.border }]}>
-              <EmptyState title={query ? t('map.noMatches') : t('map.emptyPlaces')} />
+              <EmptyState title={t('map.emptyPlaces')} />
             </View>
           ) : null}
           {nearest ? <NearestParkCard park={nearest} usingFallback={location.usingFallback} floating /> : null}
@@ -269,6 +332,21 @@ const styles = StyleSheet.create({
   searchInput: { flex: 1, paddingVertical: Spacing.two },
   bottom: { position: 'absolute', left: Spacing.three, right: Spacing.three, gap: Spacing.three },
   controls: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  // Same look as the Icon Button (glass, radius 18), stacked: 2 × 48 pt targets.
+  zoom: {
+    alignSelf: 'flex-end',
+    width: 52,
+    borderRadius: 18,
+    borderWidth: 1,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 4,
+  },
+  zoomButton: { height: 48, alignItems: 'center', justifyContent: 'center' },
+  zoomDivider: { height: StyleSheet.hairlineWidth, marginHorizontal: 10 },
   spacer: { flex: 1 },
   card: { borderRadius: Radius[16], borderWidth: 1, padding: Spacing.three },
   sheetWrap: { position: 'absolute', left: 0, right: 0, bottom: 0 },

@@ -263,9 +263,9 @@
     "marker": "{{name}}, {{dogs}} now",
     "filtersHint": "Opens the filters",
     "emptyAction": "Clear filters",
-    "searchPlaceholder": "Search parks and places",
+    "searchPlaceholder": "Search places or addresses",
     "searchLabel": "Search the map",
-    "searchHint": "Only places whose name matches stay on the map",
+    "searchHint": "Suggests parks, services, community picks and addresses. Choosing one moves the map there.",
     "categories": {
       "all": "All",
       "parks": "Parks",
@@ -295,7 +295,19 @@
     "cluster_one": "{{count}} place, zoom in",
     "cluster_other": "{{count}} places, zoom in",
     "myLocation": "Your location",
-    "markerQuiet": "{{name}}, quiet right now"
+    "markerQuiet": "{{name}}, quiet right now",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "searchPin": "Searched place: {{name}}",
+    "search": {
+      "suggestions": "Search suggestions",
+      "addresses": "Addresses",
+      "selectHint": "Moves the map to this place",
+      "loading": "Searching…",
+      "empty": "Nothing found. Try another name or address.",
+      "failed": "Search failed. Check your internet connection.",
+      "addressesUnavailable": "Addresses could not be searched right now, showing Käpp places only."
+    }
   },
   "parkRow": {
     "dogsNow": "{{dogs}} now",

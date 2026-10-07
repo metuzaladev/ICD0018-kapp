@@ -1,39 +1,46 @@
 /**
- * Development seed: a handful of Tallinn dog parks so the map and "nearby" query have data, and
- * (M6) fictional dog service providers so the booking flow can be tried end to end.
- * Park names are real areas with approximate coordinates — sample data, not a verified registry.
+ * Development seed: real Estonian dog parks and dog swimming spots (koertepargid.ee, facts only —
+ * db/park-import.ts) so the map and "nearby" query have data, and (M6) fictional dog service
+ * providers so the booking flow can be tried end to end.
  * Providers are invented (the app says so on the Services screen); any likeness to a real business
  * name is unintended.
  * M9b adds paw discounts and invented products for those providers and a few approved demo place
  * posts (invented café/shop names, approximate coordinates) by a system author that cannot sign in.
- * Insert-only and idempotent: re-running never deletes or overwrites anything.
+ * Insert-only and idempotent: re-running never deletes anything; the only update hides the six
+ * invented parks of the first seeds (status → rejected).
  */
 import { and, eq, inArray, isNull } from 'drizzle-orm';
 
+import { readFileSync } from 'node:fs';
+
 import { db, pool } from './client';
+import { isInEstonia, toParkRow, type SourcePark } from './park-import';
 import { partnerProducts, parks, placePosts, providerHours, serviceProviders, services, user } from './schema';
 
-const samples = [
-  { name: 'Kadrioru koerapark', address: 'Kadriorg, Tallinn', x: 24.7925, y: 59.4389, fenced: true, smallDogArea: true, water: true, lighting: true },
-  { name: 'Stroomi koerapark', address: 'Pelguranna, Tallinn', x: 24.687, y: 59.446, fenced: true, smallDogArea: false, water: true, lighting: false },
-  { name: 'Nõmme koerapark', address: 'Nõmme, Tallinn', x: 24.683, y: 59.383, fenced: true, smallDogArea: true, water: false, lighting: true },
-  { name: 'Mustamäe koerapark', address: 'Mustamäe, Tallinn', x: 24.69, y: 59.408, fenced: true, smallDogArea: false, water: false, lighting: true },
-  { name: 'Lasnamäe koerapark', address: 'Lasnamäe, Tallinn', x: 24.848, y: 59.433, fenced: true, smallDogArea: true, water: true, lighting: true },
-  { name: 'Pirita koerapark', address: 'Pirita, Tallinn', x: 24.834, y: 59.468, fenced: false, smallDogArea: false, water: false, lighting: false },
-];
+/* ---------- Parks: real Estonian dog parks (koertepargid.ee, facts only — see db/park-import.ts) ---------- */
 
-// Insert only the missing samples, never delete and recreate: favourites, check-ins, plans, reviews
-// and photos reference parks with ON DELETE CASCADE, so re-running the seed used to wipe all of them.
+const source = JSON.parse(readFileSync(new URL('./data/koertepargid.json', import.meta.url), 'utf8')) as { parks: SourcePark[] };
+const realParks = source.parks.filter(isInEstonia).map(toParkRow);
+
+// Insert only the missing parks, never delete and recreate: favourites, check-ins, plans, reviews and
+// photos reference parks with ON DELETE CASCADE, so re-running the seed must not touch existing rows.
 const existingParks = new Set(
-  (await db.select({ name: parks.name }).from(parks).where(inArray(parks.name, samples.map((s) => s.name)))).map((r) => r.name),
+  (await db.select({ name: parks.name }).from(parks).where(inArray(parks.name, realParks.map((p) => p.name)))).map((r) => r.name),
 );
-const missingParks = samples.filter((s) => !existingParks.has(s.name));
-if (missingParks.length > 0) {
-  await db.insert(parks).values(
-    missingParks.map(({ x, y, ...rest }) => ({ ...rest, location: { x, y }, status: 'approved' as const })),
-  );
-}
-console.log(`Seeded ${missingParks.length} parks (${existingParks.size} already existed)`);
+const missingParks = realParks.filter((p) => !existingParks.has(p.name));
+for (let i = 0; i < missingParks.length; i += 50) await db.insert(parks).values(missingParks.slice(i, i + 50));
+console.log(`Seeded ${missingParks.length} parks from koertepargid.ee (${existingParks.size} already existed)`);
+
+// The first seeds had six invented Tallinn parks ("Kadrioru koerapark" …) with approximate
+// coordinates. Hide them now that real parks exist: status → rejected, which the public queries
+// already filter out. Not deleted — a delete would cascade away users' check-ins and reviews.
+const INVENTED_SAMPLES = ['Kadrioru koerapark', 'Stroomi koerapark', 'Nõmme koerapark', 'Mustamäe koerapark', 'Lasnamäe koerapark', 'Pirita koerapark'];
+const retired = await db
+  .update(parks)
+  .set({ status: 'rejected' })
+  .where(and(inArray(parks.name, INVENTED_SAMPLES), isNull(parks.createdBy), eq(parks.status, 'approved')))
+  .returning({ id: parks.id });
+if (retired.length) console.log(`Hid ${retired.length} invented sample parks`);
 
 /* ---------- M6: service providers ---------- */
 

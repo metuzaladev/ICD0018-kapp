@@ -47,7 +47,7 @@ export interface FriendsService {
   claimInvite(userId: string, code: string): Promise<void>;
 }
 
-export const INVITE_CODE_LENGTH = 8;
+const INVITE_CODE_LENGTH = 8;
 
 export function createFriendsService({
   repository,

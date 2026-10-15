@@ -97,7 +97,7 @@ export function createSmtpTransport(options: SmtpTransportOptions): MailTranspor
 
 /* ---------------- Resend (HTTP) ---------------- */
 
-export const RESEND_ENDPOINT = 'https://api.resend.com/emails';
+const RESEND_ENDPOINT = 'https://api.resend.com/emails';
 
 export function classifyResendStatus(status: number): MailDeliveryError {
   // 409 = a concurrent request with the same Idempotency-Key is still running; 429 = rate limit.

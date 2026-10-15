@@ -22,7 +22,7 @@ const MAX_TAG_FEATURES = 2;
 const MAX_FACES = 3;
 
 /** "Aiaga · vesi": the first feature as written, the rest lower-cased as in the Figma tag. */
-export function useFeatureTag(park: Pick<Park, (typeof FEATURES)[number]>): string | null {
+function useFeatureTag(park: Pick<Park, (typeof FEATURES)[number]>): string | null {
   const { t } = useTranslation();
   const labels = FEATURES.filter((key) => park[key])
     .slice(0, MAX_TAG_FEATURES)

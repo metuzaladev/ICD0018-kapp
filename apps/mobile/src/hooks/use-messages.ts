@@ -5,7 +5,7 @@ import { apiGet, apiSend } from '@/lib/api';
 import { useRealtimeConnected } from '@/lib/realtime';
 
 /** Fallback when the socket is down (docs/12-kogukond.md): an open conversation refetches every 15 s. */
-export const POLL_MS = 15_000;
+const POLL_MS = 15_000;
 
 export const conversationKeys = {
   all: ['conversations'] as const,

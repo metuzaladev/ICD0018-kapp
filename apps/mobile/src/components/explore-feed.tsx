@@ -35,7 +35,7 @@ import { setExploreView } from '@/state/explore-view';
 let lastFilters: FeedFilters = DEFAULT_FEED_FILTERS;
 
 /** Kaart / Avasta at the top of both halves of the Kaart tab (state/explore-view.ts). */
-export function ExploreSwitch() {
+function ExploreSwitch() {
   const { t } = useTranslation();
   return (
     <SegmentedControl

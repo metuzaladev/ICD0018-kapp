@@ -15,7 +15,7 @@ export const serviceKeys = {
 };
 
 /** Days shown in the date picker: a week, like the plan-visit chips. */
-export const SLOT_DAYS = 7;
+const SLOT_DAYS = 7;
 
 export function useProviders(category: ServiceCategory | null, origin: { lat: number; lng: number }) {
   return useQuery({

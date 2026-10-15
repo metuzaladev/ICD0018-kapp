@@ -29,7 +29,7 @@ export interface RewardsService {
 }
 
 /** Enough history for a long streak to be counted; older days cannot change "current". */
-export const STREAK_LOOKBACK_DAYS = 400;
+const STREAK_LOOKBACK_DAYS = 400;
 
 export function createRewardsService({
   repository,

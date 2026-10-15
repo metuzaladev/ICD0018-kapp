@@ -24,7 +24,7 @@ export interface BookingsService {
   sendReminder(bookingId: string): Promise<void>;
 }
 
-export const BOOKINGS_LIST_LIMIT = 50;
+const BOOKINGS_LIST_LIMIT = 50;
 /** Scheduling a reminder talks to Redis; like the notifier it must not hold the request. */
 export const REMINDER_SCHEDULE_TIMEOUT_MS = 2000;
 

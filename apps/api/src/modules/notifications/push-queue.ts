@@ -8,7 +8,7 @@ import { Queue, Worker, type Job } from 'bullmq';
  * retries with backoff that survive a restart — BullMQ keeps jobs in Redis.
  */
 
-export const PUSH_QUEUE_NAME = 'push';
+const PUSH_QUEUE_NAME = 'push';
 
 /** One push to all devices of one user. Texts are already in the recipient's language. */
 export interface PushJob {
@@ -39,7 +39,7 @@ export interface QueueConnection {
 }
 
 /** Expo's guidance: fetch receipts after some minutes, they exist for about a day. */
-export const RECEIPT_DELAY_MS = 15 * 60_000;
+const RECEIPT_DELAY_MS = 15 * 60_000;
 
 const connectionOptions = (url: string) => ({
   url,

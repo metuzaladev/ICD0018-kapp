@@ -26,7 +26,7 @@ export type ClusterItem<T extends ClusterInput> =
 type PointProps = { key: string };
 
 /** Pixel radius pins merge within (a 40 pt pin + its neighbour's half), and the last clustering zoom. */
-export const CLUSTER_RADIUS = 56;
+const CLUSTER_RADIUS = 56;
 export const CLUSTER_MAX_ZOOM = 15;
 /** The map opens here: a city view (≈ Tallinn's centre on a phone), not a fit of every park. */
 export const CITY_ZOOM = 12.5;

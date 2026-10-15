@@ -37,14 +37,14 @@ export const REWARD_RULES = {
  */
 export const SETTLE_WINDOW_DAYS = 14;
 
-export const LEVELS: readonly { id: RewardLevelId; minPoints: number }[] = [
+const LEVELS: readonly { id: RewardLevelId; minPoints: number }[] = [
   { id: 'puppy', minPoints: 0 },
   { id: 'park_friend', minPoints: 200 },
   { id: 'park_legend', minPoints: 500 },
   { id: 'pack_leader', minPoints: 1000 },
 ];
 
-export const BADGE_TARGETS: Record<RewardBadgeId, number> = {
+const BADGE_TARGETS: Record<RewardBadgeId, number> = {
   /** A qualifying check-in that started before 08:00 Tallinn time. */
   early_bird: 1,
   /** Distinct parks with a qualifying check-in. */
@@ -54,8 +54,6 @@ export const BADGE_TARGETS: Record<RewardBadgeId, number> = {
   /** Qualifying check-ins in one and the same park (named after Kadriorg in Figma). */
   kadriorg_legend: 20,
 };
-export const EARLY_BIRD_HOUR = 8;
-
 export const WAYS_TO_EARN: RewardsSummary['waysToEarn'] = [
   { reason: 'check_in', points: REWARD_RULES.checkIn.points, dailyLimit: REWARD_RULES.checkIn.perDay },
   { reason: 'streak', points: REWARD_RULES.streak.points, dailyLimit: 1 },

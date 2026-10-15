@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  AVAILABLE_CATEGORIES,
   CATEGORY_ICON,
   categoryOf,
   categoryShows,
@@ -16,8 +15,7 @@ import {
 
 describe('map categories', () => {
   it('offers every Figma chip now that M9b places back cafés and beaches', () => {
-    expect(AVAILABLE_CATEGORIES).toEqual(['all', 'parks', 'cafes', 'services', 'beaches', 'vets']);
-    expect(AVAILABLE_CATEGORIES.every((c) => MAP_CATEGORIES.includes(c))).toBe(true);
+    expect(MAP_CATEGORIES).toEqual(['all', 'parks', 'cafes', 'services', 'beaches', 'vets']);
   });
 
   it('has an icon for every category and place kind (Figma Chip / Icon, Map Pin / Place)', () => {

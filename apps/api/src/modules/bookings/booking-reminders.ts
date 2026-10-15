@@ -12,7 +12,7 @@ import type { QueueConnection } from '../notifications/push-queue';
  * respects the "Broneeringute uuendused" preference and writes in the user's language.
  */
 
-export const BOOKING_REMINDER_QUEUE = 'booking-reminders';
+const BOOKING_REMINDER_QUEUE = 'booking-reminders';
 
 export interface BookingReminderJob {
   bookingId: string;
@@ -27,7 +27,7 @@ export interface BookingReminders {
 export const noBookingReminders: BookingReminders = { schedule: async () => {}, cancel: async () => {} };
 
 /** Deterministic id: scheduling twice is a no-op and cancel can find the job (BullMQ forbids ':'). */
-export const reminderJobId = (bookingId: string) => `reminder-${bookingId}`;
+const reminderJobId = (bookingId: string) => `reminder-${bookingId}`;
 
 export function createBookingReminderQueue({ url, prefix }: QueueConnection, now: () => number = Date.now): BookingReminders & { queue: Queue; close(): Promise<void> } {
   const queue = new Queue<BookingReminderJob>(BOOKING_REMINDER_QUEUE, {

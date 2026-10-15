@@ -16,14 +16,14 @@ import ru from './locales/ru.json';
  * Estonian is the source language and the fallback for a missing key.
  */
 
-export const resources = {
+const resources = {
   et: { translation: et },
   en: { translation: en },
   ru: { translation: ru },
 } as const;
 
 /** BCP 47 tags for Intl: en-GB for a 24-hour clock and day-month order, as in Estonia. */
-export const LOCALE_TAG: Record<Language, string> = { et: 'et-EE', en: 'en-GB', ru: 'ru-RU' };
+const LOCALE_TAG: Record<Language, string> = { et: 'et-EE', en: 'en-GB', ru: 'ru-RU' };
 
 /** The first language in the device's preference list that the app supports, else Estonian. */
 export function deviceLanguage(): Language {

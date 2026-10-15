@@ -28,7 +28,7 @@ export interface VisitsService {
   cancelPlan(userId: string, planId: string): Promise<void>;
 }
 
-export const HISTORY_LIMIT = 50;
+const HISTORY_LIMIT = 50;
 
 export function createVisitsService({
   visits,

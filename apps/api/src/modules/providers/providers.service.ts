@@ -24,7 +24,7 @@ export interface ProvidersService {
 }
 
 /** Tallinn has a few dozen dog businesses; 50 keeps the response bounded without paging. */
-export const PROVIDERS_LIMIT = 50;
+const PROVIDERS_LIMIT = 50;
 
 export function createProvidersService({
   repository,

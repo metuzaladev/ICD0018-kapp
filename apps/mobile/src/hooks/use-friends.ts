@@ -8,13 +8,13 @@ import { apiGet, apiSend } from '@/lib/api';
  * Profile, Home). Every change to a relation invalidates the whole ['friends'] and ['users'] tree,
  * because one tap changes several lists (requests, friends, search results, the profile).
  */
-export const friendKeys = {
+const friendKeys = {
   all: ['friends'] as const,
   list: ['friends', 'list'] as const,
   requests: ['friends', 'requests'] as const,
   plans: ['friends', 'plans'] as const,
 };
-export const userKeys = {
+const userKeys = {
   all: ['users'] as const,
   search: (q: string) => ['users', 'search', q] as const,
   profile: (userId: string) => ['users', 'profile', userId] as const,

@@ -21,7 +21,7 @@ import { rewardKeys } from './use-rewards';
  * Avasta (docs/16): community place posts, likes/bookmarks, reports, "Soovita kohta" and the map
  * pins. Every post list lives under ['place-posts'] so one invalidation refreshes all of them.
  */
-export const exploreKeys = {
+const exploreKeys = {
   all: ['place-posts'] as const,
   feed: (params: Record<string, string | number>) => ['place-posts', 'feed', params] as const,
   detail: (postId: string) => ['place-posts', 'detail', postId] as const,

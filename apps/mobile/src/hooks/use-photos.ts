@@ -6,7 +6,7 @@ import { preparePhoto, uploadToStorage } from '@/lib/photo-upload';
 
 import { dogKeys } from './use-dogs';
 
-export const photoKeys = { dog: (dogId: string) => ['dogs', dogId, 'photos'] as const };
+const photoKeys = { dog: (dogId: string) => ['dogs', dogId, 'photos'] as const };
 
 /**
  * Photo URLs are signed for 15 minutes. Treating the list as stale after 5 minutes means a

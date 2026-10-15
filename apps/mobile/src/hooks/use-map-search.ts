@@ -6,7 +6,7 @@ import { apiGet } from '@/lib/api';
 import { SEARCH_DEBOUNCE_MS, searchableQuery } from '@/lib/map-search';
 
 /** The value after it has stopped changing for `ms` (typing pauses). */
-export function useDebouncedValue<T>(value: T, ms: number): T {
+function useDebouncedValue<T>(value: T, ms: number): T {
   const [settled, setSettled] = useState(value);
   useEffect(() => {
     const timer = setTimeout(() => setSettled(value), ms);

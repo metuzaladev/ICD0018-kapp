@@ -1,8 +1,8 @@
 import sharp, { type Sharp } from 'sharp';
 
 /** Longer side of the stored versions (px). Thumbnails serve grids and avatars. */
-export const FULL_SIZE = 1600;
-export const THUMBNAIL_SIZE = 400;
+const FULL_SIZE = 1600;
+const THUMBNAIL_SIZE = 400;
 
 /**
  * Formats accepted after decoding. The declared Content-Type is not trusted: the bytes decide.

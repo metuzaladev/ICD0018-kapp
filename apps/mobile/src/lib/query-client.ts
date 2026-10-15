@@ -1,6 +1,6 @@
 import { focusManager, onlineManager, QueryClient } from '@tanstack/react-query';
 import * as Network from 'expo-network';
-import { AppState, Platform } from 'react-native';
+import { AppState } from 'react-native';
 
 import { ApiRequestError } from './api';
 
@@ -32,5 +32,5 @@ onlineManager.setEventListener((setOnline) => {
 
 /** Treat "app came back to the foreground" as window focus, so stale data refreshes. */
 AppState.addEventListener('change', (status) => {
-  if (Platform.OS !== 'web') focusManager.setFocused(status === 'active');
+  focusManager.setFocused(status === 'active');
 });

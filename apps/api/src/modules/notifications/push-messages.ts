@@ -34,7 +34,7 @@ const TIME_ZONE = 'Europe/Tallinn';
 const LOCALE_TAG: Record<Language, string> = { et: 'et-EE', en: 'en-GB', ru: 'ru-RU' };
 
 /** A preview, not the whole message: lock screens are seen by others, and payloads are size-limited. */
-export const PREVIEW_LENGTH = 120;
+const PREVIEW_LENGTH = 120;
 export const preview = (text: string) => (text.length > PREVIEW_LENGTH ? `${text.slice(0, PREVIEW_LENGTH - 1)}…` : text);
 
 /** "R 17.00–18.00" / "Fri 17:00–18:00" / "пт 17:00–18:00" — same time style as the app (lib/format.ts). */

@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiSend } from '@/lib/api';
 
 /** Blocking, reporting and the privacy settings (Safety / Report or Block, Settings / Privacy). */
-export const safetyKeys = { blocks: ['blocks'] as const };
+const safetyKeys = { blocks: ['blocks'] as const };
 export const ownProfileKey = ['me'] as const;
 
 export function useBlockedUsers() {

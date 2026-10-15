@@ -14,7 +14,7 @@ import type { QueueConnection } from '../notifications/push-queue';
  * idempotent and safe to retry. Only ids and counts are logged, never keys with names.
  */
 
-export const STORAGE_CLEANUP_QUEUE = 'storage-cleanup';
+const STORAGE_CLEANUP_QUEUE = 'storage-cleanup';
 
 export interface StorageCleanupJob {
   /** The deleted user's id — job id and log correlation only; the user no longer exists. */

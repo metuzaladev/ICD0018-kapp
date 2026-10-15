@@ -18,7 +18,7 @@ import { MailDeliveryError, type MailTransport } from './mail-transport';
  * id stays for idempotency. Nothing about the recipient is ever logged.
  */
 
-export const MAIL_QUEUE_NAME = 'mail';
+const MAIL_QUEUE_NAME = 'mail';
 
 export interface MailJob {
   template: MailTemplate;

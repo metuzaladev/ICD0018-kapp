@@ -53,7 +53,7 @@ const POST_NOT_FOUND = 'errors.placePostNotFound';
 const UPLOAD_NOT_FOUND = 'errors.uploadNotFound';
 
 export const placePrefix = (postId: string) => `places/${postId}/`;
-export const placePhotoKeys = (postId: string, photoId: string): PhotoKeys => ({
+const placePhotoKeys = (postId: string, photoId: string): PhotoKeys => ({
   imageKey: `places/${postId}/${photoId}/full.webp`,
   thumbnailKey: `places/${postId}/${photoId}/thumb.webp`,
 });

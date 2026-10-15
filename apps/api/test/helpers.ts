@@ -73,7 +73,7 @@ export function makeParkDetailRecord(overrides: Partial<ParkDetailRecord> = {}):
   return { ...makeParkRecord(), ratingAverage: 4.8, reviewCount: 32, ...overrides };
 }
 
-export function makeParkDetail(overrides: Partial<ParkDetail> = {}): ParkDetail {
+function makeParkDetail(overrides: Partial<ParkDetail> = {}): ParkDetail {
   return { ...makeParkDetailRecord(), ...overrides };
 }
 
@@ -180,7 +180,7 @@ export const mockVisitsRepository = () =>
 export const mockReviewsRepository = () => mockAll<ReviewsRepository>(['hasVisited', 'upsert', 'listForPark']);
 
 /** Where the fixture photo claims to have been taken (Kadriorg, Tallinn). */
-export const FIXTURE_GPS = { GPSLatitudeRef: 'N', GPSLatitude: '59/1 26/1 18/1', GPSLongitudeRef: 'E', GPSLongitude: '24/1 47/1 33/1' };
+const FIXTURE_GPS = { GPSLatitudeRef: 'N', GPSLatitude: '59/1 26/1 18/1', GPSLongitudeRef: 'E', GPSLongitude: '24/1 47/1 33/1' };
 
 /**
  * A real JPEG like a phone camera makes: EXIF with camera model, GPS position and orientation 6
@@ -357,7 +357,7 @@ export const mockProvidersRepository = () => mockAll<ProvidersRepository>(['list
 export const mockBookingsRepository = () =>
   mockAll<BookingsRepository>(['create', 'findOwn', 'findById', 'listUpcoming', 'listPast', 'cancel']);
 
-export const mockPlacePostsService = () =>
+const mockPlacePostsService = () =>
   mockAll<PlacePostsService>(['createUpload', 'create', 'feed', 'saved', 'mine', 'get', 'remove', 'setLike', 'setSave', 'report', 'moderate', 'mapPlaces']);
 export const mockPlacePostsRepository = () =>
   mockAll<PlacePostsRepository>(['create', 'feed', 'saved', 'mine', 'findVisible', 'remove', 'setLike', 'setSave', 'reactions', 'report', 'moderate', 'mapPlaces']);

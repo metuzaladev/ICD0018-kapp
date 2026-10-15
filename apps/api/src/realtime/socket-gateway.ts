@@ -46,7 +46,7 @@ interface AttachOptions {
   log?: { warn: (obj: object, msg: string) => void };
 }
 
-export const userRoom = (userId: string) => `user:${userId}`;
+const userRoom = (userId: string) => `user:${userId}`;
 
 interface SocketData {
   userId: string;

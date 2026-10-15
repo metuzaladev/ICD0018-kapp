@@ -193,7 +193,7 @@ const REQUIRED_IN_PRODUCTION = ['DATABASE_URL', 'REDIS_URL', 'API_PUBLIC_URL', '
  * - TRUST_PROXY=true behind a platform's load balancer is common, but it is the one value that
  *   makes rate limits spoofable, so it is allowed with a warning (returned separately).
  */
-export function productionConfigProblems(parsed: ParsedEnv, source: Record<string, string | undefined>): { errors: string[]; warnings: string[] } {
+function productionConfigProblems(parsed: ParsedEnv, source: Record<string, string | undefined>): { errors: string[]; warnings: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];
   if (parsed.NODE_ENV !== 'production') return { errors, warnings };
@@ -230,7 +230,7 @@ const DEV_S3_SECRET_ACCESS_KEY = 'kapp-dev-secret';
  * production rules without touching process.env.
  */
 /** Provider settings that are wrong in every environment (a chosen provider without its credentials). */
-export function mailConfigProblems(parsed: Pick<ParsedEnv, 'MAIL_PROVIDER' | 'SMTP_URL' | 'RESEND_API_KEY'>): string[] {
+function mailConfigProblems(parsed: Pick<ParsedEnv, 'MAIL_PROVIDER' | 'SMTP_URL' | 'RESEND_API_KEY'>): string[] {
   if (parsed.MAIL_PROVIDER === 'smtp' && !parsed.SMTP_URL) return ['SMTP_URL is required when MAIL_PROVIDER=smtp'];
   if (parsed.MAIL_PROVIDER === 'resend' && !parsed.RESEND_API_KEY) return ['RESEND_API_KEY is required when MAIL_PROVIDER=resend'];
   return [];

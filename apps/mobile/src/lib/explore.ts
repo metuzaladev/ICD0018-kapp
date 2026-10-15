@@ -176,7 +176,7 @@ export type FeedFilters = {
 export const DEFAULT_FEED_FILTERS: FeedFilters = { near: true, category: null, friends: false };
 
 /** Feed radius for "Lähedal": Tallinn and its edges. */
-export const NEAR_RADIUS_KM = 15;
+const NEAR_RADIUS_KM = 15;
 
 /** Query parameters for GET /place-posts (without the paging cursor). */
 export function feedQueryParams(filters: FeedFilters, origin: { lat: number; lng: number }): Record<string, string | number> {

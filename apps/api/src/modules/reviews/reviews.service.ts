@@ -13,7 +13,7 @@ export interface ReviewsService {
   list(parkId: string, viewerId?: string): Promise<Review[]>;
 }
 
-export const REVIEWS_PAGE_SIZE = 20;
+const REVIEWS_PAGE_SIZE = 20;
 
 export function createReviewsService({
   reviews,

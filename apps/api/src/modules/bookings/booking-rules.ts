@@ -29,9 +29,9 @@ export function effectiveStatus(stored: BookingStatus, endsAt: Date, now: Date):
 }
 
 /** Reminders go out this long before the start, the first one that is still far enough ahead. */
-export const REMINDER_OFFSETS_MS = [24 * HOUR, 2 * HOUR] as const;
+const REMINDER_OFFSETS_MS = [24 * HOUR, 2 * HOUR] as const;
 /** A reminder sooner than this after booking would only repeat the confirmation the user just saw. */
-export const REMINDER_MIN_DELAY_MS = HOUR;
+const REMINDER_MIN_DELAY_MS = HOUR;
 
 /**
  * When to remind about a booking made at `now`: 24 h before, or 2 h before when booked later than

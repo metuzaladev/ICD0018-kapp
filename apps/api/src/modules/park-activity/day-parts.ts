@@ -13,7 +13,7 @@ export const TIME_ZONE = 'Europe/Tallinn';
 const offsetFormatters = new Map<string, Intl.DateTimeFormat>();
 
 /** Offset of `timeZone` from UTC at `instant`, in milliseconds (Tallinn: +2 h winter, +3 h summer). */
-export function zoneOffsetMs(instant: Date, timeZone: string): number {
+function zoneOffsetMs(instant: Date, timeZone: string): number {
   let format = offsetFormatters.get(timeZone);
   if (!format) {
     format = new Intl.DateTimeFormat('en-US', {

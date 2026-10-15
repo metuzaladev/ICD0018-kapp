@@ -34,12 +34,6 @@ export const PLACE_ICON: Record<PlaceKind, IconName> = {
   shop: 'store',
 };
 
-/**
- * Every Figma chip is backed by data since M9b: parks (M2), service providers (M6) and community
- * place posts tagged cafés / beaches by GET /map/places (docs/16).
- */
-export const AVAILABLE_CATEGORIES: readonly MapCategory[] = MAP_CATEGORIES;
-
 /** A provider's service category on the map: clinics have their own chip and colour. */
 export function providerPlaceKind(category: ServiceCategory): Extract<PlaceKind, 'service' | 'vet'> {
   return category === 'vet' ? 'vet' : 'service';

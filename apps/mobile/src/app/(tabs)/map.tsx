@@ -30,7 +30,7 @@ import { useNearbyParks } from '@/hooks/use-parks';
 import { useTheme } from '@/hooks/use-theme';
 import { errorMessage } from '@/lib/api';
 import { bboxAround, bboxFromRegion, mapTagsFor, placeRoute, type Bbox } from '@/lib/explore';
-import { AVAILABLE_CATEGORIES, CATEGORY_ICON, categoryShows, parkKindOf, type MapCategory } from '@/lib/map-categories';
+import { MAP_CATEGORIES, CATEGORY_ICON, categoryShows, parkKindOf, type MapCategory } from '@/lib/map-categories';
 import { clearMapFocus, useExploreState } from '@/state/explore-view';
 import { searchableQuery } from '@/lib/map-search';
 import { activeFilterCount, DEFAULT_FILTERS, setParkFilters, useParkFilters } from '@/state/park-filters';
@@ -234,7 +234,7 @@ function MapScreen() {
           />
         ) : (
         <ChipRow radiogroup bleed={Spacing.three}>
-          {AVAILABLE_CATEGORIES.map((key) => (
+          {MAP_CATEGORIES.map((key) => (
             <IconChip
               key={key}
               role="radio"

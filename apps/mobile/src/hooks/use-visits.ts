@@ -20,14 +20,14 @@ import { parkKeys } from './use-parks';
  * Everything that changes who is in a park also invalidates ['parks'], because park lists and
  * markers show the "koera praegu" counter.
  */
-export const visitKeys = {
+const visitKeys = {
   all: ['visits'] as const,
   active: ['visits', 'active'] as const,
   history: ['visits', 'history'] as const,
   plans: ['visits', 'plans'] as const,
   visitors: (parkId: string) => ['visits', 'visitors', parkId] as const,
 };
-export const reviewKeys = { park: (parkId: string) => ['parks', 'reviews', parkId] as const };
+const reviewKeys = { park: (parkId: string) => ['parks', 'reviews', parkId] as const };
 
 export function useActiveCheckIn() {
   return useQuery({ queryKey: visitKeys.active, queryFn: () => apiGet<ActiveCheckIn | null>('/me/check-ins/active') });

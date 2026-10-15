@@ -33,11 +33,11 @@ export interface ShopService {
   cancelRedemption(userId: string, redemptionId: string): Promise<Redemption>;
 }
 
-export const SHOP_PARTNERS_LIMIT = 20;
-export const SHOP_FEATURED_PRODUCTS = 10;
-export const SHOP_PRODUCTS_LIMIT = 100;
-export const REDEMPTIONS_LIMIT = 50;
-export const REDEMPTION_CODE_LENGTH = 10;
+const SHOP_PARTNERS_LIMIT = 20;
+const SHOP_FEATURED_PRODUCTS = 10;
+const SHOP_PRODUCTS_LIMIT = 100;
+const REDEMPTIONS_LIMIT = 50;
+const REDEMPTION_CODE_LENGTH = 10;
 
 export const discountedPrice = (priceCents: number, discountPercent: number) => Math.round((priceCents * (100 - discountPercent)) / 100);
 

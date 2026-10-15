@@ -118,7 +118,7 @@ export const defaultAppConfig: AppConfig = {
 };
 
 /** Public API version prefix — lets old app builds keep working when v2 ships. */
-export const API_PREFIX = '/api/v1';
+const API_PREFIX = '/api/v1';
 
 const trustFirstHops = (hops: number) => (_address: string, hop: number) => hop < hops;
 

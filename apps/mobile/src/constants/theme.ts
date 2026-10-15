@@ -9,22 +9,11 @@ import { Manrope_700Bold, Manrope_800ExtraBold } from '@expo-google-fonts/manrop
 import { Platform } from 'react-native';
 
 /** Figma "03 · Screens" is Light mode + Green accent since the M9 redesign (docs/05). */
-export const ACCENT: AccentName = 'green';
-
-function palette(scheme: 'light' | 'dark') {
-  const c = semanticColors(scheme, ACCENT);
-  return {
-    ...c,
-    // Aliases used by the Expo template components
-    backgroundElement: c.surface,
-    backgroundSelected: c.soft,
-    textSecondary: c.muted,
-  };
-}
+const ACCENT: AccentName = 'green';
 
 export const Colors = {
-  light: palette('light'),
-  dark: palette('dark'),
+  light: semanticColors('light', ACCENT),
+  dark: semanticColors('dark', ACCENT),
 } as const;
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;

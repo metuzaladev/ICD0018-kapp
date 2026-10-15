@@ -9,7 +9,7 @@ import { serviceKeys } from './use-services';
 import { shopKeys } from './use-shop';
 
 /** "Minu broneeringud". A booking changes both the user's lists and the provider's free times. */
-export const bookingKeys = {
+const bookingKeys = {
   all: ['bookings'] as const,
   list: (scope: 'upcoming' | 'past') => ['bookings', scope] as const,
 };
